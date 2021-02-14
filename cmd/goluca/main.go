@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
@@ -9,11 +10,15 @@ import (
 )
 
 func main() {
+	ctx := context.Background()
 	if err := configloader.Load(); err != nil {
 		log.Fatalf("failed to load config\n%s", err.Error())
 	}
-	if err := data.CreateDB(); err != nil {
+	if err := data.CreateDB(ctx); err != nil {
 		log.Fatalf("failed to create new DB\n%s", err.Error())
+	}
+	if err := data.Migrate(ctx); err != nil {
+		log.Fatalf("failed to migrate\n%s", err.Error())
 	}
 	run()
 }
