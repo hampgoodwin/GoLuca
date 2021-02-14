@@ -1,6 +1,8 @@
 package data
 
 import (
+	"context"
+
 	"github.com/abelgoodwin1988/GoLuca/internal/config"
 	"github.com/jmoiron/sqlx"
 
@@ -18,5 +20,12 @@ func CreateDB() error {
 	if err != nil {
 		return err
 	}
+	// test the connection
+	ctx := context.Background()
+	c, err := DB.Conn(ctx)
+	if err != nil {
+		return err
+	}
+	defer c.Close()
 	return nil
 }
