@@ -32,13 +32,7 @@ func Load() error {
 }
 
 func loadConfigurationFile() error {
-	wd, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-	fp := fmt.Sprintf("%s/.env.toml", wd)
-	fmt.Println(fp)
-	f, err := os.Open(fp)
+	f, err := os.Open("/etc/goluca/.env.toml")
 	if err != nil {
 		return err
 	}
