@@ -11,12 +11,12 @@ import (
 )
 
 func registerEntryRoute(r *chi.Mux) {
-	r.Route("/entries", func(r chi.Router) {
-		r.Get("/entries", getEntries) // GET /entries
-		// r.Get("/entries/{id:[0-9]+}", getEntry) // GET /entries/1
+	// r.Route("/entries", func(r chi.Router) {
+	r.Get("/entries", getEntries) // GET /entries
+	// r.Get("/entries/{id:[0-9]+}", getEntry) // GET /entries/1
 
-		// r.Post("/entries", createEntry) // POST /entries
-	})
+	// r.Post("/entries", createEntry) // POST /entries
+	// })
 }
 
 func getEntries(w http.ResponseWriter, r *http.Request) {
@@ -26,7 +26,7 @@ func getEntries(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
-	txStmt, err := tx.Prepare(`SELECT id, account, change FROM entry;`)
+	txStmt, err := tx.Prepare(`SELECT id, account_id, amount FROM entry;`)
 	if err != nil {
 		w.Write([]byte(err.Error()))
 	}
