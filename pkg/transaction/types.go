@@ -13,6 +13,7 @@ type Transaction struct {
 // Entry ...
 type Entry struct {
 	// Account account.Account `validate:"required"`
+	ID      int64   `validate:"gte=1"`
 	Account string  `validate:"required"`
 	Amount  float64 `validate:"gt=0"`
 }

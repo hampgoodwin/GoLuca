@@ -3,25 +3,31 @@
 package main
 
 import (
-	"log"
-	"os"
-	"os/exec"
+	"context"
+
+	"github.com/magefile/mage/mg"
+	"github.com/magefile/mage/sh"
 )
 
-func DBUp() {
-	cmd := exec.Command("docker-compose", "-f", "build/package/docker-compose.yml", "up", "-d", "db")
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		log.Fatal(err.Error())
-	}
+// Up creates all docker-compose services
+func Up() error {
+	ctx := context.Background()
+	mg.CtxDeps(ctx, DBUp)
+	return nil
 }
 
-func DBDown() {
-	cmd := exec.Command("docker-compose", "-f ./build/package/docker-compose.yml", "down")
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		log.Fatal(err.Error())
+// DBUp creates a postgres instance in a docker container with which to work in for local development
+func DBUp(ctx context.Context) error {
+	if err := sh.Run("docker-compose", "-f", "build/package/docker-compose.yml", "up", "-d", "db"); err != nil {
+		return err
 	}
+	return nil
+}
+
+// Down removes all docker-compose resources
+func DCDown(ctx context.Context) error {
+	if err := sh.Run("docker-compose", "-f", "build/package/docker-compose.yml", "down"); err != nil {
+		return err
+	}
+	return nil
 }

@@ -37,14 +37,16 @@ func Migrate(ctx context.Context) error {
 		return err
 	}
 	_, err = tx.Exec(`
-USE goluca;
 CREATE TABLE IF NOT EXISTS entry(
 	id SERIAL PRIMARY KEY,
-	account_id VARCHAR(255),
+	account VARCHAR(255),
 	amount DOUBLE PRECISION
 )
 ;`)
 	if err != nil {
+		return err
+	}
+	if err := tx.Commit(); err != nil {
 		return err
 	}
 	fmt.Println("migration successful")
