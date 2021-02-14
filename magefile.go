@@ -20,8 +20,11 @@ func SetEnvFromKVConf(fs string) error {
 		return err
 	}
 	for k, v := range kv {
-		fmt.Printf("%s=%s", k, v)
-		os.Setenv(k, v)
+		err := os.Setenv(k, v)
+		if err != nil {
+			return err
+		}
 	}
+	fmt.Println(os.Environ())
 	return nil
 }

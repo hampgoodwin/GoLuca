@@ -4,12 +4,12 @@ import (
 	"fmt"
 
 	"github.com/abelgoodwin1988/GoLuca/internal/configloader"
-	"github.com/abelgoodwin1988/GoLuca/internal/db"
+	"github.com/abelgoodwin1988/GoLuca/internal/data"
 )
 
 func main() {
 	configloader.Load()
-	db.Create()
+	data.CreateDB()
 	run()
 }
 

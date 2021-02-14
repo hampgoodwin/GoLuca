@@ -11,7 +11,7 @@ import (
 var DB *sqlx.DB
 
 // Create creates and puts in memory a DB
-func Create() error {
+func CreateDB() error {
 	var err error
 	DB, err = sqlx.Open(config.Env.DBDriverName, config.Env.DBConnectionString)
 	if err != nil {

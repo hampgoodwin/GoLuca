@@ -9,7 +9,7 @@ import (
 // Load loads at rest configuration into memory
 func Load() {
 	config.Env = config.Environment{
-		DBConnectionString: os.Getenv("DBConnectionString"),
-		DBDriverName:       os.Getenv("DBDriverName"),
+		DBConnectionString: os.Getenv("DBCONNSTRING"),
+		DBDriverName:       os.Getenv("DBDRIVERNAME"),
 	}
 }
