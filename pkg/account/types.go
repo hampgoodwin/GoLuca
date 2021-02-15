@@ -6,20 +6,20 @@ import (
 
 // Account represents a collection of entries into a logical grouping
 type Account struct {
-	Parent *Account
-	ID     uint32 `validate:"required,gte=0"`
-	Name   string `validate:"required"`
-	Type   Type   `validate:"required,gt=0,lte=6"`
-	Basis  string `validate:"required,eq=debit,credit"`
+	ID       int64  `json:"id" validate:"gte=0"`
+	ParentID int64  `json:"parent_id" validate:"gte=0"`
+	Name     string `json:"name" validate:"required"`
+	Type     Type   `json:"type" validate:"required,gt=0,lte=7"`
+	Basis    string `json:"basis" validate:"required,oneof=debit credit"`
 }
 
 func (a Account) String() string {
 	stringer := fmt.Sprintf(`ID: %d
-	Name: %s
-	Type: %s
-	Basis: %s
-	Parent Account Name: %s`,
-		a.ID, a.Name, a.Type, a.Basis, a.Parent.Name)
+Parent ID %d
+Name: %s
+Type: %s
+Basis: %s`,
+		a.ID, a.ParentID, a.Name, a.Type, a.Basis)
 	return stringer
 }
 
@@ -34,9 +34,9 @@ const (
 	Revenue
 	Expense
 	Gain
-	Lose
+	Loss
 )
 
 func (t Type) String() string {
-	return [...]string{"Asset", "Liability", "Equity", "Revenue", "Expense", "Gain", "Lose"}[t]
+	return [...]string{"Asset", "Liability", "Equity", "Revenue", "Expense", "Gain", "Loss"}[t-1]
 }

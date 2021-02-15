@@ -2,7 +2,7 @@ package api
 
 import (
 	"context"
-	"fmt"
+	"encoding/json"
 	"net/http"
 
 	"github.com/abelgoodwin1988/GoLuca/internal/data"
@@ -11,14 +11,14 @@ import (
 )
 
 func registerEntryRoute(r *chi.Mux) {
-	// r.Route("/entries", func(r chi.Router) {
 	r.Get("/entries", getEntries) // GET /entries
-	// r.Get("/entries/{id:[0-9]+}", getEntry) // GET /entries/1
-
-	// r.Post("/entries", createEntry) // POST /entries
-	// })
 }
 
+type entriesResponse struct {
+	Entries transaction.Entries `json:"entries,omitempty"`
+}
+
+// TODO: PAGINATE
 func getEntries(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 	tx, err := data.DB.BeginTx(ctx, nil)
@@ -26,21 +26,28 @@ func getEntries(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
-	txStmt, err := tx.Prepare(`SELECT id, account_id, amount FROM entry;`)
+	txStmt, err := tx.Prepare(`SELECT id, account, amount FROM entry;`)
 	if err != nil {
-		w.Write([]byte(err.Error()))
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("failed to get entries on db query"))
+		return
 	}
 	rows, err := txStmt.QueryContext(ctx)
-	var entries []*transaction.Entry
+	var entries []transaction.Entry
 	for rows.Next() {
-		entry := &transaction.Entry{}
+		entry := transaction.Entry{}
 		rows.Scan(
 			&entry.ID,
-			&entry.Account,
+			&entry.AccountID,
 			&entry.Amount,
 		)
 		entries = append(entries, entry)
 	}
-	w.Write([]byte(fmt.Sprintf("%v", entries)))
+	entriesResp := &entriesResponse{Entries: entries}
+	if err := json.NewEncoder(w).Encode(entriesResp); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("failed to encode entries response"))
+		return
+	}
 	return
 }

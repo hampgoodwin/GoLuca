@@ -6,6 +6,7 @@ import (
 
 	"github.com/abelgoodwin1988/GoLuca/internal/config"
 	"github.com/jmoiron/sqlx"
+	"github.com/pkg/errors"
 
 	// postgres driver
 	_ "github.com/lib/pq"
@@ -37,17 +38,41 @@ func Migrate(ctx context.Context) error {
 		return err
 	}
 	_, err = tx.Exec(`
-CREATE TABLE IF NOT EXISTS entry(
+CREATE TABLE IF NOT EXISTS account(
 	id SERIAL PRIMARY KEY,
-	account VARCHAR(255),
-	amount DOUBLE PRECISION
+	parent_id INT,
+	name VARCHAR(255),
+	type SMALLINT,
+	basis VARCHAR(6)
 )
 ;`)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to create account table")
+	}
+	_, err = tx.Exec(`
+CREATE TABLE IF NOT EXISTS transaction(
+	id SERIAL PRIMARY KEY,
+	description TEXT
+)
+;`)
+	if err != nil {
+		return errors.Wrap(err, "failed to create transaction table")
+	}
+	_, err = tx.Exec(`
+CREATE TABLE IF NOT EXISTS entry(
+	id SERIAL PRIMARY KEY,
+	transaction_id int,
+	account_id int,
+	amount DOUBLE PRECISION,
+	CONSTRAINT fk_transaction FOREIGN KEY(transaction_id) REFERENCES transaction(id),
+	CONSTRAINT fk_account FOREIGN KEY(account_id) REFERENCES account(id)
+)
+;`)
+	if err != nil {
+		return errors.Wrap(err, "failed to create entry table")
 	}
 	if err := tx.Commit(); err != nil {
-		return err
+		return errors.Wrap(err, "failed to commit migration")
 	}
 	fmt.Println("migration successful")
 	return nil

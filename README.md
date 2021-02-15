@@ -16,3 +16,14 @@ Making the environments ready with data
 
 - We'll be using [mage](https://magefile.org/) to preload a development appvault with secrets
 
+TODO
+
+- Complete the basic CRUD for book-keeping
+- Add metadata fields for all tables (created_at, updated_at)
+- Better error handling
+    - Better error logging
+- Pagination
+- Cache for account name/data?
+- Add a queueing system
+- Add a stress testing system
+

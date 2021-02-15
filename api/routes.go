@@ -22,6 +22,8 @@ func Register() *chi.Mux {
 	r.Use(middleware.Timeout(60 * time.Second))
 
 	registerEntryRoute(r)
+	registerTransactionRoute(r)
+	registerAccountRoutes(r)
 
 	return r
 }

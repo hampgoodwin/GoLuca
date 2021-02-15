@@ -6,17 +6,22 @@ import (
 
 // Transaction ...
 type Transaction struct {
-	Description string  `validate:"required"`
-	Entries     []Entry `validate:"required,dive,gte=0"`
+	ID          int64   `json:"id" validate:"gte=0"`
+	Description string  `json:"description" validate:"required"`
+	Entries     []Entry `json:"entries" validate:"required,dive,gte=2"`
 }
 
 // Entry ...
 type Entry struct {
 	// Account account.Account `validate:"required"`
-	ID      int64   `validate:"gte=1"`
-	Account string  `validate:"required"`
-	Amount  float64 `validate:"gt=0"`
+	ID            int64   `json:"id" validate:"gte=0"`
+	TransactionID int64   `json:"transaction_id" validate:"gte=0"`
+	AccountID     int64   `json:"account_id"  validate:"required,gte=0"`
+	Amount        float64 `json:"amount" validate:"required,ne=0"`
 }
+
+// Entries ...
+type Entries []Entry
 
 func (t Transaction) String() string {
 	stringer := fmt.Sprintf(`%s\n`, t.Description)
@@ -27,7 +32,7 @@ func (t Transaction) String() string {
 }
 
 func (e Entry) String() string {
-	return fmt.Sprintf(`%s
+	return fmt.Sprintf(`%d
 %f
-`, e.Account, e.Amount)
+`, e.AccountID, e.Amount)
 }

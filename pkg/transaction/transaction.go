@@ -7,8 +7,8 @@ import (
 	"github.com/abelgoodwin1988/GoLuca/internal/data"
 )
 
-// Entry makes an entry to the accounting ledger
-func (t *Transaction) Entry(ctx context.Context) error {
+// MakeEntry makes an entry to the accounting ledger
+func (t *Transaction) MakeEntry(ctx context.Context) error {
 	if !t.balanced() {
 		return errors.New("this transaction is not balanced")
 	}
@@ -27,12 +27,12 @@ func (t *Transaction) Entry(ctx context.Context) error {
 
 	for _, entry := range t.Entries {
 		entryInsertStmt, err := data.DB.PrepareContext(ctx,
-			`INSERT INTO entry(transaction_id, account_id, amount) VALUES(?, ?, ?)`)
+			`INSERT INTO entry(transaction_id, account_id, amount) VALUES($1, $2, $3)`)
 		if err != nil {
 			return err
 		}
 
-		entryInsertStmt.ExecContext(ctx, transactionID, entry.Account, entry.Amount)
+		entryInsertStmt.ExecContext(ctx, transactionID, entry.AccountID, entry.Amount)
 	}
 
 	return nil
