@@ -15,7 +15,7 @@ func registerEntryRoute(r *chi.Mux) {
 }
 
 type entriesResponse struct {
-	Entries transaction.Entries `json:"entries,omitempty"`
+	Entries []transaction.Entry `json:"entries,omitempty"`
 }
 
 // TODO: PAGINATE

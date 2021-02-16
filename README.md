@@ -19,6 +19,7 @@ Making the environments ready with data
 TODO
 
 - Complete the basic CRUD for book-keeping
+- make DB methods for CRUD
 - Add metadata fields for all tables (created_at, updated_at)
 - Better error handling
     - Better error logging

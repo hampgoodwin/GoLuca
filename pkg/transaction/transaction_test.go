@@ -99,7 +99,7 @@ func TestBalanced(t *testing.T) {
 		tc := tc
 		t.Run(tc.input.Description, func(t *testing.T) {
 			t.Parallel()
-			output := tc.input.balanced()
+			output := tc.input.Balanced()
 			if tc.expected != output {
 				t.Errorf("expected %t\nreceived %t\n", output, tc.expected)
 			}

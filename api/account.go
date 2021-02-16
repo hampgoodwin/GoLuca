@@ -26,12 +26,52 @@ type accountsResponse struct {
 
 func registerAccountRoutes(r *chi.Mux) {
 	r.Get("/accounts", getAccounts)
-	r.Get("/accounts/{id:[0-9]+}", getAccount)
+	r.Get("/accounts/{account_id:[0-9]+}", getAccount)
 	r.Post("/accounts", createAccount)
 }
 
 func getAccount(w http.ResponseWriter, r *http.Request) {
-
+	ctx := r.Context()
+	accountID := chi.URLParam(r, "account_id")
+	tx, err := data.DB.BeginTx(ctx, nil)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		err = errors.Wrap(err, "failed to start db-transaction for getting an account")
+		w.Write([]byte(err.Error()))
+		return
+	}
+	txAccountSelectSmt, err := tx.PrepareContext(ctx,
+		`SELECT id, parent_id, name, type, basis
+FROM account
+WHERE id=$1
+;`)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		err = errors.Wrap(err, "failed to prepare account get statement")
+		w.Write([]byte(err.Error()))
+		return
+	}
+	account := account.Account{}
+	txAccountSelectSmt.QueryRowContext(ctx, accountID).
+		Scan(&account.ID, &account.ParentID, &account.Name, &account.Type, &account.Basis)
+	fmt.Println(account)
+	accountResp := &accountResponse{Account: &account}
+	if err := validator.New().Struct(accountResp); err != nil {
+		validationErrors := err.(validator.ValidationErrors)
+		if len(validationErrors) > 0 {
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte("{}"))
+			return
+		}
+	}
+	if err := json.NewEncoder(w).Encode(accountResp); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		err = errors.Wrap(err, "failed to encode account response")
+		w.Write([]byte(err.Error()))
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	return
 }
 
 // TODO: PAGINATE
@@ -41,22 +81,25 @@ func getAccounts(w http.ResponseWriter, r *http.Request) {
 	tx, err := data.DB.BeginTx(ctx, nil)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("failed to start db-transaction for creating transaction"))
+		err = errors.Wrap(err, "failed to start db-transaction for creating transaction")
+		w.Write([]byte(err.Error()))
 		return
 	}
-	txAccountSelectStmt, err := tx.PrepareContext(ctx, `
+	txAccountsSelectStmt, err := tx.PrepareContext(ctx, `
 SELECT id, parent_id, name, type, basis
 FROM account
 ;`)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("failed to prepare account get all statement"))
+		err = errors.Wrap(err, "failed to prepare account get all statement")
+		w.Write([]byte(err.Error()))
 		return
 	}
-	rows, err := txAccountSelectStmt.QueryContext(ctx)
+	rows, err := txAccountsSelectStmt.QueryContext(ctx)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("failed to get accounts on db query"))
+		err = errors.Wrap(err, "failed to get accounts on db query")
+		w.Write([]byte(err.Error()))
 		return
 	}
 	accounts := []account.Account{}
@@ -74,7 +117,8 @@ FROM account
 	accountsResp := &accountsResponse{Accounts: accounts}
 	if err := json.NewEncoder(w).Encode(accountsResp); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("failed to encode entries response"))
+		err = errors.Wrap(err, "failed to encode entries response")
+		w.Write([]byte(err.Error()))
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -86,59 +130,26 @@ func createAccount(w http.ResponseWriter, r *http.Request) {
 	aReq := &accountRequest{}
 	if err := json.NewDecoder(r.Body).Decode(aReq); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("failed to decode body\n%s\n", err.Error())))
-		return
-	}
-	if err := validator.New().Struct(aReq); err != nil {
-		validationErrors := err.(validator.ValidationErrors)
-		if len(validationErrors) > 0 {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(string(err.Error())))
-			return
-		}
-	}
-	// get a db-transaction
-	tx, err := data.DB.BeginTx(ctx, nil)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("failed to start db-transaction for creating transaction"))
-		return
-	}
-	txInsertAccountStmt, err := tx.PrepareContext(ctx, `INSERT INTO account(parent_id, name, type, basis)
-	VALUES($1, $2, $3, $4)
-	RETURNING id, parent_id, name, type, basis;`)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		err = errors.Wrap(err, "failed to prepare account insert statement")
+		err = errors.Wrap(err, "failed to decode body")
 		w.Write([]byte(err.Error()))
-		tx.Rollback()
 		return
 	}
-	account := &account.Account{}
-	txInsertAccountStmt.QueryRowContext(ctx, aReq.ParentID, aReq.Name, aReq.Type, aReq.Basis).Scan(
-		&account.ID,
-		&account.ParentID,
-		&account.Name,
-		&account.Type,
-		&account.Basis,
-	)
-	aRes := &accountResponse{Account: account}
-	if err := validator.New().Struct(aRes); err != nil {
-		validationErrors := err.(validator.ValidationErrors)
-		if len(validationErrors) > 0 {
-			w.WriteHeader(http.StatusInternalServerError)
-			err = errors.Wrap(err, "response type failed validation")
-			w.Write([]byte(err.Error()))
-			return
-		}
+	if err := data.Validate(aReq); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
 	}
-	if err := json.NewEncoder(w).Encode(&aRes); err != nil {
+	acc, err := data.CreateAccount(ctx, aReq.Account)
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("failed to encode createAccount response"))
-		tx.Rollback()
+		w.Write([]byte(err.Error()))
+	}
+	aRes := accountResponse{Account: acc}
+	if err := encode(w, aRes); err != nil {
+		err = errors.Wrap(err, "failed to encode createAccount response")
+		w.Write([]byte(err.Error()))
 		return
 	}
-	tx.Commit()
 	w.WriteHeader(http.StatusCreated)
 	return
 }

@@ -12,6 +12,8 @@ import (
 )
 
 func registerTransactionRoute(r *chi.Mux) {
+	r.Get("/transactions", getTransactions)
+	r.Get("/transactions/{transaction_id:[0-9]+}", getTransaction)
 	r.Post("/transactions", createTransaction)
 }
 
@@ -23,6 +25,45 @@ type transactionResponse struct {
 	*transaction.Transaction `json:"transaction" validate:"required"`
 }
 
+func getTransactions(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func getTransaction(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	transactionID := chi.URLParam(r, "transaction_id")
+	tx, err := data.DB.BeginTx(ctx, nil)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		err = errors.Wrap(err, "failed to start db-transaction for getting a transaction")
+		w.Write([]byte(err.Error()))
+		return
+	}
+	txTransactionSelectSmt, err := tx.PrepareContext(ctx,
+		`SELECT id, description
+FROM transaction
+WHERE id=$1
+;`)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		err = errors.Wrap(err, "failed to prepare account get statement")
+		w.Write([]byte(err.Error()))
+		return
+	}
+	transaction := transaction.Transaction{}
+	txTransactionSelectSmt.QueryRowContext(ctx, transactionID).Scan(
+		&transaction.ID,
+		&transaction.Description,
+	)
+	transactionResp := &transactionResponse{Transaction: &transaction}
+	if err := json.NewEncoder(w).Encode(transactionResp); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		err = errors.Wrap(err, "failed to encode response body")
+		w.Write([]byte(err.Error()))
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
 func createTransaction(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	tReq := &transactionRequest{}
@@ -30,6 +71,13 @@ func createTransaction(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewDecoder(r.Body).Decode(tReq); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		err = errors.Wrap(err, "failed to decode body")
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	if !tReq.Transaction.Balanced() {
+		w.WriteHeader(http.StatusBadRequest)
+		err := fmt.Errorf("transaction entires are not balanced\n%s", tReq.Transaction.Entries)
 		w.Write([]byte(err.Error()))
 		return
 	}

@@ -16,7 +16,8 @@ import (
 var DB *sqlx.DB
 
 // CreateDB creates and puts in memory a DB
-func CreateDB(ctx context.Context) error {
+func CreateDB() error {
+	ctx := context.Background()
 	var err error
 	DB, err = sqlx.Open(config.Env.DBDriverName, config.Env.DBConnString)
 	if err != nil {
@@ -32,7 +33,8 @@ func CreateDB(ctx context.Context) error {
 }
 
 // Migrate handles the db migration logic. Eventually this should be replaced with a well-tested migration tool
-func Migrate(ctx context.Context) error {
+func Migrate() error {
+	ctx := context.Background()
 	tx, err := DB.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -41,7 +43,7 @@ func Migrate(ctx context.Context) error {
 CREATE TABLE IF NOT EXISTS account(
 	id SERIAL PRIMARY KEY,
 	parent_id INT,
-	name VARCHAR(255),
+	name VARCHAR(255) UNIQUE,
 	type SMALLINT,
 	basis VARCHAR(6)
 )

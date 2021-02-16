@@ -1,7 +1,7 @@
 package account
 
 import (
-	"fmt"
+	"encoding/json"
 )
 
 // Account represents a collection of entries into a logical grouping
@@ -14,13 +14,11 @@ type Account struct {
 }
 
 func (a Account) String() string {
-	stringer := fmt.Sprintf(`ID: %d
-Parent ID %d
-Name: %s
-Type: %s
-Basis: %s`,
-		a.ID, a.ParentID, a.Name, a.Type, a.Basis)
-	return stringer
+	b, err := json.Marshal(a)
+	if err != nil {
+		return "err"
+	}
+	return string(b)
 }
 
 // Type represents the type of account

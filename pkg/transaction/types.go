@@ -1,6 +1,7 @@
 package transaction
 
 import (
+	"encoding/json"
 	"fmt"
 )
 
@@ -8,7 +9,7 @@ import (
 type Transaction struct {
 	ID          int64   `json:"id" validate:"gte=0"`
 	Description string  `json:"description" validate:"required"`
-	Entries     []Entry `json:"entries" validate:"required,dive,gte=2"`
+	Entries     []Entry `json:"entries,omitempty" validate:"dive,gte=2"`
 }
 
 // Entry ...
@@ -20,9 +21,6 @@ type Entry struct {
 	Amount        float64 `json:"amount" validate:"required,ne=0"`
 }
 
-// Entries ...
-type Entries []Entry
-
 func (t Transaction) String() string {
 	stringer := fmt.Sprintf(`%s\n`, t.Description)
 	for _, event := range t.Entries {
@@ -32,7 +30,9 @@ func (t Transaction) String() string {
 }
 
 func (e Entry) String() string {
-	return fmt.Sprintf(`%d
-%f
-`, e.AccountID, e.Amount)
+	b, err := json.Marshal(e)
+	if err != nil {
+		return "err"
+	}
+	return string(b)
 }
