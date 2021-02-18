@@ -2,13 +2,12 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/abelgoodwin1988/GoLuca/internal/data"
 	"github.com/abelgoodwin1988/GoLuca/pkg/account"
 	"github.com/go-chi/chi"
-	"github.com/go-playground/validator/v10"
 	"github.com/pkg/errors"
 )
 
@@ -33,37 +32,23 @@ func registerAccountRoutes(r *chi.Mux) {
 func getAccount(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	accountID := chi.URLParam(r, "account_id")
-	tx, err := data.DB.BeginTx(ctx, nil)
+	accIDInt, _ := strconv.ParseInt(accountID, 10, 64) // we ignore the err bc the route regexp filters already
+	account, err := data.GetAccount(ctx, accIDInt)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		err = errors.Wrap(err, "failed to start db-transaction for getting an account")
+		err = errors.Wrap(err, "failed to query account from database")
 		w.Write([]byte(err.Error()))
 		return
 	}
-	txAccountSelectSmt, err := tx.PrepareContext(ctx,
-		`SELECT id, parent_id, name, type, basis
-FROM account
-WHERE id=$1
-;`)
-	if err != nil {
+
+	accountResp := &accountResponse{Account: account}
+	if err := data.Validate(accountResp); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		err = errors.Wrap(err, "failed to prepare account get statement")
+		err = errors.Wrap(err, "data validation for gathered type failed")
 		w.Write([]byte(err.Error()))
 		return
 	}
-	account := account.Account{}
-	txAccountSelectSmt.QueryRowContext(ctx, accountID).
-		Scan(&account.ID, &account.ParentID, &account.Name, &account.Type, &account.Basis)
-	fmt.Println(account)
-	accountResp := &accountResponse{Account: &account}
-	if err := validator.New().Struct(accountResp); err != nil {
-		validationErrors := err.(validator.ValidationErrors)
-		if len(validationErrors) > 0 {
-			w.WriteHeader(http.StatusNotFound)
-			w.Write([]byte("{}"))
-			return
-		}
-	}
+
 	if err := json.NewEncoder(w).Encode(accountResp); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		err = errors.Wrap(err, "failed to encode account response")
@@ -74,46 +59,33 @@ WHERE id=$1
 	return
 }
 
-// TODO: PAGINATE
 func getAccounts(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	// get a db-transaction
-	tx, err := data.DB.BeginTx(ctx, nil)
+	// Get query strings for pagination
+	limit, cursor := r.URL.Query().Get("limit"), r.URL.Query().Get("cursor")
+	limitInt, err := strconv.ParseInt(limit, 10, 64)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		err = errors.Wrap(err, "failed to start db-transaction for creating transaction")
+		w.WriteHeader(http.StatusBadRequest)
+		err = errors.Wrap(err, "required query string limit must be integer")
 		w.Write([]byte(err.Error()))
 		return
 	}
-	txAccountsSelectStmt, err := tx.PrepareContext(ctx, `
-SELECT id, parent_id, name, type, basis
-FROM account
-;`)
+	cursorInt, err := strconv.ParseInt(cursor, 10, 64)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		err = errors.Wrap(err, "failed to prepare account get all statement")
+		w.WriteHeader(http.StatusBadRequest)
+		err = errors.Wrap(err, "required query string cursor must be integer")
 		w.Write([]byte(err.Error()))
 		return
 	}
-	rows, err := txAccountsSelectStmt.QueryContext(ctx)
+
+	accounts, err := data.GetAccounts(ctx, limitInt, cursorInt)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		err = errors.Wrap(err, "failed to get accounts on db query")
+		err = errors.Wrapf(err, "failed to get accounts from database with limit %d, offset %d", limitInt, cursorInt)
 		w.Write([]byte(err.Error()))
 		return
 	}
-	accounts := []account.Account{}
-	for rows.Next() {
-		account := account.Account{}
-		rows.Scan(
-			&account.ID,
-			&account.ParentID,
-			&account.Name,
-			&account.Type,
-			&account.Basis,
-		)
-		accounts = append(accounts, account)
-	}
+
 	accountsResp := &accountsResponse{Accounts: accounts}
 	if err := json.NewEncoder(w).Encode(accountsResp); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

@@ -1,13 +1,14 @@
 package api
 
 import (
-	"context"
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/abelgoodwin1988/GoLuca/internal/data"
 	"github.com/abelgoodwin1988/GoLuca/pkg/transaction"
 	"github.com/go-chi/chi"
+	"github.com/pkg/errors"
 )
 
 func registerEntryRoute(r *chi.Mux) {
@@ -18,30 +19,29 @@ type entriesResponse struct {
 	Entries []transaction.Entry `json:"entries,omitempty"`
 }
 
-// TODO: PAGINATE
 func getEntries(w http.ResponseWriter, r *http.Request) {
-	ctx := context.Background()
-	tx, err := data.DB.BeginTx(ctx, nil)
+	ctx := r.Context()
+
+	limit, cursor := r.URL.Query().Get("limit"), r.URL.Query().Get("cursor")
+	limitInt, err := strconv.ParseInt(limit, 10, 64)
 	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		err = errors.Wrap(err, "required query string limit must be integer")
 		w.Write([]byte(err.Error()))
 		return
 	}
-	txStmt, err := tx.Prepare(`SELECT id, account, amount FROM entry;`)
+	cursorInt, err := strconv.ParseInt(cursor, 10, 64)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("failed to get entries on db query"))
+		w.WriteHeader(http.StatusBadRequest)
+		err = errors.Wrap(err, "required query string cursor must be integer")
+		w.Write([]byte(err.Error()))
 		return
 	}
-	rows, err := txStmt.QueryContext(ctx)
-	var entries []transaction.Entry
-	for rows.Next() {
-		entry := transaction.Entry{}
-		rows.Scan(
-			&entry.ID,
-			&entry.AccountID,
-			&entry.Amount,
-		)
-		entries = append(entries, entry)
+
+	entries, err := data.GetEntries(ctx, limitInt, cursorInt)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		err = errors.Wrapf(err, "failed to get entries from database with limit %d, offset %d", limitInt, cursorInt)
 	}
 	entriesResp := &entriesResponse{Entries: entries}
 	if err := json.NewEncoder(w).Encode(entriesResp); err != nil {

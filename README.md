@@ -18,13 +18,15 @@ Making the environments ready with data
 
 TODO
 
-- Complete the basic CRUD for book-keeping
-- make DB methods for CRUD
-- Add metadata fields for all tables (created_at, updated_at)
-- Better error handling
-    - Better error logging
-- Pagination
-- Cache for account name/data?
-- Add a queueing system
-- Add a stress testing system
+- [x] Complete the basic CRUD for book-keeping
+- [x] make DB methods for CRUD
+- [ ] set up linting
+- [ ] Add metadata fields for all tables (created_at, updated_at)
+- [ ] Better error handling
+    - [ ] Better error logging
+- [ ] Pagination
+- [ ] Cache for account name/data?
+- [ ] Add a queueing system
+    - [ ] Add some kind of concurrency for the luls and learnings
+- [ ] Add a stress testing system
 

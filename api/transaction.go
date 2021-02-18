@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/abelgoodwin1988/GoLuca/internal/data"
 	"github.com/abelgoodwin1988/GoLuca/pkg/transaction"
@@ -32,30 +33,14 @@ func getTransactions(w http.ResponseWriter, r *http.Request) {
 func getTransaction(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	transactionID := chi.URLParam(r, "transaction_id")
-	tx, err := data.DB.BeginTx(ctx, nil)
+	transactionIDInt, _ := strconv.ParseInt(transactionID, 10, 64) // the route regexp handles err cases
+	transaction, err := data.GetTransaction(ctx, transactionIDInt)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		err = errors.Wrap(err, "failed to start db-transaction for getting a transaction")
+		err = errors.Wrapf(err, "failed to get transaction by id %d from database", transactionIDInt)
 		w.Write([]byte(err.Error()))
-		return
 	}
-	txTransactionSelectSmt, err := tx.PrepareContext(ctx,
-		`SELECT id, description
-FROM transaction
-WHERE id=$1
-;`)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		err = errors.Wrap(err, "failed to prepare account get statement")
-		w.Write([]byte(err.Error()))
-		return
-	}
-	transaction := transaction.Transaction{}
-	txTransactionSelectSmt.QueryRowContext(ctx, transactionID).Scan(
-		&transaction.ID,
-		&transaction.Description,
-	)
-	transactionResp := &transactionResponse{Transaction: &transaction}
+	transactionResp := &transactionResponse{Transaction: transaction}
 	if err := json.NewEncoder(w).Encode(transactionResp); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		err = errors.Wrap(err, "failed to encode response body")
@@ -67,7 +52,6 @@ WHERE id=$1
 func createTransaction(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	tReq := &transactionRequest{}
-
 	if err := json.NewDecoder(r.Body).Decode(tReq); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		err = errors.Wrap(err, "failed to decode body")
@@ -82,49 +66,14 @@ func createTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// get a db-transaction
-	tx, err := data.DB.BeginTx(ctx, nil)
+	trans, err := data.CreateTransaction(ctx, tReq.Transaction)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		err = errors.Wrap(err, "failed to start db-transaction for creating transaction")
+		err = errors.Wrap(err, "failed to create transaction in db")
 		w.Write([]byte(err.Error()))
-		return
 	}
 
-	// insert the transaction
-	txInsertTransactionStmt, err := tx.PrepareContext(ctx, `
-INSERT INTO transaction (description) VALUES ($1)
-RETURNING id, description;`)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		err = errors.Wrap(err, "failed to prepare transaction insert statement")
-		w.Write([]byte(err.Error()))
-		return
-	}
-	transactionCreated := transaction.Transaction{}
-	txInsertTransactionStmt.QueryRowContext(ctx, tReq.Transaction.Description).
-		Scan(&transactionCreated.ID, transactionCreated.Description)
-
-	// insert the entries
-	for _, entry := range tReq.Transaction.Entries {
-		txInsertEntryStmt, err := tx.PrepareContext(ctx, `
-INSERT INTO entry(transaction_id, account_id, amount) VALUES ($1, $2, $3)
-RETURNING id, transaction_id, account_id, amount;`)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			err = errors.Wrap(err, "failed to prepare entry insert statement")
-			w.Write([]byte(err.Error()))
-			return
-		}
-		entryCreated := transaction.Entry{}
-		txInsertEntryStmt.QueryRowContext(ctx, transactionCreated.ID, entry.AccountID, entry.Amount).
-			Scan(&entryCreated.ID, &entryCreated.TransactionID, &entryCreated.AccountID, &entryCreated.Amount)
-		fmt.Println(entryCreated)
-		transactionCreated.Entries = append(transactionCreated.Entries, entryCreated)
-	}
-	tx.Commit()
-
-	tRes := &transactionResponse{Transaction: &transactionCreated}
+	tRes := &transactionResponse{Transaction: trans}
 	if err := json.NewEncoder(w).Encode(tRes); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		err = errors.Wrap(err, "failed to encode response")
