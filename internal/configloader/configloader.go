@@ -1,7 +1,6 @@
 package configloader
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/abelgoodwin1988/GoLuca/internal/config"
@@ -40,7 +39,6 @@ func loadConfigurationFile() error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("%+#v\n", config.Env)
 	return nil
 }
 
@@ -52,6 +50,5 @@ func loadEnvironmentVariables() error {
 	if val := os.Getenv("GOLUCA_DBCONNSTRING"); val != "" {
 		config.Env.DBDriverName = val
 	}
-	fmt.Printf("%+#v\n", config.Env)
 	return nil
 }

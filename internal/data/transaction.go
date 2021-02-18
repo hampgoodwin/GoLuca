@@ -2,7 +2,6 @@ package data
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/abelgoodwin1988/GoLuca/pkg/transaction"
 	"github.com/pkg/errors"
@@ -56,7 +55,6 @@ RETURNING id, transaction_id, account_id, amount;`)
 		entryCreated := transaction.Entry{}
 		txInsertEntryStmt.QueryRowContext(ctx, transactionCreated.ID, entry.AccountID, entry.Amount).
 			Scan(&entryCreated.ID, &entryCreated.TransactionID, &entryCreated.AccountID, &entryCreated.Amount)
-		fmt.Println(entryCreated)
 		transactionCreated.Entries = append(transactionCreated.Entries, entryCreated)
 	}
 	tx.Commit()

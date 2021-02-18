@@ -37,8 +37,7 @@ func getEntries(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
-
-	entries, err := data.GetEntries(ctx, limitInt, cursorInt)
+	entries, err := data.GetEntries(ctx, cursorInt, limitInt)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		err = errors.Wrapf(err, "failed to get entries from database with limit %d, offset %d", limitInt, cursorInt)
