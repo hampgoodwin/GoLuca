@@ -14,7 +14,7 @@ FROM account WHERE id=$1;`)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to prepare account select statement")
 	}
-	account := *&account.Account{}
+	account := &account.Account{}
 	if err := selectAccountStmt.QueryRowContext(ctx).Scan(&account.ID, &account.ParentID, &account.Name, &account.Type, &account.Basis); err != nil {
 		return nil, errors.Wrap(err, "failed to scan row from account query results set")
 	}
