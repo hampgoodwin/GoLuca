@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
@@ -30,8 +29,4 @@ func main() {
 	if err := http.ListenAndServe(":3333", r); err != nil {
 		log.Fatal("api failure")
 	}
-}
-
-func run() {
-	fmt.Println("run")
 }

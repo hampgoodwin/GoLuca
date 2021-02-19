@@ -9,13 +9,15 @@ import (
 
 // GetAccount gets an account from the database
 func GetAccount(ctx context.Context, id int64) (*account.Account, error) {
-	txSelectAccountStmt, err := DB.PrepareContext(ctx, `SELECT id, parent_id, name, type, basis
+	selectAccountStmt, err := DB.PrepareContext(ctx, `SELECT id, parent_id, name, type, basis
 FROM account WHERE id=$1;`)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to prepare account select statement")
 	}
 	account := *&account.Account{}
-	txSelectAccountStmt.QueryRowContext(ctx).Scan(&account.ID, &account.ParentID, &account.Name, &account.Type, &account.Basis)
+	if err := selectAccountStmt.QueryRowContext(ctx).Scan(&account.ID, &account.ParentID, &account.Name, &account.Type, &account.Basis); err != nil {
+		return nil, errors.Wrap(err, "failed to scan row from account query results set")
+	}
 	if err := Validate(account); err != nil {
 		return nil, err
 	}
@@ -41,7 +43,9 @@ LIMIT $2
 	accounts := []account.Account{}
 	for rows.Next() {
 		account := account.Account{}
-		rows.Scan(&account.ID, &account.ParentID, &account.Name, &account.Type, &account.Basis)
+		if err := rows.Scan(&account.ID, &account.ParentID, &account.Name, &account.Type, &account.Basis); err != nil {
+			return nil, errors.Wrap(err, "failed to scan row from accounts query result set")
+		}
 		accounts = append(accounts, account)
 	}
 	return accounts, nil
@@ -59,21 +63,32 @@ func CreateAccount(ctx context.Context, acc *account.Account) (*account.Account,
 	VALUES($1, $2, $3, $4)
 	RETURNING id, parent_id, name, type, basis;`)
 	if err != nil {
-		tx.Rollback()
+		if err := tx.Rollback(); err != nil {
+			return nil, errors.Wrap(err, "failed to roll back account creation transaction")
+		}
 		return nil, errors.Wrap(err, "failed to prepare account insert statement")
 	}
 	account := &account.Account{}
-	txInsertAccountStmt.QueryRowContext(ctx, acc.ParentID, acc.Name, acc.Type, acc.Basis).Scan(
+	if err := txInsertAccountStmt.QueryRowContext(ctx, acc.ParentID, acc.Name, acc.Type, acc.Basis).Scan(
 		&account.ID,
 		&account.ParentID,
 		&account.Name,
 		&account.Type,
 		&account.Basis,
-	)
+	); err != nil {
+		return nil, errors.Wrap(err, "failed to scan account creation query result set")
+	}
 	if err := Validate(account); err != nil {
-		tx.Rollback()
+		if err := tx.Rollback(); err != nil {
+			return nil, errors.Wrap(err, "failed to rollback account creation transaction on failed return data validation")
+		}
 		return nil, err
 	}
-	tx.Commit()
+	if err := tx.Commit(); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return nil, errors.Wrap(err, "failed to rollback back on account creation failed commit")
+		}
+		return nil, errors.Wrap(err, "failed to commit on account creation")
+	}
 	return account, nil
 }

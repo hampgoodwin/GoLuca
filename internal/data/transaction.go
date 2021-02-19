@@ -18,10 +18,12 @@ WHERE id=$1
 		return nil, errors.Wrap(err, "failed to prepare account get statement")
 	}
 	transaction := &transaction.Transaction{}
-	transactionSelectSmt.QueryRowContext(ctx, transactionID).Scan(
+	if err := transactionSelectSmt.QueryRowContext(ctx, transactionID).Scan(
 		&transaction.ID,
 		&transaction.Description,
-	)
+	); err != nil {
+		return nil, errors.Wrap(err, "failed to scan row from transaction query result set")
+	}
 	return transaction, nil
 }
 

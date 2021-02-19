@@ -21,12 +21,14 @@ func GetEntries(ctx context.Context, cursor int64, limit int64) ([]transaction.E
 	var entries []transaction.Entry
 	for rows.Next() {
 		entry := transaction.Entry{}
-		rows.Scan(
+		if err := rows.Scan(
 			&entry.ID,
 			&entry.TransactionID,
 			&entry.AccountID,
 			&entry.Amount,
-		)
+		); err != nil {
+			return nil, errors.Wrap(err, "failed to scan row from entries query results set")
+		}
 		entries = append(entries, entry)
 	}
 	return entries, nil
@@ -46,12 +48,14 @@ func GetEntriesByTransactionID(ctx context.Context, transactionID int64) ([]tran
 	var entries []transaction.Entry
 	for rows.Next() {
 		entry := transaction.Entry{}
-		rows.Scan(
+		if err := rows.Scan(
 			&entry.ID,
 			&entry.TransactionID,
 			&entry.AccountID,
 			&entry.Amount,
-		)
+		); err != nil {
+			return nil, errors.Wrap(err, "failed to scan row from entries by transaction id query results set")
+		}
 		entries = append(entries, entry)
 	}
 	return entries, nil
