@@ -24,7 +24,7 @@ type Entry struct {
 func (t Transaction) String() string {
 	stringer := fmt.Sprintf(`%s\n`, t.Description)
 	for _, event := range t.Entries {
-		stringer += fmt.Sprintf("%s", event)
+		stringer += event.String()
 	}
 	return stringer
 }

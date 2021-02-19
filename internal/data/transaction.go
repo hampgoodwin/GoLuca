@@ -43,8 +43,10 @@ RETURNING id, description;`)
 		return nil, errors.Wrap(err, "failed to prepare transaction insert statement")
 	}
 	transactionCreated := &transaction.Transaction{}
-	txInsertTransactionStmt.QueryRowContext(ctx, trans.Description).
-		Scan(&transactionCreated.ID, transactionCreated.Description)
+	if err := txInsertTransactionStmt.QueryRowContext(ctx, trans.Description).
+		Scan(&transactionCreated.ID, transactionCreated.Description); err != nil {
+		return nil, errors.Wrap(err, "failed to scan transaction created return result set")
+	}
 
 	// insert the entries
 	for _, entry := range trans.Entries {
@@ -55,10 +57,20 @@ RETURNING id, transaction_id, account_id, amount;`)
 			return nil, errors.Wrap(err, "failed to prepare entry insert statement")
 		}
 		entryCreated := transaction.Entry{}
-		txInsertEntryStmt.QueryRowContext(ctx, transactionCreated.ID, entry.AccountID, entry.Amount).
-			Scan(&entryCreated.ID, &entryCreated.TransactionID, &entryCreated.AccountID, &entryCreated.Amount)
+		if err := txInsertEntryStmt.QueryRowContext(ctx, transactionCreated.ID, entry.AccountID, entry.Amount).
+			Scan(&entryCreated.ID,
+				&entryCreated.TransactionID,
+				&entryCreated.AccountID,
+				&entryCreated.Amount); err != nil {
+			return nil, errors.Wrap(err, "failed to scan transaction entry created return result set")
+		}
 		transactionCreated.Entries = append(transactionCreated.Entries, entryCreated)
 	}
-	tx.Commit()
+	if err := tx.Commit(); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return nil, errors.Wrap(err, "failed to rollback on failed transaction creation commit")
+		}
+		return nil, errors.Wrap(err, "failed to commit on transaction creation")
+	}
 	return transactionCreated, nil
 }

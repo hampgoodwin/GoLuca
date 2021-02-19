@@ -27,14 +27,14 @@ func getEntries(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		err = errors.Wrap(err, "required query string limit must be integer")
-		w.Write([]byte(err.Error()))
+		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
 	cursorInt, err := strconv.ParseInt(cursor, 10, 64)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		err = errors.Wrap(err, "required query string cursor must be integer")
-		w.Write([]byte(err.Error()))
+		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
 	entries, err := data.GetEntries(ctx, cursorInt, limitInt)
@@ -45,8 +45,7 @@ func getEntries(w http.ResponseWriter, r *http.Request) {
 	entriesResp := &entriesResponse{Entries: entries}
 	if err := json.NewEncoder(w).Encode(entriesResp); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("failed to encode entries response"))
+		_, _ = w.Write([]byte("failed to encode entries response"))
 		return
 	}
-	return
 }

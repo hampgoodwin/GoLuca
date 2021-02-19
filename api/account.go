@@ -37,7 +37,7 @@ func getAccount(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		err = errors.Wrap(err, "failed to query account from database")
-		w.Write([]byte(err.Error()))
+		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
 
@@ -45,18 +45,16 @@ func getAccount(w http.ResponseWriter, r *http.Request) {
 	if err := data.Validate(accountResp); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		err = errors.Wrap(err, "data validation for gathered type failed")
-		w.Write([]byte(err.Error()))
+		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
 
 	if err := json.NewEncoder(w).Encode(accountResp); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		err = errors.Wrap(err, "failed to encode account response")
-		w.Write([]byte(err.Error()))
+		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
-	w.WriteHeader(http.StatusOK)
-	return
 }
 
 func getAccounts(w http.ResponseWriter, r *http.Request) {
@@ -67,14 +65,14 @@ func getAccounts(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		err = errors.Wrap(err, "required query string limit must be integer")
-		w.Write([]byte(err.Error()))
+		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
 	cursorInt, err := strconv.ParseInt(cursor, 10, 64)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		err = errors.Wrap(err, "required query string cursor must be integer")
-		w.Write([]byte(err.Error()))
+		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
 
@@ -82,7 +80,7 @@ func getAccounts(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		err = errors.Wrapf(err, "failed to get accounts from database with limit %d, offset %d", limitInt, cursorInt)
-		w.Write([]byte(err.Error()))
+		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
 
@@ -90,11 +88,9 @@ func getAccounts(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewEncoder(w).Encode(accountsResp); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		err = errors.Wrap(err, "failed to encode entries response")
-		w.Write([]byte(err.Error()))
+		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
-	w.WriteHeader(http.StatusOK)
-	return
 }
 
 func createAccount(w http.ResponseWriter, r *http.Request) {
@@ -103,25 +99,25 @@ func createAccount(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewDecoder(r.Body).Decode(aReq); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		err = errors.Wrap(err, "failed to decode body")
-		w.Write([]byte(err.Error()))
+		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
 	if err := data.Validate(aReq); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
+		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
 	acc, err := data.CreateAccount(ctx, aReq.Account)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+		_, _ = w.Write([]byte(err.Error()))
 	}
 	aRes := accountResponse{Account: acc}
+	w.WriteHeader(http.StatusCreated)
 	if err := encode(w, aRes); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		err = errors.Wrap(err, "failed to encode createAccount response")
-		w.Write([]byte(err.Error()))
+		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
-	w.WriteHeader(http.StatusCreated)
-	return
 }
