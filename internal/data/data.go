@@ -12,7 +12,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// DB is the app-wide accessable DB
+// DB is the app-wide accessible DB
 var DB *sqlx.DB
 
 // CreateDB creates and puts in memory a DB

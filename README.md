@@ -1,5 +1,7 @@
 Application
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/abelgoodwin1988/GoLuca)](https://goreportcard.com/report/github.com/abelgoodwin1988/GoLuca)
+
 - Simple application which writes and reads accounting ledger entries to a postgres database
 
 Database

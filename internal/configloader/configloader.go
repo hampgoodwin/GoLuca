@@ -9,7 +9,7 @@ import (
 )
 
 // Load at rest configuration into memory
-// First load configuratin files into the local configuration store.
+// First load configuration files into the local configuration store.
 // Second, load environmental variables to the local configuration store, overwriting pre-existing values, if any.
 // Lastly, set configuration values with cli flags, overwriting pre-existing values, if any.
 func Load() error {
