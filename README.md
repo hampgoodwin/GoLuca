@@ -1,4 +1,6 @@
-Application
+# GoLuca
+
+A Simple Accounting Ledger
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/abelgoodwin1988/GoLuca)](https://goreportcard.com/report/github.com/abelgoodwin1988/GoLuca)
 
@@ -27,8 +29,9 @@ TODO
 - [ ] Better error handling
     - [ ] Better error logging
 - [x] Pagination
-- [ ] Cache for account name/data?
 - [ ] Add a queueing system
-    - [ ] Add some kind of concurrency for the luls and learnings
+    - [ ] Add some kind of concurrency for the luls and the learnings
 - [ ] Add a stress testing system
+- [ ] Add chi doc generation
+- [ ] Create a seeder for a basic dev environment of data
 
