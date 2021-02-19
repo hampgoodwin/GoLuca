@@ -26,7 +26,7 @@ TODO
 - [x] Add metadata fields for all tables (created_at, updated_at)
 - [ ] Better error handling
     - [ ] Better error logging
-- [ ] Pagination
+- [x] Pagination
 - [ ] Cache for account name/data?
 - [ ] Add a queueing system
     - [ ] Add some kind of concurrency for the luls and learnings
