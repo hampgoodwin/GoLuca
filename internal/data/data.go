@@ -2,9 +2,9 @@ package data
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/abelgoodwin1988/GoLuca/internal/config"
+	"github.com/abelgoodwin1988/GoLuca/internal/lucalog"
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 
@@ -80,6 +80,6 @@ CREATE TABLE IF NOT EXISTS entry(
 	if err := tx.Commit(); err != nil {
 		return errors.Wrap(err, "failed to commit migration")
 	}
-	fmt.Println("migration successful")
+	lucalog.Logger.Info("migration successful")
 	return nil
 }

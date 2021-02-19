@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	github.com/go-chi/chi v1.5.2
+	github.com/go-chi/docgen v1.1.0
 	github.com/go-chi/render v1.0.1
 	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/go-playground/validator/v10 v10.4.1

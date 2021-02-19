@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	"flag"
 	"net/http"
 
 	"github.com/abelgoodwin1988/GoLuca/api"
@@ -12,21 +12,24 @@ import (
 )
 
 func main() {
+	flag.Parse()
+
 	logger, _ := zap.NewProduction()
 	lucalog.Logger = logger
 
 	if err := configloader.Load(); err != nil {
-		log.Fatalf("failed to load config\n%s", err.Error())
+		lucalog.Logger.Fatal("failed to load config", zap.Error(err))
 	}
 	if err := data.CreateDB(); err != nil {
-		log.Fatalf("failed to create new DB\n%s", err.Error())
+		lucalog.Logger.Fatal("failed to create new DB", zap.Error(err))
 	}
 	if err := data.Migrate(); err != nil {
-		log.Fatalf("failed to migrate\n%s", err.Error())
+		lucalog.Logger.Fatal("failed to migrate", zap.Error(err))
 	}
 
 	r := api.Register()
+
 	if err := http.ListenAndServe(":3333", r); err != nil {
-		log.Fatal("api failure")
+		lucalog.Logger.Fatal("api failure", zap.Error(err))
 	}
 }
