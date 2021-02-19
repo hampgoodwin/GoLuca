@@ -21,7 +21,7 @@ TODO
 - [x] Complete the basic CRUD for book-keeping
 - [x] make DB methods for CRUD
 - [ ] set up linting
-- [ ] Add metadata fields for all tables (created_at, updated_at)
+- [x] Add metadata fields for all tables (created_at, updated_at)
 - [ ] Better error handling
     - [ ] Better error logging
 - [ ] Pagination

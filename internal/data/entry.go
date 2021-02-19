@@ -14,6 +14,10 @@ func GetEntries(ctx context.Context, cursor int64, limit int64) ([]transaction.E
 		return nil, errors.Wrap(err, "failed to get entries on db query")
 	}
 	rows, err := getEntriesStmt.QueryContext(ctx, cursor, limit)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get entries from db")
+	}
+	defer rows.Close()
 	var entries []transaction.Entry
 	for rows.Next() {
 		entry := transaction.Entry{}
@@ -35,6 +39,10 @@ func GetEntriesByTransactionID(ctx context.Context, transactionID int64) ([]tran
 		return nil, errors.Wrap(err, "failed to get entries on db query")
 	}
 	rows, err := getEntriesStmt.QueryContext(ctx, transactionID)
+	if err != nil {
+		return nil, errors.Wrap(err, "failured getting entries from db")
+	}
+	defer rows.Close()
 	var entries []transaction.Entry
 	for rows.Next() {
 		entry := transaction.Entry{}

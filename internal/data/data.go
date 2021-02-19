@@ -45,7 +45,9 @@ CREATE TABLE IF NOT EXISTS account(
 	parent_id INT,
 	name VARCHAR(255) UNIQUE,
 	type SMALLINT,
-	basis VARCHAR(6)
+	basis VARCHAR(6),
+	created_at TIMESTAMP DEFAULT NOW(),
+	modified_at TIMESTAMP DEFAULT NOW()
 )
 ;`)
 	if err != nil {
@@ -54,7 +56,8 @@ CREATE TABLE IF NOT EXISTS account(
 	_, err = tx.Exec(`
 CREATE TABLE IF NOT EXISTS transaction(
 	id SERIAL PRIMARY KEY,
-	description TEXT
+	description TEXT,
+	created_at TIMESTAMP DEFAULT NOW()
 )
 ;`)
 	if err != nil {
@@ -66,6 +69,7 @@ CREATE TABLE IF NOT EXISTS entry(
 	transaction_id int,
 	account_id int,
 	amount DOUBLE PRECISION,
+	created_at TIMESTAMP DEFAULT NOW(),
 	CONSTRAINT fk_transaction FOREIGN KEY(transaction_id) REFERENCES transaction(id),
 	CONSTRAINT fk_account FOREIGN KEY(account_id) REFERENCES account(id)
 )

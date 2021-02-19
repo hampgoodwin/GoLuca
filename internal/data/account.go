@@ -35,8 +35,9 @@ LIMIT $2
 	}
 	rows, err := accountsSelectStmt.QueryContext(ctx, cursor, limit)
 	if err != nil {
-		return nil, errors.Wrap(err, "")
+		return nil, errors.Wrap(err, "error quering database for accounts")
 	}
+	defer rows.Close()
 	accounts := []account.Account{}
 	for rows.Next() {
 		account := account.Account{}
