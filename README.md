@@ -29,9 +29,14 @@ TODO
 - [ ] Better error handling
     - [ ] Better error logging
 - [x] Pagination
-- [ ] Add a queueing system
-    - [ ] Add some kind of concurrency for the luls and the learnings
+- [ ] Add a queueing system?
+    - idk about this, we need transactions to be completely ACID.. maybe check queue if no affected accounts...?
+- [ ] Add some kind of concurrency for the luls and the learnings
 - [ ] Add a stress testing system
+    - [ ] Magefile
 - [ ] Add chi doc generation
+    - [ ] Magefile
 - [ ] Create a seeder for a basic dev environment of data
+- [ ] Add code-coverage report via github actions?
+    - [ ] https://blog.seriesci.com/how-to-measure-code-coverage-in-go/
 

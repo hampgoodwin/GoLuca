@@ -38,7 +38,7 @@ func Test(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	_, err = sh.Exec(nil, os.Stdout, os.Stderr, "go", "test", "./...", "-v", "--bench", ".", "--benchmem")
+	_, err = sh.Exec(nil, os.Stdout, os.Stderr, "go", "test", "./...", "-v", "--bench", ".", "--benchmem", "--covermode=count")
 	if err != nil {
 		return err
 	}
