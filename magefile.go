@@ -4,6 +4,7 @@ package main
 
 import (
 	"context"
+	"os"
 
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
@@ -27,6 +28,18 @@ func DBUp(ctx context.Context) error {
 // Down removes all docker-compose resources
 func DCDown(ctx context.Context) error {
 	if err := sh.Run("docker-compose", "-f", "build/package/docker-compose.yml", "down"); err != nil {
+		return err
+	}
+	return nil
+}
+
+func Test(ctx context.Context) error {
+	_, err := sh.Exec(nil, os.Stdout, os.Stderr, "golangci-lint", "run")
+	if err != nil {
+		return err
+	}
+	_, err = sh.Exec(nil, os.Stdout, os.Stderr, "go", "test", "./...", "-v", "--bench", ".", "--benchmem")
+	if err != nil {
 		return err
 	}
 	return nil
