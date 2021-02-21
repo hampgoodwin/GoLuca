@@ -2,7 +2,7 @@
 
 A Simple Accounting Ledger
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/abelgoodwin1988/GoLuca)](https://goreportcard.com/report/github.com/abelgoodwin1988/GoLuca) [![Coverage Status](https://coveralls.io/repos/github/abelgoodwin1988/GoLuca/badge.svg?branch=main)](https://coveralls.io/github/abelgoodwin1988/GoLuca?branch=main)
+[![Go Report Card](https://goreportcard.com/badge/github.com/abelgoodwin1988/GoLuca)](https://goreportcard.com/report/github.com/abelgoodwin1988/GoLuca) [![Coverage Status](https://coveralls.io/repos/github/abelgoodwin1988/GoLuca/badge.svg?branch=main)](https://coveralls.io/github/abelgoodwin1988/GoLuca?branch=main) [![golangci-lint](https://github.com/abelgoodwin1988/GoLuca/actions/workflows/golint-ci.yml/badge.svg)](https://github.com/abelgoodwin1988/GoLuca/actions/workflows/golint-ci.yml)
 
 - Simple application which writes and reads accounting ledger entries to a postgres database
 
@@ -29,8 +29,6 @@ TODO
 - [x] Better error handling
     - [x] Better error logging
 - [x] Pagination
-- [ ] Add a queueing system?
-    - idk about this, we need transactions to be completely ACID.. maybe check queue if no affected accounts...?
 - [ ] Add some kind of concurrency for the luls and the learnings
 - [ ] Add a stress testing system
     - [ ] Magefile
@@ -38,6 +36,7 @@ TODO
     - [ ] magefile for chi doc generation
 - [ ] Add swaggo b/c I'm lazy at curl
     - [ ] https://github.com/swaggo/swag
+- [ ] Add some tests!
 - [ ] Create a seeder for a basic dev environment of data
 - [x] Add code-coverage report via github actions?
     - [x] https://blog.seriesci.com/how-to-measure-code-coverage-in-go/

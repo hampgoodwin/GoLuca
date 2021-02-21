@@ -44,7 +44,7 @@ RETURNING id, description;`)
 	}
 	transactionCreated := &transaction.Transaction{}
 	if err := txInsertTransactionStmt.QueryRowContext(ctx, trans.Description).
-		Scan(&transactionCreated.ID, transactionCreated.Description); err != nil {
+		Scan(&transactionCreated.ID, &transactionCreated.Description); err != nil {
 		return nil, errors.Wrap(err, "failed to scan transaction created return result set")
 	}
 
@@ -54,6 +54,9 @@ RETURNING id, description;`)
 INSERT INTO entry(transaction_id, account_id, amount) VALUES ($1, $2, $3)
 RETURNING id, transaction_id, account_id, amount;`)
 		if err != nil {
+			if err := tx.Rollback(); err != nil {
+				return nil, errors.Wrap(err, "failed to rollback on failed transaction creation commit")
+			}
 			return nil, errors.Wrap(err, "failed to prepare entry insert statement")
 		}
 		entryCreated := transaction.Entry{}

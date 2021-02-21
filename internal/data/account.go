@@ -15,13 +15,14 @@ FROM account WHERE id=$1;`)
 		return nil, errors.Wrap(err, "failed to prepare account select statement")
 	}
 	account := &account.Account{}
-	if err := selectAccountStmt.QueryRowContext(ctx).Scan(&account.ID, &account.ParentID, &account.Name, &account.Type, &account.Basis); err != nil {
+	if err := selectAccountStmt.QueryRowContext(ctx, id).
+		Scan(&account.ID, &account.ParentID, &account.Name, &account.Type, &account.Basis); err != nil {
 		return nil, errors.Wrap(err, "failed to scan row from account query results set")
 	}
 	if err := Validate(account); err != nil {
 		return nil, err
 	}
-	return nil, nil
+	return account, nil
 }
 
 // GetAccounts get accounts paginated based on a cursor and limit
@@ -29,7 +30,7 @@ func GetAccounts(ctx context.Context, cursor int64, limit int64) ([]account.Acco
 	accountsSelectStmt, err := DB.PrepareContext(ctx, `
 SELECT id, parent_id, name, type, basis
 FROM account
-WHERE account.id > $1
+WHERE account.id => $1
 LIMIT $2
 ;`)
 	if err != nil {

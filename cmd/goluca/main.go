@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"net/http"
 
 	"github.com/abelgoodwin1988/GoLuca/api"
@@ -12,8 +11,6 @@ import (
 )
 
 func main() {
-	flag.Parse()
-
 	logger, _ := zap.NewProduction()
 	lucalog.Logger = logger
 
@@ -29,7 +26,12 @@ func main() {
 
 	r := api.Register()
 
-	if err := http.ListenAndServe(":3333", r); err != nil {
+	server := http.Server{
+		Handler: r,
+		Addr:    ":3333",
+	}
+
+	if err := server.ListenAndServe(); err != nil {
 		lucalog.Logger.Fatal("api failure", zap.Error(err))
 	}
 }
