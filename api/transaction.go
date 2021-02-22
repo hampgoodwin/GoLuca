@@ -27,12 +27,48 @@ type transactionResponse struct {
 	*transaction.Transaction `json:"transaction" validate:"required"`
 }
 
+type transactionsResponse struct {
+	Transactions []transaction.Transaction `json:"transactions" validate:"required"`
+}
+
 type transactionEntriesResponse struct {
 	Entries []transaction.Entry `json:"entries" validate:"required"`
 }
 
 func getTransactions(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	// Get query strings for pagination
+	limit, cursor := r.URL.Query().Get("limit"), r.URL.Query().Get("cursor")
+	limitInt, err := strconv.ParseInt(limit, 10, 64)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		err = errors.Wrap(err, "required query string limit must be integer")
+		_, _ = w.Write([]byte(err.Error()))
+		return
+	}
+	cursorInt, err := strconv.ParseInt(cursor, 10, 64)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		err = errors.Wrap(err, "required query string cursor must be integer")
+		_, _ = w.Write([]byte(err.Error()))
+		return
+	}
 
+	transactions, err := data.GetTransactions(ctx, limitInt, cursorInt)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		err = errors.Wrapf(err, "failed to get transactions from database with limit %d, offset %d", limitInt, cursorInt)
+		_, _ = w.Write([]byte(err.Error()))
+		return
+	}
+
+	transactionsResp := &transactionsResponse{Transactions: transactions}
+	if err := json.NewEncoder(w).Encode(transactionsResp); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		err = errors.Wrap(err, "failed to encode transactions response")
+		_, _ = w.Write([]byte(err.Error()))
+		return
+	}
 }
 
 func getTransaction(w http.ResponseWriter, r *http.Request) {
@@ -49,7 +85,7 @@ func getTransaction(w http.ResponseWriter, r *http.Request) {
 	transactionResp := &transactionResponse{Transaction: transaction}
 	if err := json.NewEncoder(w).Encode(transactionResp); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		err = errors.Wrap(err, "failed to encode response body")
+		err = errors.Wrap(err, "failed to encode transaction body")
 		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
@@ -70,7 +106,7 @@ func getTransactionEntries(w http.ResponseWriter, r *http.Request) {
 	tRes := transactionEntriesResponse{entries}
 	if err := json.NewEncoder(w).Encode(tRes); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		err = errors.Wrap(err, "failed to encode response")
+		err = errors.Wrap(err, "failed to encode transactoin response")
 		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
@@ -105,7 +141,7 @@ func createTransaction(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	if err := json.NewEncoder(w).Encode(tRes); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		err = errors.Wrap(err, "failed to encode response")
+		err = errors.Wrap(err, "failed to encode transactions response")
 		_, _ = w.Write([]byte(err.Error()))
 		return
 	}

@@ -41,7 +41,7 @@ func Migrate() error {
 	}
 	_, err = tx.Exec(`
 CREATE TABLE IF NOT EXISTS account(
-	id SERIAL PRIMARY KEY,
+	id BIGSERIAL PRIMARY KEY,
 	parent_id INT,
 	name VARCHAR(255) UNIQUE,
 	type SMALLINT,
@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS account(
 	}
 	_, err = tx.Exec(`
 CREATE TABLE IF NOT EXISTS transaction(
-	id SERIAL PRIMARY KEY,
+	id BIGSERIAL PRIMARY KEY,
 	description TEXT,
 	created_at TIMESTAMP DEFAULT NOW()
 )
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS transaction(
 	}
 	_, err = tx.Exec(`
 CREATE TABLE IF NOT EXISTS entry(
-	id SERIAL PRIMARY KEY,
+	id BIGSERIAL PRIMARY KEY,
 	transaction_id int,
 	account_id int,
 	amount DOUBLE PRECISION,

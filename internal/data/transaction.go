@@ -3,8 +3,10 @@ package data
 import (
 	"context"
 
+	"github.com/abelgoodwin1988/GoLuca/internal/lucalog"
 	"github.com/abelgoodwin1988/GoLuca/pkg/transaction"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 )
 
 // GetTransaction get's a transaction record, without it's entries, by the transaction ID
@@ -25,6 +27,45 @@ WHERE id=$1
 		return nil, errors.Wrap(err, "failed to scan row from transaction query result set")
 	}
 	return transaction, nil
+}
+
+// GetTransactions get's transactions paginaged by cursor and limit
+func GetTransactions(ctx context.Context, cursor int64, limit int64) ([]transaction.Transaction, error) {
+	transactionsSelectStmt, err := DB.PrepareContext(ctx,
+		`SELECT id, description
+FROM transaction
+WHERE transaction.id > $1
+LIMIT $2
+;`)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to prepare transactions get statement")
+	}
+	rows, err := transactionsSelectStmt.QueryContext(ctx, cursor, limit)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to query db for transactions")
+	}
+	defer rows.Close()
+	transactions := []transaction.Transaction{}
+	for rows.Next() {
+		transaction := transaction.Transaction{}
+		if err := rows.Scan(
+			&transaction.ID,
+			&transaction.Description,
+		); err != nil {
+			return nil, errors.Wrap(err, "failed to scan transactions results set")
+		}
+		transactions = append(transactions, transaction)
+	}
+	lucalog.Logger.Info("db transactions", zap.Any("transactions", transactions))
+	for i, transaction := range transactions {
+		entries, err := GetEntriesByTransactionID(ctx, transaction.ID)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to query db for entries when getting transactions")
+		}
+		lucalog.Logger.Info("entries", zap.Any("entries", entries))
+		transactions[i].Entries = append(transactions[i].Entries, entries...)
+	}
+	return transactions, nil
 }
 
 // CreateTransaction creates a transaction and associated entries in a single transaction

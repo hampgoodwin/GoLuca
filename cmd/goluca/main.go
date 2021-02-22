@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/abelgoodwin1988/GoLuca/api"
 	"github.com/abelgoodwin1988/GoLuca/internal/configloader"
@@ -28,7 +30,7 @@ func main() {
 
 	server := http.Server{
 		Handler: r,
-		Addr:    ":3333",
+		Addr:    fmt.Sprintf("%s:%s", os.Getenv("HOST"), os.Getenv("PORT")),
 	}
 
 	if err := server.ListenAndServe(); err != nil {

@@ -76,7 +76,7 @@ func getAccounts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accounts, err := data.GetAccounts(ctx, limitInt, cursorInt)
+	accounts, err := data.GetAccounts(ctx, cursorInt, limitInt)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		err = errors.Wrapf(err, "failed to get accounts from database with limit %d, offset %d", limitInt, cursorInt)
@@ -87,7 +87,7 @@ func getAccounts(w http.ResponseWriter, r *http.Request) {
 	accountsResp := &accountsResponse{Accounts: accounts}
 	if err := json.NewEncoder(w).Encode(accountsResp); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		err = errors.Wrap(err, "failed to encode entries response")
+		err = errors.Wrap(err, "failed to encode accounts response")
 		_, _ = w.Write([]byte(err.Error()))
 		return
 	}

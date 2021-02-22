@@ -27,10 +27,9 @@ FROM account WHERE id=$1;`)
 
 // GetAccounts get accounts paginated based on a cursor and limit
 func GetAccounts(ctx context.Context, cursor int64, limit int64) ([]account.Account, error) {
-	accountsSelectStmt, err := DB.PrepareContext(ctx, `
-SELECT id, parent_id, name, type, basis
+	accountsSelectStmt, err := DB.PrepareContext(ctx, `SELECT id, parent_id, name, type, basis
 FROM account
-WHERE account.id => $1
+WHERE account.id > $1
 LIMIT $2
 ;`)
 	if err != nil {

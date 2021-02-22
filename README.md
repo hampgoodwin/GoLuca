@@ -29,13 +29,18 @@ TODO
 - [x] Better error handling
     - [x] Better error logging
 - [x] Pagination
+- [ ] use pgx driver with sql interface
 - [ ] Add some kind of concurrency for the luls and the learnings
 - [ ] Add a stress testing system
     - [ ] Magefile
 - [ ] Decouple app setup and routing
     - [ ] magefile for chi doc generation
-- [ ] Add swaggo b/c I'm lazy at curl
-    - [ ] https://github.com/swaggo/swag
+- [ ] ~~Add swaggo b/c I'm lazy at curl~~
+    - [ ] ~~https://github.com/swaggo/swag~~
+    - [ ] After attempting to implement a swagger doc generation via comments tool, I decided I hate it. I think the most sensible, time saving, best-path will be to hand-roll openapi docs, and serve them. I can't believe these auto-gen things became a thing... the open-api spec isn't that bad.
+    - [x] ~~Look into https://mermade.github.io/openapi-gui/~~
+        - [x] If this ^ doesn't make sense, maybe we can useoptic, https://useoptic.com/
+            - [ ] Ok, let's try this.
 - [ ] Add some tests!
 - [ ] Create a seeder for a basic dev environment of data
 - [x] Add code-coverage report via github actions?

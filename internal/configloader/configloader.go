@@ -47,8 +47,5 @@ func loadEnvironmentVariables() error {
 	if val := os.Getenv("GOLUCA_DBDRIVERNAME"); val != "" {
 		config.Env.DBConnString = val
 	}
-	if val := os.Getenv("GOLUCA_DBCONNSTRING"); val != "" {
-		config.Env.DBDriverName = val
-	}
 	return nil
 }
