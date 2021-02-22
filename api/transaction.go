@@ -54,7 +54,7 @@ func getTransactions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	transactions, err := data.GetTransactions(ctx, limitInt, cursorInt)
+	transactions, err := data.GetTransactions(ctx, cursorInt, limitInt)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		err = errors.Wrapf(err, "failed to get transactions from database with limit %d, offset %d", limitInt, cursorInt)

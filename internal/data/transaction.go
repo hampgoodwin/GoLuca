@@ -3,10 +3,8 @@ package data
 import (
 	"context"
 
-	"github.com/abelgoodwin1988/GoLuca/internal/lucalog"
 	"github.com/abelgoodwin1988/GoLuca/pkg/transaction"
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 )
 
 // GetTransaction get's a transaction record, without it's entries, by the transaction ID
@@ -56,13 +54,12 @@ LIMIT $2
 		}
 		transactions = append(transactions, transaction)
 	}
-	lucalog.Logger.Info("db transactions", zap.Any("transactions", transactions))
+
 	for i, transaction := range transactions {
 		entries, err := GetEntriesByTransactionID(ctx, transaction.ID)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to query db for entries when getting transactions")
 		}
-		lucalog.Logger.Info("entries", zap.Any("entries", entries))
 		transactions[i].Entries = append(transactions[i].Entries, entries...)
 	}
 	return transactions, nil
