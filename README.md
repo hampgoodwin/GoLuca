@@ -34,7 +34,8 @@ TODO
 - [ ] Add a stress testing system
     - [ ] Magefile
 - [ ] Decouple app setup and routing
-    - [ ] magefile for chi doc generation
+    - [ ] ~~magefile for chi doc generation~~
+        - I didn't really like chi doc gen; it missed query params
 - [ ] ~~Add swaggo b/c I'm lazy at curl~~
     - [ ] ~~https://github.com/swaggo/swag~~
     - [ ] After attempting to implement a swagger doc generation via comments tool, I decided I hate it. I think the most sensible, time saving, best-path will be to hand-roll openapi docs, and serve them. I can't believe these auto-gen things became a thing... the open-api spec isn't that bad.
