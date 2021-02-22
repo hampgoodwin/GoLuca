@@ -1,0 +1,80 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Swagger Petstore",
+        "version": "1.0.0",
+        "contact": {}
+    },
+    "paths": {
+        "/accounts": {
+            "get": {
+                "summary": "Get paginated result of accounts by cursor and limit",
+                "description": "This endpoint returns a list of paginated accounts. Requests must include the cursor and limit query parameters with int64 values.",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "cursor is the entity id minimum from which to begin the paginated accounts results. To start from account_id 10, provide a query parameter cursor of 10 \"cursor=10\""
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "limit is the number of accounts to be returned"
+                    }
+                ],
+                "operationId": "",
+                "responses": {
+                    "default": {
+                        "description": "Default response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Create an account",
+                "description": "",
+                "parameters": [],
+                "operationId": "",
+                "responses": {
+                    "default": {
+                        "description": "Default response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "*/*": {
+                            "schema": {}
+                        }
+                    },
+                    "description": "{\n  \"Account\": {\n    \"parent_id\": 0,\n    \"name\": \"account name\",\n    \"type\": 0,\n    \"basis\": \"debit/credit\"\n  }\n}"
+                },
+                "callbacks": {}
+            }
+        }
+    },
+    "security": [],
+    "servers": [],
+    "components": {
+        "links": {},
+        "callbacks": {},
+        "schemas": {}
+    }
+}
