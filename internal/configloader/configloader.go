@@ -6,6 +6,7 @@ import (
 	"github.com/abelgoodwin1988/GoLuca/internal/config"
 	"github.com/go-playground/validator/v10"
 	"github.com/pelletier/go-toml"
+	"github.com/pkg/errors"
 )
 
 // Load at rest configuration into memory
@@ -14,10 +15,10 @@ import (
 // Lastly, set configuration values with cli flags, overwriting pre-existing values, if any.
 func Load() error {
 	if err := loadConfigurationFile(); err != nil {
-		return err
+		return errors.Wrap(err, "failed to load configuration from file")
 	}
 	if err := loadEnvironmentVariables(); err != nil {
-		return err
+		return errors.Wrap(err, "failed to load configuration from environment variables")
 	}
 	// load flags here at some point
 	validate := validator.New()
@@ -44,8 +45,29 @@ func loadConfigurationFile() error {
 
 // loadEnvironmentVariables reads environmental variables and stores then into the config.Env
 func loadEnvironmentVariables() error {
-	if val := os.Getenv("GOLUCA_DBDRIVERNAME"); val != "" {
-		config.Env.DBConnString = val
+	if val := os.Getenv("GOLUCA_DBHOST"); val != "" {
+		config.Env.DBHost = val
+	}
+	if val := os.Getenv("GOLUCA_DBPORT"); val != "" {
+		config.Env.DBPort = val
+	}
+	if val := os.Getenv("GOLUCA_DBUSER"); val != "" {
+		config.Env.DBUser = val
+	}
+	if val := os.Getenv("GOLUCA_DBPASS"); val != "" {
+		config.Env.DBPass = val
+	}
+	if val := os.Getenv("GOLUCA_DBDB"); val != "" {
+		config.Env.DBDB = val
+	}
+	if val := os.Getenv("GOLUCA_APIHOST"); val != "" {
+		config.Env.APIHost = val
+	}
+	if val := os.Getenv("GOLUCA_APIPORT"); val != "" {
+		config.Env.APIPort = val
+	}
+	if val := os.Getenv("GOLUCA_ENVTYPE"); val != "" {
+		config.Env.EnvType = val
 	}
 	return nil
 }

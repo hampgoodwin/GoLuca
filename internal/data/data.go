@@ -2,44 +2,45 @@ package data
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/abelgoodwin1988/GoLuca/internal/config"
 	"github.com/abelgoodwin1988/GoLuca/internal/lucalog"
-	"github.com/jmoiron/sqlx"
+	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/pkg/errors"
-
-	// postgres driver
-	_ "github.com/lib/pq"
 )
 
-// DB is the app-wide accessible DB
-var DB *sqlx.DB
+// DBPool is the app-wide accessible pgx conn pool
+var DBPool *pgxpool.Pool
 
 // CreateDB creates and puts in memory a DB
 func CreateDB() error {
 	ctx := context.Background()
 	var err error
-	DB, err = sqlx.Open(config.Env.DBDriverName, config.Env.DBConnString)
+	connString := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s",
+		config.Env.DBUser,
+		config.Env.DBPass,
+		config.Env.DBHost,
+		config.Env.DBPort,
+		config.Env.DBDB,
+	)
+
+	DBPool, err = pgxpool.Connect(ctx, connString)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to create pgx connection pool")
 	}
-	// test the connection
-	c, err := DB.Conn(ctx)
-	if err != nil {
-		return err
-	}
-	defer c.Close()
 	return nil
 }
 
 // Migrate handles the db migration logic. Eventually this should be replaced with a well-tested migration tool
 func Migrate() error {
 	ctx := context.Background()
-	tx, err := DB.BeginTx(ctx, nil)
+	tx, err := DBPool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		return err
 	}
-	_, err = tx.Exec(`
+	_, err = tx.Exec(ctx, `
 CREATE TABLE IF NOT EXISTS account(
 	id BIGSERIAL PRIMARY KEY,
 	parent_id INT,
@@ -53,7 +54,7 @@ CREATE TABLE IF NOT EXISTS account(
 	if err != nil {
 		return errors.Wrap(err, "failed to create account table")
 	}
-	_, err = tx.Exec(`
+	_, err = tx.Exec(ctx, `
 CREATE TABLE IF NOT EXISTS transaction(
 	id BIGSERIAL PRIMARY KEY,
 	description TEXT,
@@ -63,7 +64,7 @@ CREATE TABLE IF NOT EXISTS transaction(
 	if err != nil {
 		return errors.Wrap(err, "failed to create transaction table")
 	}
-	_, err = tx.Exec(`
+	_, err = tx.Exec(ctx, `
 CREATE TABLE IF NOT EXISTS entry(
 	id BIGSERIAL PRIMARY KEY,
 	transaction_id int,
@@ -77,7 +78,7 @@ CREATE TABLE IF NOT EXISTS entry(
 	if err != nil {
 		return errors.Wrap(err, "failed to create entry table")
 	}
-	if err := tx.Commit(); err != nil {
+	if err := tx.Commit(ctx); err != nil {
 		return errors.Wrap(err, "failed to commit migration")
 	}
 	lucalog.Logger.Info("migration successful")

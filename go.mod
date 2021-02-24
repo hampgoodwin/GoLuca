@@ -7,9 +7,7 @@ require (
 	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/go-playground/validator/v10 v10.4.1
 	github.com/jackc/pgx/v4 v4.10.1
-	github.com/jmoiron/sqlx v1.3.1
 	github.com/kr/text v0.2.0 // indirect
-	github.com/lib/pq v1.3.0
 	github.com/magefile/mage v1.11.0
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/pelletier/go-toml v1.8.1
