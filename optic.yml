@@ -1,5 +1,0 @@
-name: "GoLuca"
-tasks:
-  start:
-    command: "go run cmd/goluca/main.go"
-    inboundUrl: http://localhost:3333

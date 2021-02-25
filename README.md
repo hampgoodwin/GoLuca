@@ -37,6 +37,11 @@ TODO
 - [ ] Use https://mermade.github.io/openapi-gui/ to generate OAS and serve it
 - [ ] Add some tests!
 - [ ] Create a seeder for a basic dev environment of data
+- [x] swap pq for pgx
 - [x] Add code-coverage report via github actions?
     - [x] https://blog.seriesci.com/how-to-measure-code-coverage-in-go/
+- [ ] set up dev appvault and set secrets
+- [ ] set up configuration loader or a new secrets loader to load values from appvault
+- [ ] make a frontend, OOOOH!!!
+- [ ] improve pagination by displaying page number of result.
 
