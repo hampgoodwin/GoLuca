@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/go-chi/chi"
+	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 type LogMsg struct {
@@ -18,6 +19,7 @@ type RouterMsg struct {
 
 type DBMsg struct {
 	Ready bool
+	Val   *pgxpool.Pool
 }
 type MigrationMsg struct {
 	Ready bool

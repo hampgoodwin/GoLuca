@@ -71,7 +71,9 @@ func signalsReceiver() {
 	}()
 
 	<-done
-	lucalog.Logger.Info("exiting")
+	lucalog.Logger.Info("cleanup")
+	setup.C.Cleanup()
+	lucalog.Logger.Info("exit")
 	// thought should be moved out, exitting passes to done channel on setup, and then handles graceful exit
 	os.Exit(1)
 }

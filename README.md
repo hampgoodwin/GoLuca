@@ -44,4 +44,5 @@ TODO
 - [ ] set up configuration loader or a new secrets loader to load values from appvault
 - [ ] make a frontend, OOOOH!!!
 - [ ] improve pagination by displaying page number of result.
+- [ ] use lucalog / zap for http request logging. the chi logger is dope, but conflicting logging structures would be annoying in log shipping
 

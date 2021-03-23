@@ -36,6 +36,7 @@ func CreateDB() {
 
 	setup.C.Mu.Lock()
 	setup.C.DB.Ready = true
+	setup.C.DB.Val = DBPool
 	setup.C.Mu.Unlock()
 
 	lucalog.Logger.Info("db connection established")

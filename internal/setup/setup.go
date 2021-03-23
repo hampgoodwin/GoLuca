@@ -18,7 +18,7 @@ func Set() {
 		Log:          LogMsg{true},
 		ConfigLoader: ConfigLoaderMsg{false},
 		Router:       RouterMsg{false, nil},
-		DB:           DBMsg{false},
+		DB:           DBMsg{false, nil},
 		Migration:    MigrationMsg{false},
 		Server:       ServerMsg{false, nil},
 	}
@@ -68,4 +68,15 @@ func (c *Ch) ReadyForServer() chan bool {
 		}
 	}()
 	return rdyChan
+}
+
+func (c *Ch) Cleanup() chan bool {
+	doneCh := make(chan bool, 1)
+	lucalog.Logger.Info("closing server")
+	c.Server.Val.Close()
+	lucalog.Logger.Info("server closed")
+	lucalog.Logger.Info("closing db")
+	c.DB.Val.Close()
+	lucalog.Logger.Info("db closed")
+	return doneCh
 }
