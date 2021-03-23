@@ -4,6 +4,8 @@ import (
 	"os"
 
 	"github.com/abelgoodwin1988/GoLuca/internal/config"
+	"github.com/abelgoodwin1988/GoLuca/internal/lucalog"
+	"github.com/abelgoodwin1988/GoLuca/internal/setup"
 	"github.com/go-playground/validator/v10"
 	"github.com/pelletier/go-toml"
 	"github.com/pkg/errors"
@@ -13,22 +15,25 @@ import (
 // First load configuration files into the local configuration store.
 // Second, load environmental variables to the local configuration store, overwriting pre-existing values, if any.
 // Lastly, set configuration values with cli flags, overwriting pre-existing values, if any.
-func Load() error {
+func Load() {
 	if err := loadConfigurationFile(); err != nil {
-		return errors.Wrap(err, "failed to load configuration from file")
+		setup.C.Err <- errors.Wrap(err, "failed to load configuration from file")
 	}
 	if err := loadEnvironmentVariables(); err != nil {
-		return errors.Wrap(err, "failed to load configuration from environment variables")
+		setup.C.Err <- errors.Wrap(err, "failed to load configuration from environment variables")
 	}
 	// load flags here at some point
 	validate := validator.New()
 	if err := validate.Struct(config.Env); err != nil {
 		validationErrors := err.(validator.ValidationErrors)
 		if len(validationErrors) > 0 {
-			return err
+			setup.C.Err <- err
 		}
 	}
-	return nil
+	setup.C.Mu.Lock()
+	setup.C.ConfigLoader.Ready = true
+	setup.C.Mu.Unlock()
+	lucalog.Logger.Info("configuration loaded")
 }
 
 func loadConfigurationFile() error {

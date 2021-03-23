@@ -6,6 +6,7 @@ import (
 
 	"github.com/abelgoodwin1988/GoLuca/internal/config"
 	"github.com/abelgoodwin1988/GoLuca/internal/lucalog"
+	"github.com/abelgoodwin1988/GoLuca/internal/setup"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/pkg/errors"
@@ -15,7 +16,9 @@ import (
 var DBPool *pgxpool.Pool
 
 // CreateDB creates and puts in memory a DB
-func CreateDB() error {
+func CreateDB() {
+	<-setup.C.ReadyForDBCreation()
+
 	ctx := context.Background()
 	var err error
 	connString := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s",
@@ -28,17 +31,23 @@ func CreateDB() error {
 
 	DBPool, err = pgxpool.Connect(ctx, connString)
 	if err != nil {
-		return errors.Wrap(err, "failed to create pgx connection pool")
+		setup.C.Err <- errors.Wrap(err, "failed to create pgx connection pool")
 	}
-	return nil
+
+	setup.C.Mu.Lock()
+	setup.C.DB.Ready = true
+	setup.C.Mu.Unlock()
+
+	lucalog.Logger.Info("db connection established")
 }
 
 // Migrate handles the db migration logic. Eventually this should be replaced with a well-tested migration tool
-func Migrate() error {
+func Migrate() {
+	<-setup.C.ReadyForMigration()
 	ctx := context.Background()
 	tx, err := DBPool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
-		return err
+		setup.C.Err <- err
 	}
 	_, err = tx.Exec(ctx, `
 CREATE TABLE IF NOT EXISTS account(
@@ -52,7 +61,7 @@ CREATE TABLE IF NOT EXISTS account(
 )
 ;`)
 	if err != nil {
-		return errors.Wrap(err, "failed to create account table")
+		setup.C.Err <- errors.Wrap(err, "failed to create account table")
 	}
 	_, err = tx.Exec(ctx, `
 CREATE TABLE IF NOT EXISTS transaction(
@@ -62,7 +71,7 @@ CREATE TABLE IF NOT EXISTS transaction(
 )
 ;`)
 	if err != nil {
-		return errors.Wrap(err, "failed to create transaction table")
+		setup.C.Err <- errors.Wrap(err, "failed to create transaction table")
 	}
 	_, err = tx.Exec(ctx, `
 CREATE TABLE IF NOT EXISTS entry(
@@ -76,11 +85,13 @@ CREATE TABLE IF NOT EXISTS entry(
 )
 ;`)
 	if err != nil {
-		return errors.Wrap(err, "failed to create entry table")
+		setup.C.Err <- errors.Wrap(err, "failed to create entry table")
 	}
 	if err := tx.Commit(ctx); err != nil {
-		return errors.Wrap(err, "failed to commit migration")
+		setup.C.Err <- errors.Wrap(err, "failed to commit migration")
 	}
+	setup.C.Mu.Lock()
+	setup.C.Migration.Ready = true
+	setup.C.Mu.Unlock()
 	lucalog.Logger.Info("migration successful")
-	return nil
 }

@@ -3,6 +3,8 @@ package api
 import (
 	"time"
 
+	"github.com/abelgoodwin1988/GoLuca/internal/lucalog"
+	"github.com/abelgoodwin1988/GoLuca/internal/setup"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 )
@@ -24,6 +26,13 @@ func Register() *chi.Mux {
 	registerEntryRoute(r)
 	registerTransactionRoute(r)
 	registerAccountRoutes(r)
+
+	setup.C.Mu.Lock()
+	setup.C.Router.Ready = true
+	setup.C.Router.Val = r
+	setup.C.Mu.Unlock()
+
+	lucalog.Logger.Info("endpoints registered")
 
 	return r
 }
