@@ -4,21 +4,7 @@ A Simple Accounting Ledger
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/hampgoodwin/GoLuca)](https://goreportcard.com/report/github.com/hampgoodwin/GoLuca) [![Coverage Status](https://coveralls.io/repos/github/hampgoodwin/GoLuca/badge.svg?branch=main)](https://coveralls.io/github/hampgoodwin/GoLuca?branch=main) [![golangci-lint](https://github.com/hampgoodwin/GoLuca/actions/workflows/golint-ci.yml/badge.svg)](https://github.com/hampgoodwin/GoLuca/actions/workflows/golint-ci.yml)
 
-- Simple application which writes and reads accounting ledger entries to a postgres database
-
-Database
-
-- Postgres database with a single Schema and single Entries table
-- For development we'll be blowing up the database every time, and creating the schema (seeding soon TM)
-- Later we'll introduce a migration proess for my self-learning
-
-Secrets
-
-- Secrets will be read from environment variables
-
-Making the environments ready with data
-
-- We'll be using [mage](https://magefile.org/) to preload a development appvault with secrets
+- Simple application which writes and reads accounting ledger entries
 
 TODO
 
@@ -29,19 +15,18 @@ TODO
 - [x] Better error handling
     - [x] Better error logging
 - [x] Pagination
-- [ ] Add some kind of concurrency for the luls and the learnings
-    - [ ] when we hit a performance wall we're not happy with, lets look into swapping out pq for pgx
 - [ ] Add a stress testing system
-    - [ ] Magefile
+- [ ] Add fuzzing
+- [x] Add service layer 
 - [ ] Decouple app setup and routing
 - [ ] Use https://mermade.github.io/openapi-gui/ to generate OAS and serve it
-- [ ] Add some tests!
 - [ ] Create a seeder for a basic dev environment of data
 - [x] swap pq for pgx
 - [x] Add code-coverage report via github actions?
     - [x] https://blog.seriesci.com/how-to-measure-code-coverage-in-go/
 - [ ] set up dev appvault and set secrets
-- [ ] set up configuration loader or a new secrets loader to load values from appvault
+    - [ ] set up configuration loader or a new secrets loader to load values from appvault
 - [ ] make a frontend, OOOOH!!!
 - [ ] improve pagination by displaying page number of result.
+- [ ] swap to uuid over auto incr values for id's
 
