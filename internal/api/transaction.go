@@ -9,7 +9,6 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/hampgoodwin/GoLuca/internal/service"
 	"github.com/hampgoodwin/GoLuca/pkg/transaction"
-	"github.com/pkg/errors"
 )
 
 func registerTransactionRoute(r *chi.Mux) {
@@ -41,30 +40,22 @@ func getTransactions(w http.ResponseWriter, r *http.Request) {
 	limit, cursor := r.URL.Query().Get("limit"), r.URL.Query().Get("cursor")
 	limitInt, err := strconv.ParseInt(limit, 10, 64)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		err = errors.Wrap(err, "required query string limit must be integer")
-		_, _ = w.Write([]byte(err.Error()))
+		encodeError(w, http.StatusBadRequest, err)
 		return
 	}
 	cursorInt, err := strconv.ParseInt(cursor, 10, 64)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		err = errors.Wrap(err, "required query string cursor must be integer")
-		_, _ = w.Write([]byte(err.Error()))
+		encodeError(w, http.StatusBadRequest, err)
 		return
 	}
 	transactions, err := service.GetTransactions(ctx, cursorInt, limitInt)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		err = errors.Wrapf(err, "failed to get transactions from database with limit %d, offset %d", limitInt, cursorInt)
-		_, _ = w.Write([]byte(err.Error()))
+		encodeError(w, http.StatusInternalServerError, err)
 		return
 	}
-	transactionsResp := &transactionsResponse{Transactions: transactions}
-	if err := json.NewEncoder(w).Encode(transactionsResp); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		err = errors.Wrap(err, "failed to encode transactions response")
-		_, _ = w.Write([]byte(err.Error()))
+	res := &transactionsResponse{Transactions: transactions}
+	if err := json.NewEncoder(w).Encode(res); err != nil {
+		encodeError(w, http.StatusInternalServerError, err)
 		return
 	}
 }
@@ -72,19 +63,19 @@ func getTransactions(w http.ResponseWriter, r *http.Request) {
 func getTransaction(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	transactionID := chi.URLParam(r, "transaction_id")
-	transactionIDInt, _ := strconv.ParseInt(transactionID, 10, 64) // the route regexp handles err cases
-	transaction, err := service.GetTransaction(ctx, transactionIDInt)
+	transactionIDInt, err := strconv.ParseInt(transactionID, 10, 64) // the route regexp handles err cases
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		err = errors.Wrapf(err, "failed to get transaction by id %d from database", transactionIDInt)
-		_, _ = w.Write([]byte(err.Error()))
+		encodeError(w, http.StatusBadRequest, err)
 		return
 	}
-	transactionResp := &transactionResponse{Transaction: transaction}
-	if err := json.NewEncoder(w).Encode(transactionResp); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		err = errors.Wrap(err, "failed to encode transaction body")
-		_, _ = w.Write([]byte(err.Error()))
+	transaction, err := service.GetTransaction(ctx, transactionIDInt)
+	if err != nil {
+		encodeError(w, http.StatusInternalServerError, err)
+		return
+	}
+	res := &transactionResponse{Transaction: transaction}
+	if err := json.NewEncoder(w).Encode(res); err != nil {
+		encodeError(w, http.StatusInternalServerError, err)
 		return
 	}
 }
@@ -92,55 +83,48 @@ func getTransaction(w http.ResponseWriter, r *http.Request) {
 func getTransactionEntries(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	transactionID := chi.URLParam(r, "transaction_id")
-	transactionIDInt, _ := strconv.ParseInt(transactionID, 10, 64) // the route regexp handles err cases
+	transactionIDInt, err := strconv.ParseInt(transactionID, 10, 64) // the route regexp handles err cases
+	if err != nil {
+		encodeError(w, http.StatusBadRequest, err)
+		return
+	}
 	entries, err := service.GetTransactionEntries(ctx, transactionIDInt)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		err := errors.Wrap(err, "failed to get entries from db")
-		_, _ = w.Write([]byte(err.Error()))
+		encodeError(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	tRes := transactionEntriesResponse{entries}
-	if err := json.NewEncoder(w).Encode(tRes); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		err = errors.Wrap(err, "failed to encode transactoin response")
-		_, _ = w.Write([]byte(err.Error()))
+	res := transactionEntriesResponse{entries}
+	if err := json.NewEncoder(w).Encode(res); err != nil {
+		encodeError(w, http.StatusBadRequest, err)
 		return
 	}
 }
 
 func createTransaction(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	tReq := &transactionRequest{}
-	if err := json.NewDecoder(r.Body).Decode(tReq); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		err = errors.Wrap(err, "failed to decode body")
-		_, _ = w.Write([]byte(err.Error()))
+	req := &transactionRequest{}
+	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
+		encodeError(w, http.StatusBadRequest, err)
 		return
 	}
 
-	if !tReq.Transaction.Balanced() {
-		w.WriteHeader(http.StatusBadRequest)
-		err := fmt.Errorf("transaction entires are not balanced\n%s", tReq.Transaction.Entries)
-		_, _ = w.Write([]byte(err.Error()))
+	if !req.Transaction.Balanced() {
+		err := fmt.Errorf("transaction entires are not balanced\n%s", req.Transaction.Entries)
+		encodeError(w, http.StatusBadRequest, err)
 		return
 	}
 
-	trans, err := service.CreateTransaction(ctx, tReq.Transaction)
+	transaction, err := service.CreateTransaction(ctx, req.Transaction)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		err = errors.Wrap(err, "failed to create transaction in db")
-		_, _ = w.Write([]byte(err.Error()))
+		encodeError(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	tRes := &transactionResponse{Transaction: trans}
+	res := &transactionResponse{Transaction: transaction}
 	w.WriteHeader(http.StatusCreated)
-	if err := json.NewEncoder(w).Encode(tRes); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		err = errors.Wrap(err, "failed to encode transactions response")
-		_, _ = w.Write([]byte(err.Error()))
+	if err := json.NewEncoder(w).Encode(res); err != nil {
+		encodeError(w, http.StatusInternalServerError, err)
 		return
 	}
 }

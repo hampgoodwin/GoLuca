@@ -7,9 +7,10 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/hampgoodwin/GoLuca/internal/data"
+	"github.com/hampgoodwin/GoLuca/internal/lucalog"
 	"github.com/hampgoodwin/GoLuca/internal/service"
 	"github.com/hampgoodwin/GoLuca/pkg/account"
-	"github.com/pkg/errors"
+	"go.uber.org/zap"
 )
 
 type accountRequest struct {
@@ -36,24 +37,18 @@ func getAccount(w http.ResponseWriter, r *http.Request) {
 	accIDInt, _ := strconv.ParseInt(accountID, 10, 64) // we ignore the err bc the route regexp filters already
 	account, err := service.GetAccount(ctx, accIDInt)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		err = errors.Wrap(err, "failed to get account")
-		_, _ = w.Write([]byte(err.Error()))
+		encodeError(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	accountResp := &accountResponse{Account: account}
-	if err := data.Validate(accountResp); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		err = errors.Wrap(err, "data validation for gathered type failed")
-		_, _ = w.Write([]byte(err.Error()))
+	res := &accountResponse{Account: account}
+	if err := data.Validate(res); err != nil {
+		encodeError(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	if err := json.NewEncoder(w).Encode(accountResp); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		err = errors.Wrap(err, "failed to encode account response")
-		_, _ = w.Write([]byte(err.Error()))
+	if err := encode(w, res); err != nil {
+		encodeError(w, http.StatusInternalServerError, err)
 		return
 	}
 }
@@ -64,61 +59,50 @@ func getAccounts(w http.ResponseWriter, r *http.Request) {
 	limit, cursor := r.URL.Query().Get("limit"), r.URL.Query().Get("cursor")
 	limitInt, err := strconv.ParseInt(limit, 10, 64)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		err = errors.Wrap(err, "required query string limit must be integer")
-		_, _ = w.Write([]byte(err.Error()))
+		encodeError(w, http.StatusBadRequest, err)
 		return
 	}
 	cursorInt, err := strconv.ParseInt(cursor, 10, 64)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		err = errors.Wrap(err, "required query string cursor must be integer")
-		_, _ = w.Write([]byte(err.Error()))
+		encodeError(w, http.StatusBadRequest, err)
 		return
 	}
 
 	accounts, err := service.GetAccounts(ctx, cursorInt, limitInt)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		err = errors.Wrapf(err, "getting accounts with limit %d, offset %d", limitInt, cursorInt)
-		_, _ = w.Write([]byte(err.Error()))
+		encodeError(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	accountsResp := &accountsResponse{Accounts: accounts}
-	if err := json.NewEncoder(w).Encode(accountsResp); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		err = errors.Wrap(err, "failed to encode accounts response")
-		_, _ = w.Write([]byte(err.Error()))
+	res := &accountsResponse{Accounts: accounts}
+	if err := encode(w, res); err != nil {
+		encodeError(w, http.StatusInternalServerError, err)
 		return
 	}
 }
 
 func createAccount(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	aReq := &accountRequest{}
-	if err := json.NewDecoder(r.Body).Decode(aReq); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		err = errors.Wrap(err, "failed to decode body")
-		_, _ = w.Write([]byte(err.Error()))
+	req := &accountRequest{}
+	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
+		encodeError(w, http.StatusBadRequest, err)
 		return
 	}
-	if err := data.Validate(aReq); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		_, _ = w.Write([]byte(err.Error()))
+	if err := data.Validate(req); err != nil {
+		encodeError(w, http.StatusBadRequest, err)
 		return
 	}
-	acc, err := service.CreateAccount(ctx, aReq.Account)
+	acc, err := service.CreateAccount(ctx, req.Account)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = w.Write([]byte(err.Error()))
+		encodeError(w, http.StatusBadRequest, err)
+		return
 	}
-	aRes := accountResponse{Account: acc}
+	res := accountResponse{Account: acc}
 	w.WriteHeader(http.StatusCreated)
-	if err := encode(w, aRes); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		err = errors.Wrap(err, "failed to encode createAccount response")
-		_, _ = w.Write([]byte(err.Error()))
+	if err := encode(w, res); err != nil {
+		// TODO split "encodoing" and "responding/writing" code
+		encodeError(w, http.StatusInternalServerError, err)
+		lucalog.Logger.Error("encoding and writing response", zap.Error(err))
 		return
 	}
 }
