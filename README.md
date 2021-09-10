@@ -26,7 +26,11 @@ TODO
     - [x] https://blog.seriesci.com/how-to-measure-code-coverage-in-go/
 - [ ] set up dev appvault and set secrets
     - [ ] set up configuration loader or a new secrets loader to load values from appvault
-- [ ] make a frontend, OOOOH!!!
+- [ ] make a frontend with some dashboard functionality, (vue3 plz) OOOOH!!!
 - [ ] improve pagination by displaying page number of result.
 - [ ] swap to uuid over auto incr values for id's
+- [ ] implement a separate errors package like unto nate finches error flags solution
+- [ ] implement standard api response and error response to simplify api handler functions
+- [ ] split api encode and write code
+- [ ] more elegant error response handling
 
