@@ -33,4 +33,5 @@ TODO
 - [ ] implement standard api response and error response to simplify api handler functions
 - [ ] split api encode and write code
 - [ ] more elegant error response handling
+- [ ] replace transaction with single value and debit/credit accounts; balanced by design
 
