@@ -23,7 +23,7 @@ func CreateDB() error {
 		config.Env.DBPass,
 		config.Env.DBHost,
 		config.Env.DBPort,
-		config.Env.DBDB,
+		config.Env.DBDatabase,
 	)
 
 	DBPool, err = pgxpool.Connect(ctx, connString)

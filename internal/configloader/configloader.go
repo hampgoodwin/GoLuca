@@ -57,8 +57,8 @@ func loadEnvironmentVariables() error {
 	if val := os.Getenv("GOLUCA_DBPASS"); val != "" {
 		config.Env.DBPass = val
 	}
-	if val := os.Getenv("GOLUCA_DBDB"); val != "" {
-		config.Env.DBDB = val
+	if val := os.Getenv("GOLUCA_DBDATABASE"); val != "" {
+		config.Env.DBDatabase = val
 	}
 	if val := os.Getenv("GOLUCA_APIHOST"); val != "" {
 		config.Env.APIHost = val
