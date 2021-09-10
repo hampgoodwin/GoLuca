@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/abelgoodwin1988/GoLuca/api"
-	"github.com/abelgoodwin1988/GoLuca/internal/config"
-	"github.com/abelgoodwin1988/GoLuca/internal/configloader"
-	"github.com/abelgoodwin1988/GoLuca/internal/data"
-	"github.com/abelgoodwin1988/GoLuca/internal/lucalog"
+	"github.com/hampgoodwin/GoLuca/api"
+	"github.com/hampgoodwin/GoLuca/internal/config"
+	"github.com/hampgoodwin/GoLuca/internal/configloader"
+	"github.com/hampgoodwin/GoLuca/internal/data"
+	"github.com/hampgoodwin/GoLuca/internal/lucalog"
 	"go.uber.org/zap"
 )
 

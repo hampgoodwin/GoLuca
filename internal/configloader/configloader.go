@@ -3,8 +3,8 @@ package configloader
 import (
 	"os"
 
-	"github.com/abelgoodwin1988/GoLuca/internal/config"
 	"github.com/go-playground/validator/v10"
+	"github.com/hampgoodwin/GoLuca/internal/config"
 	"github.com/pelletier/go-toml"
 	"github.com/pkg/errors"
 )
