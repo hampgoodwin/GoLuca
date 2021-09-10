@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi"
-	"github.com/hampgoodwin/GoLuca/internal/data"
+	"github.com/hampgoodwin/GoLuca/internal/service"
 	"github.com/hampgoodwin/GoLuca/pkg/transaction"
 	"github.com/pkg/errors"
 )
@@ -37,10 +37,10 @@ func getEntries(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
-	entries, err := data.GetEntries(ctx, cursorInt, limitInt)
+	entries, err := service.GetEntries(ctx, cursorInt, limitInt)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		err = errors.Wrapf(err, "failed to get entries from database with limit %d, offset %d", limitInt, cursorInt)
+		err = errors.Wrapf(err, "failed to get entries with limit %d, offset %d", limitInt, cursorInt)
 		_, _ = w.Write([]byte(err.Error()))
 	}
 	entriesResp := &entriesResponse{Entries: entries}

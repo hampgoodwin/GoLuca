@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/hampgoodwin/GoLuca/internal/data"
+	"github.com/hampgoodwin/GoLuca/internal/service"
 	"github.com/hampgoodwin/GoLuca/pkg/account"
 	"github.com/pkg/errors"
 )
@@ -33,10 +34,10 @@ func getAccount(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	accountID := chi.URLParam(r, "account_id")
 	accIDInt, _ := strconv.ParseInt(accountID, 10, 64) // we ignore the err bc the route regexp filters already
-	account, err := data.GetAccount(ctx, accIDInt)
+	account, err := service.GetAccount(ctx, accIDInt)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		err = errors.Wrap(err, "failed to query account from database")
+		err = errors.Wrap(err, "failed to get account")
 		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
@@ -76,10 +77,10 @@ func getAccounts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accounts, err := data.GetAccounts(ctx, cursorInt, limitInt)
+	accounts, err := service.GetAccounts(ctx, cursorInt, limitInt)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		err = errors.Wrapf(err, "failed to get accounts from database with limit %d, offset %d", limitInt, cursorInt)
+		err = errors.Wrapf(err, "getting accounts with limit %d, offset %d", limitInt, cursorInt)
 		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
@@ -107,7 +108,7 @@ func createAccount(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
-	acc, err := data.CreateAccount(ctx, aReq.Account)
+	acc, err := service.CreateAccount(ctx, aReq.Account)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte(err.Error()))

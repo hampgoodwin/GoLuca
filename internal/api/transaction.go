@@ -7,7 +7,7 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi"
-	"github.com/hampgoodwin/GoLuca/internal/data"
+	"github.com/hampgoodwin/GoLuca/internal/service"
 	"github.com/hampgoodwin/GoLuca/pkg/transaction"
 	"github.com/pkg/errors"
 )
@@ -53,15 +53,13 @@ func getTransactions(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
-
-	transactions, err := data.GetTransactions(ctx, cursorInt, limitInt)
+	transactions, err := service.GetTransactions(ctx, cursorInt, limitInt)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		err = errors.Wrapf(err, "failed to get transactions from database with limit %d, offset %d", limitInt, cursorInt)
 		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
-
 	transactionsResp := &transactionsResponse{Transactions: transactions}
 	if err := json.NewEncoder(w).Encode(transactionsResp); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -75,7 +73,7 @@ func getTransaction(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	transactionID := chi.URLParam(r, "transaction_id")
 	transactionIDInt, _ := strconv.ParseInt(transactionID, 10, 64) // the route regexp handles err cases
-	transaction, err := data.GetTransaction(ctx, transactionIDInt)
+	transaction, err := service.GetTransaction(ctx, transactionIDInt)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		err = errors.Wrapf(err, "failed to get transaction by id %d from database", transactionIDInt)
@@ -95,7 +93,7 @@ func getTransactionEntries(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	transactionID := chi.URLParam(r, "transaction_id")
 	transactionIDInt, _ := strconv.ParseInt(transactionID, 10, 64) // the route regexp handles err cases
-	entries, err := data.GetEntriesByTransactionID(ctx, transactionIDInt)
+	entries, err := service.GetTransactionEntries(ctx, transactionIDInt)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		err := errors.Wrap(err, "failed to get entries from db")
@@ -129,7 +127,7 @@ func createTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	trans, err := data.CreateTransaction(ctx, tReq.Transaction)
+	trans, err := service.CreateTransaction(ctx, tReq.Transaction)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		err = errors.Wrap(err, "failed to create transaction in db")
