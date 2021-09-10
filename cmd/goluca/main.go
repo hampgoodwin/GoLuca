@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/hampgoodwin/GoLuca/api"
+	"github.com/hampgoodwin/GoLuca/internal/api"
 	"github.com/hampgoodwin/GoLuca/internal/config"
 	"github.com/hampgoodwin/GoLuca/internal/configloader"
 	"github.com/hampgoodwin/GoLuca/internal/data"
