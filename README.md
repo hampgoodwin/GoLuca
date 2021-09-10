@@ -2,7 +2,7 @@
 
 A Simple Accounting Ledger
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/abelgoodwin1988/GoLuca)](https://goreportcard.com/report/github.com/abelgoodwin1988/GoLuca) [![Coverage Status](https://coveralls.io/repos/github/abelgoodwin1988/GoLuca/badge.svg?branch=main)](https://coveralls.io/github/abelgoodwin1988/GoLuca?branch=main) [![golangci-lint](https://github.com/abelgoodwin1988/GoLuca/actions/workflows/golint-ci.yml/badge.svg)](https://github.com/abelgoodwin1988/GoLuca/actions/workflows/golint-ci.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/hampgoodwin/GoLuca)](https://goreportcard.com/report/github.com/hampgoodwin/GoLuca) [![Coverage Status](https://coveralls.io/repos/github/hampgoodwin/GoLuca/badge.svg?branch=main)](https://coveralls.io/github/hampgoodwin/GoLuca?branch=main) [![golangci-lint](https://github.com/hampgoodwin/GoLuca/actions/workflows/golint-ci.yml/badge.svg)](https://github.com/hampgoodwin/GoLuca/actions/workflows/golint-ci.yml)
 
 - Simple application which writes and reads accounting ledger entries to a postgres database
 

@@ -3,7 +3,7 @@ package data
 import (
 	"context"
 
-	"github.com/abelgoodwin1988/GoLuca/pkg/account"
+	"github.com/hampgoodwin/GoLuca/pkg/account"
 	"github.com/jackc/pgx/v4"
 	"github.com/pkg/errors"
 )

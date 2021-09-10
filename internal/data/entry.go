@@ -3,7 +3,7 @@ package data
 import (
 	"context"
 
-	"github.com/abelgoodwin1988/GoLuca/pkg/transaction"
+	"github.com/hampgoodwin/GoLuca/pkg/transaction"
 	"github.com/pkg/errors"
 )
 

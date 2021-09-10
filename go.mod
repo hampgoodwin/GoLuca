@@ -1,4 +1,4 @@
-module github.com/abelgoodwin1988/GoLuca
+module github.com/hampgoodwin/GoLuca
 
 go 1.14
 

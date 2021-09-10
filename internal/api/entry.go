@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/abelgoodwin1988/GoLuca/internal/data"
-	"github.com/abelgoodwin1988/GoLuca/pkg/transaction"
 	"github.com/go-chi/chi"
+	"github.com/hampgoodwin/GoLuca/internal/data"
+	"github.com/hampgoodwin/GoLuca/pkg/transaction"
 	"github.com/pkg/errors"
 )
 

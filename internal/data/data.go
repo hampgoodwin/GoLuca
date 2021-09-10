@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/abelgoodwin1988/GoLuca/internal/config"
-	"github.com/abelgoodwin1988/GoLuca/internal/lucalog"
+	"github.com/hampgoodwin/GoLuca/internal/config"
+	"github.com/hampgoodwin/GoLuca/internal/lucalog"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/pkg/errors"
