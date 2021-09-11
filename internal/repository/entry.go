@@ -1,4 +1,4 @@
-package data
+package repository
 
 import (
 	"context"
@@ -8,8 +8,8 @@ import (
 )
 
 // GetEntries gets a paginated result of db entries
-func GetEntries(ctx context.Context, cursor int64, limit int64) ([]transaction.Entry, error) {
-	rows, err := DBPool.Query(ctx, `SELECT id, transaction_id, account_id, amount FROM entry WHERE id > $1 LIMIT $2;`, cursor, limit)
+func (r *Repository) GetEntries(ctx context.Context, cursor int64, limit int64) ([]transaction.Entry, error) {
+	rows, err := r.Database.Query(ctx, `SELECT id, transaction_id, account_id, amount FROM entry WHERE id > $1 LIMIT $2;`, cursor, limit)
 	if err != nil {
 		return nil, errors.Wrap(err, "getting entries from database")
 	}
@@ -31,8 +31,8 @@ func GetEntries(ctx context.Context, cursor int64, limit int64) ([]transaction.E
 }
 
 // GetEntriesByTransactionID gets entries by transaction ID
-func GetEntriesByTransactionID(ctx context.Context, transactionID int64) ([]transaction.Entry, error) {
-	rows, err := DBPool.Query(ctx, `SELECT id, transaction_id, account_id, amount FROM entry WHERE transaction_id=$1`, transactionID)
+func (r *Repository) GetEntriesByTransactionID(ctx context.Context, transactionID int64) ([]transaction.Entry, error) {
+	rows, err := r.Database.Query(ctx, `SELECT id, transaction_id, account_id, amount FROM entry WHERE transaction_id=$1`, transactionID)
 	if err != nil {
 		return nil, errors.Wrap(err, "getting entries by transaction id from database")
 	}

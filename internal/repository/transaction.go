@@ -1,4 +1,4 @@
-package data
+package repository
 
 import (
 	"context"
@@ -10,9 +10,9 @@ import (
 )
 
 // GetTransaction get's a transaction record, without it's entries, by the transaction ID
-func GetTransaction(ctx context.Context, transactionID int64) (*transaction.Transaction, error) {
+func (r *Repository) GetTransaction(ctx context.Context, transactionID int64) (*transaction.Transaction, error) {
 	transaction := &transaction.Transaction{}
-	if err := DBPool.QueryRow(ctx, `SELECT id, description
+	if err := r.Database.QueryRow(ctx, `SELECT id, description
 FROM transaction
 WHERE id=$1
 ;`, transactionID).Scan(
@@ -28,8 +28,8 @@ WHERE id=$1
 }
 
 // GetTransactions get's transactions paginaged by cursor and limit
-func GetTransactions(ctx context.Context, cursor int64, limit int64) ([]transaction.Transaction, error) {
-	rows, err := DBPool.Query(ctx, `SELECT id, description
+func (r *Repository) GetTransactions(ctx context.Context, cursor int64, limit int64) ([]transaction.Transaction, error) {
+	rows, err := r.Database.Query(ctx, `SELECT id, description
 FROM transaction
 WHERE transaction.id > $1
 LIMIT $2
@@ -51,7 +51,7 @@ LIMIT $2
 	}
 
 	for i, transaction := range transactions {
-		entries, err := GetEntriesByTransactionID(ctx, transaction.ID)
+		entries, err := r.GetEntriesByTransactionID(ctx, transaction.ID)
 		if err != nil {
 			return nil, errors.Wrap(err, "querying databse for entries while getting transactions")
 		}
@@ -61,9 +61,9 @@ LIMIT $2
 }
 
 // CreateTransaction creates a transaction and associated entries in a single transaction
-func CreateTransaction(ctx context.Context, trans *transaction.Transaction) (*transaction.Transaction, error) {
+func (r *Repository) CreateTransaction(ctx context.Context, trans *transaction.Transaction) (*transaction.Transaction, error) {
 	// get a db-transaction
-	tx, err := DBPool.BeginTx(ctx, pgx.TxOptions{})
+	tx, err := r.Database.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		return nil, errors.Wrap(err, "starting database transaction for creating transaction")
 	}

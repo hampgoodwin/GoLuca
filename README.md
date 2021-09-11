@@ -34,4 +34,5 @@ TODO
 - [ ] split api encode and write code
 - [ ] more elegant error response handling
 - [ ] replace transaction with single value and debit/credit accounts; balanced by design
+- [ ] implement golang-migrate or similar db migration strategy
 

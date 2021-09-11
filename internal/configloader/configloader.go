@@ -3,9 +3,9 @@ package configloader
 import (
 	"os"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/hampgoodwin/GoLuca/internal/config"
 	"github.com/hampgoodwin/GoLuca/internal/errors"
+	"github.com/hampgoodwin/GoLuca/internal/validate"
 	"github.com/pelletier/go-toml"
 )
 
@@ -13,30 +13,29 @@ import (
 // First load configuration files into the local configuration store.
 // Second, load environmental variables to the local configuration store, overwriting pre-existing values, if any.
 // Lastly, set configuration values with cli flags, overwriting pre-existing values, if any.
-func Load() error {
-	if err := loadConfigurationFile(); err != nil {
-		return errors.Wrap(err, "failed to load configuration from file")
+func Load(c *config.Config) (*config.Config, error) {
+	cfg := &config.Config{}
+	if c != nil {
+		cfg = c
 	}
-	if err := loadEnvironmentVariables(); err != nil {
-		return errors.Wrap(err, "failed to load configuration from environment variables")
+
+	if err := loadConfigurationFile(cfg); err != nil {
+		return nil, errors.Wrap(err, "failed to load configuration from file")
 	}
-	// load flags here at some point
-	validate := validator.New()
-	if err := validate.Struct(config.Env); err != nil {
-		validationErrors := err.(validator.ValidationErrors)
-		if len(validationErrors) > 0 {
-			return err
-		}
+	loadEnvironmentVariables(cfg)
+	// TODO: Load command line flags
+	if err := validate.Validate(cfg); err != nil {
+		return nil, errors.WrapFlag(err, "validating configuration", errors.NotValid)
 	}
-	return nil
+	return cfg, nil
 }
 
-func loadConfigurationFile() error {
+func loadConfigurationFile(cfg *config.Config) error {
 	f, err := os.Open("/etc/goluca/.env.toml")
 	if err != nil {
 		return err
 	}
-	err = toml.NewDecoder(f).Decode(config.Env)
+	err = toml.NewDecoder(f).Decode(cfg)
 	if err != nil {
 		return err
 	}
@@ -44,30 +43,29 @@ func loadConfigurationFile() error {
 }
 
 // loadEnvironmentVariables reads environmental variables and stores then into the config.Env
-func loadEnvironmentVariables() error {
+func loadEnvironmentVariables(cfg *config.Config) {
 	if val := os.Getenv("GOLUCA_DBHOST"); val != "" {
-		config.Env.DBHost = val
+		cfg.DBHost = val
 	}
 	if val := os.Getenv("GOLUCA_DBPORT"); val != "" {
-		config.Env.DBPort = val
+		cfg.DBPort = val
 	}
 	if val := os.Getenv("GOLUCA_DBUSER"); val != "" {
-		config.Env.DBUser = val
+		cfg.DBUser = val
 	}
 	if val := os.Getenv("GOLUCA_DBPASS"); val != "" {
-		config.Env.DBPass = val
+		cfg.DBPass = val
 	}
 	if val := os.Getenv("GOLUCA_DBDATABASE"); val != "" {
-		config.Env.DBDatabase = val
+		cfg.DBDatabase = val
 	}
 	if val := os.Getenv("GOLUCA_APIHOST"); val != "" {
-		config.Env.APIHost = val
+		cfg.APIHost = val
 	}
 	if val := os.Getenv("GOLUCA_APIPORT"); val != "" {
-		config.Env.APIPort = val
+		cfg.APIPort = val
 	}
 	if val := os.Getenv("GOLUCA_ENVTYPE"); val != "" {
-		config.Env.EnvType = val
+		cfg.EnvType = val
 	}
-	return nil
 }

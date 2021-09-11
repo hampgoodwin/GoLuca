@@ -1,41 +1,19 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
+	"log"
 
-	"github.com/hampgoodwin/GoLuca/internal/api"
-	"github.com/hampgoodwin/GoLuca/internal/config"
-	"github.com/hampgoodwin/GoLuca/internal/configloader"
-	"github.com/hampgoodwin/GoLuca/internal/data"
-	"github.com/hampgoodwin/GoLuca/internal/lucalog"
+	"github.com/hampgoodwin/GoLuca/internal/environment"
 	"go.uber.org/zap"
 )
 
 func main() {
-	logger, _ := zap.NewProduction()
-	lucalog.Logger = logger
-
-	if err := configloader.Load(); err != nil {
-		lucalog.Logger.Fatal("failed to load config", zap.Error(err))
-	}
-	if err := data.CreateDB(); err != nil {
-		lucalog.Logger.Fatal("failed to create new DB", zap.Error(err))
-	}
-	defer data.DBPool.Close()
-
-	if err := data.Migrate(); err != nil {
-		lucalog.Logger.Fatal("failed to migrate", zap.Error(err))
+	env, err := environment.NewEnvironment(nil)
+	if err != nil {
+		log.Panic("failed to create new environment")
 	}
 
-	r := api.Register()
-
-	server := http.Server{
-		Handler: r,
-		Addr:    fmt.Sprintf("%s:%s", config.Env.APIHost, config.Env.APIPort),
-	}
-
-	if err := server.ListenAndServe(); err != nil {
-		lucalog.Logger.Fatal("api failure", zap.Error(err))
+	if err := env.Server.ListenAndServe(); err != nil {
+		env.Log.Panic("http server failed", zap.Error(err))
 	}
 }

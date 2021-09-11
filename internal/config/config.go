@@ -1,4 +1,9 @@
 package config
 
-// Env is the globally exported environment loaded configuration
-var Env = &Environment{}
+// Config holds the values for environment loaded configuration values
+type Config struct {
+	EnvType                  string `validate:"required,oneof=LOCAL DEV STAGING PROD"`
+	DBHost, DBUser, DBPass   string
+	DBDatabase               string
+	DBPort, APIHost, APIPort string
+}

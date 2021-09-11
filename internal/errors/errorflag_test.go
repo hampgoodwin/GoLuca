@@ -16,6 +16,7 @@ func TestStringer(t *testing.T) {
 	}{
 		{zero, "0"},
 		{NotFound, "NotFound"},
+		{NotValid, "NotValid"},
 		{NotValidRequest, "NotValidRequest"},
 		{NotValidRequestData, "NotValidRequestData"},
 		{NotValidInternalData, "NotValidInternalData"},

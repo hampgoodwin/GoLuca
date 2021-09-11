@@ -6,10 +6,8 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi"
-	"github.com/hampgoodwin/GoLuca/internal/data"
 	"github.com/hampgoodwin/GoLuca/internal/errors"
-	"github.com/hampgoodwin/GoLuca/internal/lucalog"
-	"github.com/hampgoodwin/GoLuca/internal/service"
+	"github.com/hampgoodwin/GoLuca/internal/validate"
 	"github.com/hampgoodwin/GoLuca/pkg/account"
 	"go.uber.org/zap"
 )
@@ -26,80 +24,80 @@ type accountsResponse struct {
 	Accounts []account.Account `json:"accounts" validated:"required"`
 }
 
-func registerAccountRoutes(r *chi.Mux) {
-	r.Get("/accounts", getAccounts)
-	r.Get("/accounts/{account_id:[0-9]+}", getAccount)
-	r.Post("/accounts", createAccount)
+func (c *Controller) RegisterAccountRoutes(r *chi.Mux) {
+	r.Get("/accounts", c.getAccounts)
+	r.Get("/accounts/{account_id:[0-9]+}", c.getAccount)
+	r.Post("/accounts", c.createAccount)
 }
 
-func getAccount(w http.ResponseWriter, r *http.Request) {
+func (c *Controller) getAccount(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	accountID := chi.URLParam(r, "account_id")
-	lucalog.Logger.Info("getting account", zap.String("account", accountID))
+	c.log.Info("getting account", zap.String("account", accountID))
 	accountIDInt, err := strconv.ParseInt(accountID, 10, 64)
 	if err != nil {
 		err = errors.WrapFlag(err, "parsing account id query parameter", errors.NotValidRequest)
-		respondError(w, err)
+		c.respondError(w, c.log, err)
 	}
 
-	account, err := service.GetAccount(ctx, accountIDInt)
+	account, err := c.service.GetAccount(ctx, accountIDInt)
 	if err != nil {
-		respondError(w, err)
+		c.respondError(w, c.log, err)
 		return
 	}
-	if err := data.Validate(account); err != nil {
-		respondError(w, errors.WrapFlag(err, "validating account", errors.NotValidInternalData))
+	if err := validate.Validate(account); err != nil {
+		c.respondError(w, c.log, errors.WrapFlag(err, "validating account", errors.NotValidInternalData))
 		return
 	}
 
 	res := &accountResponse{Account: account}
-	respond(w, res, http.StatusOK)
+	c.respond(w, res, http.StatusOK)
 }
 
-func getAccounts(w http.ResponseWriter, r *http.Request) {
+func (c *Controller) getAccounts(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	// Get query strings for pagination
 	limit, cursor := r.URL.Query().Get("limit"), r.URL.Query().Get("cursor")
 	limitInt, err := strconv.ParseInt(limit, 10, 64)
 	if err != nil {
-		respondError(w, errors.WrapFlag(err, "parsing limit query param", errors.NotValidRequest))
+		c.respondError(w, c.log, errors.WrapFlag(err, "parsing limit query param", errors.NotValidRequest))
 		return
 	}
 	cursorInt, err := strconv.ParseInt(cursor, 10, 64)
 	if err != nil {
-		respondError(w, errors.WrapFlag(err, "parsing cursor int query param", errors.NotValidRequest))
+		c.respondError(w, c.log, errors.WrapFlag(err, "parsing cursor int query param", errors.NotValidRequest))
 		return
 	}
 
-	accounts, err := service.GetAccounts(ctx, cursorInt, limitInt)
+	accounts, err := c.service.GetAccounts(ctx, cursorInt, limitInt)
 	if err != nil {
-		respondError(w, errors.Wrap(err, "getting accounts from service"))
+		c.respondError(w, c.log, errors.Wrap(err, "getting accounts from service"))
 		return
 	}
-	if err := data.Validate(accounts); err != nil {
-		respondError(w, errors.WrapFlag(err, "validating accounts", errors.NotValidInternalData))
+	if err := validate.Validate(accounts); err != nil {
+		c.respondError(w, c.log, errors.WrapFlag(err, "validating accounts", errors.NotValidInternalData))
 		return
 	}
 
 	res := &accountsResponse{Accounts: accounts}
-	respond(w, res, http.StatusOK)
+	c.respond(w, res, http.StatusOK)
 }
 
-func createAccount(w http.ResponseWriter, r *http.Request) {
+func (c *Controller) createAccount(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	req := &accountRequest{}
 	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
-		respondError(w, errors.WrapFlag(err, "deserializing request body", errors.NotDeserializable))
+		c.respondError(w, c.log, errors.WrapFlag(err, "deserializing request body", errors.NotDeserializable))
 		return
 	}
 
-	created, err := service.CreateAccount(ctx, req.Account)
+	created, err := c.service.CreateAccount(ctx, req.Account)
 	if err != nil {
-		respondError(w, errors.Wrap(err, "creating account in service"))
+		c.respondError(w, c.log, errors.Wrap(err, "creating account in service"))
 		return
 	}
 
 	res := accountResponse{Account: created}
 	w.WriteHeader(http.StatusCreated)
-	respond(w, res, http.StatusCreated)
+	c.respond(w, res, http.StatusCreated)
 }

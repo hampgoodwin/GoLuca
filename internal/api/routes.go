@@ -8,7 +8,7 @@ import (
 )
 
 // Register api routes and return the router
-func Register() *chi.Mux {
+func Register(registers ...func(r *chi.Mux)) *chi.Mux {
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
@@ -21,9 +21,9 @@ func Register() *chi.Mux {
 	// processing should be stopped.
 	r.Use(middleware.Timeout(60 * time.Second))
 
-	registerEntryRoute(r)
-	registerTransactionRoute(r)
-	registerAccountRoutes(r)
+	for _, register := range registers {
+		register(r)
+	}
 
 	return r
 }

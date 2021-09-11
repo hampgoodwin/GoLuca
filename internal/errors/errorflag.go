@@ -12,6 +12,8 @@ const (
 	zero = iota
 	// NotFound is used when a resource is not found
 	NotFound
+	// NotValid indidcates a general invalid flagging
+	NotValid
 	// NotValidRequest indicates that something other than a requests body is invalid
 	// for example, if a request is on http protocol, maybe a header, or query parameter
 	// is invalid
@@ -34,6 +36,7 @@ func (ef ErrorFlag) String() string {
 	return [...]string{
 		"0",
 		"NotFound",
+		"NotValid",
 		"NotValidRequest",
 		"NotValidRequestData",
 		"NotValidInternalData",
