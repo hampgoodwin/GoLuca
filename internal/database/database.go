@@ -1,40 +1,36 @@
-package data
+package database
 
 import (
 	"context"
 	"fmt"
 
-	"github.com/hampgoodwin/GoLuca/internal/config"
 	"github.com/hampgoodwin/GoLuca/internal/errors"
-	"github.com/hampgoodwin/GoLuca/internal/lucalog"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
+	"go.uber.org/zap"
 )
 
-// DBPool is the app-wide accessible pgx conn pool
-var DBPool *pgxpool.Pool
-
-// CreateDB creates and puts in memory a DB
-func CreateDB() error {
+// NewDatabase creates a new DB
+func NewDatabase(DBUser, DBPass, DBHost, DBPort, DBDatabase string) (*pgxpool.Pool, error) {
 	ctx := context.Background()
 	var err error
 	connString := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s",
-		config.Env.DBUser,
-		config.Env.DBPass,
-		config.Env.DBHost,
-		config.Env.DBPort,
-		config.Env.DBDatabase,
+		DBUser,
+		DBPass,
+		DBHost,
+		DBPort,
+		DBDatabase,
 	)
 
-	DBPool, err = pgxpool.Connect(ctx, connString)
+	DBPool, err := pgxpool.Connect(ctx, connString)
 	if err != nil {
-		return errors.Wrap(err, "failed to create pgx connection pool")
+		return nil, errors.Wrap(err, "failed to create pgx connection pool")
 	}
-	return nil
+	return DBPool, nil
 }
 
 // Migrate handles the db migration logic. Eventually this should be replaced with a well-tested migration tool
-func Migrate() error {
+func Migrate(DBPool *pgxpool.Pool, log *zap.Logger) error {
 	ctx := context.Background()
 	tx, err := DBPool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
@@ -81,6 +77,6 @@ CREATE TABLE IF NOT EXISTS entry(
 	if err := tx.Commit(ctx); err != nil {
 		return errors.Wrap(err, "failed to commit migration")
 	}
-	lucalog.Logger.Info("migration successful")
+	log.Info("migration successful")
 	return nil
 }

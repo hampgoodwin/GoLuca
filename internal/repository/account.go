@@ -1,18 +1,19 @@
-package data
+package repository
 
 import (
 	"context"
 	"database/sql"
 
 	"github.com/hampgoodwin/GoLuca/internal/errors"
+	"github.com/hampgoodwin/GoLuca/internal/validate"
 	"github.com/hampgoodwin/GoLuca/pkg/account"
 	"github.com/jackc/pgx/v4"
 )
 
 // GetAccount gets an account from the database
-func GetAccount(ctx context.Context, id int64) (*account.Account, error) {
+func (r *Repository) GetAccount(ctx context.Context, id int64) (*account.Account, error) {
 	account := &account.Account{}
-	if err := DBPool.QueryRow(ctx, `SELECT id, parent_id, name, type, basis
+	if err := r.Database.QueryRow(ctx, `SELECT id, parent_id, name, type, basis
 FROM account WHERE id=$1;`, id).Scan(
 		&account.ID, &account.ParentID, &account.Name, &account.Type, &account.Basis,
 	); err != nil {
@@ -21,15 +22,15 @@ FROM account WHERE id=$1;`, id).Scan(
 		}
 		return nil, errors.Wrap(err, "scanning account result row")
 	}
-	if err := Validate(account); err != nil {
+	if err := validate.Validate(account); err != nil {
 		return nil, errors.WrapFlag(err, "validating account retrieved from datastore", errors.NotValidInternalData)
 	}
 	return account, nil
 }
 
 // GetAccounts get accounts paginated based on a cursor and limit
-func GetAccounts(ctx context.Context, cursor int64, limit int64) ([]account.Account, error) {
-	rows, err := DBPool.Query(ctx, `SELECT id, parent_id, name, type, basis
+func (r *Repository) GetAccounts(ctx context.Context, cursor int64, limit int64) ([]account.Account, error) {
+	rows, err := r.Database.Query(ctx, `SELECT id, parent_id, name, type, basis
 FROM account
 WHERE account.id > $1
 LIMIT $2
@@ -46,16 +47,16 @@ LIMIT $2
 		}
 		accounts = append(accounts, account)
 	}
-	if err := Validate(accounts); err != nil {
+	if err := validate.Validate(accounts); err != nil {
 		return nil, errors.WrapFlag(err, "validating accounts retrieved from datastore", errors.NotValidInternalData)
 	}
 	return accounts, nil
 }
 
 // CreateAccount creates an account record in the database and returns the created record
-func CreateAccount(ctx context.Context, acc *account.Account) (*account.Account, error) {
+func (r *Repository) CreateAccount(ctx context.Context, acc *account.Account) (*account.Account, error) {
 	// get a db-transaction
-	tx, err := DBPool.BeginTx(ctx, pgx.TxOptions{})
+	tx, err := r.Database.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		return nil, errors.Wrap(err, "starting db-transaction for creating transaction")
 	}
@@ -73,7 +74,7 @@ func CreateAccount(ctx context.Context, acc *account.Account) (*account.Account,
 	); err != nil {
 		return nil, errors.Wrap(err, "scanning account creation query returning result set")
 	}
-	if err := Validate(account); err != nil {
+	if err := validate.Validate(account); err != nil {
 		if err := tx.Rollback(ctx); err != nil {
 			return nil, errors.WrapFlag(err, "rolling back account creation transaction on invalid return data", errors.NotValidInternalData)
 		}
