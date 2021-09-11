@@ -8,6 +8,8 @@ import (
 )
 
 func TestStringer(t *testing.T) {
+	a := assert.New(t)
+
 	testCases := []struct {
 		input    ErrorFlag
 		expected string
@@ -20,8 +22,6 @@ func TestStringer(t *testing.T) {
 		{NotDeserializable, "NotDeserializable"},
 		{NotSerializable, "NotSerializable"},
 	}
-
-	a := assert.New(t)
 
 	for i, tc := range testCases {
 		tc := tc
