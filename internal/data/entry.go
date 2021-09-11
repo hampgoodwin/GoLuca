@@ -3,15 +3,15 @@ package data
 import (
 	"context"
 
+	"github.com/hampgoodwin/GoLuca/internal/errors"
 	"github.com/hampgoodwin/GoLuca/pkg/transaction"
-	"github.com/pkg/errors"
 )
 
 // GetEntries gets a paginated result of db entries
 func GetEntries(ctx context.Context, cursor int64, limit int64) ([]transaction.Entry, error) {
 	rows, err := DBPool.Query(ctx, `SELECT id, transaction_id, account_id, amount FROM entry WHERE id > $1 LIMIT $2;`, cursor, limit)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to get entries from db")
+		return nil, errors.Wrap(err, "getting entries from database")
 	}
 	defer rows.Close()
 	var entries []transaction.Entry
@@ -23,7 +23,7 @@ func GetEntries(ctx context.Context, cursor int64, limit int64) ([]transaction.E
 			&entry.AccountID,
 			&entry.Amount,
 		); err != nil {
-			return nil, errors.Wrap(err, "failed to scan row from entries query results set")
+			return nil, errors.Wrap(err, "scanning row from entries query results set")
 		}
 		entries = append(entries, entry)
 	}
@@ -34,7 +34,7 @@ func GetEntries(ctx context.Context, cursor int64, limit int64) ([]transaction.E
 func GetEntriesByTransactionID(ctx context.Context, transactionID int64) ([]transaction.Entry, error) {
 	rows, err := DBPool.Query(ctx, `SELECT id, transaction_id, account_id, amount FROM entry WHERE transaction_id=$1`, transactionID)
 	if err != nil {
-		return nil, errors.Wrap(err, "failured getting entries from db")
+		return nil, errors.Wrap(err, "getting entries by transaction id from database")
 	}
 	defer rows.Close()
 	var entries []transaction.Entry
@@ -46,7 +46,7 @@ func GetEntriesByTransactionID(ctx context.Context, transactionID int64) ([]tran
 			&entry.AccountID,
 			&entry.Amount,
 		); err != nil {
-			return nil, errors.Wrap(err, "failed to scan row from entries by transaction id query results set")
+			return nil, errors.Wrap(err, "scanning row from entries by transaction id query results set")
 		}
 		entries = append(entries, entry)
 	}
