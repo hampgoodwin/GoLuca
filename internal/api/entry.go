@@ -14,7 +14,7 @@ func (c *Controller) RegisterEntryRoutes(r *chi.Mux) {
 }
 
 type entriesResponse struct {
-	Entries []transaction.Entry `json:"entries,omitempty"`
+	Entries []transaction.Entry `json:"entries" validated:"required"`
 }
 
 func (c *Controller) getEntries(w http.ResponseWriter, r *http.Request) {

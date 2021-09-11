@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/go-playground/validator"
+	"github.com/go-playground/validator/v10"
 	"github.com/hampgoodwin/GoLuca/internal/errors"
 	"go.uber.org/zap"
 )

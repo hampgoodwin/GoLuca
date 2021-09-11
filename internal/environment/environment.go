@@ -3,7 +3,6 @@ package environment
 import (
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/hampgoodwin/GoLuca/internal/api"
 	"github.com/hampgoodwin/GoLuca/internal/config"
@@ -13,7 +12,6 @@ import (
 	"github.com/hampgoodwin/GoLuca/internal/service"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 )
 
 type Environment struct {
@@ -55,11 +53,11 @@ func NewEnvironment(e *Environment) (*Environment, error) {
 
 	case "DEV":
 		env.Log, _ = zap.NewDevelopment()
-		env.Log = env.Log.WithOptions(zap.AddCaller(), zap.AddStacktrace(zapcore.DebugLevel))
+		env.Log = env.Log.WithOptions(zap.AddCaller())
 
 	case "LOCAL":
 		env.Log, _ = zap.NewDevelopment()
-		env.Log = env.Log.WithOptions(zap.AddCaller(), zap.AddStacktrace(zapcore.DebugLevel))
+		env.Log = env.Log.WithOptions(zap.AddCaller())
 	}
 	env.Log = env.Log.With(zap.String("application", "goluca"), zap.String("environment", env.Config.EnvType))
 
@@ -88,21 +86,20 @@ func NewEnvironment(e *Environment) (*Environment, error) {
 	if env.controller == nil {
 		env.controller = api.NewController(env.Log, env.service)
 	}
+
+	if env.Server == nil {
+		env.Server = &http.Server{
+			Addr:     fmt.Sprintf("%s:%s", env.Config.APIHost, env.Config.APIPort),
+			ErrorLog: zap.NewStdLog(env.Log),
+		}
+	}
 	// register routes
-	api.Register(
+	env.Server.Handler = api.Register(
 		env.controller.RegisterHealthRoutes,
 		env.controller.RegisterAccountRoutes,
 		env.controller.RegisterTransactionRoutes,
 		env.controller.RegisterEntryRoutes,
 	)
-
-	if env.Server == nil {
-		env.Server = &http.Server{
-			Addr:        fmt.Sprintf("%s:%s", env.Config.APIHost, env.Config.APIPort),
-			ErrorLog:    zap.NewStdLog(env.Log),
-			ReadTimeout: time.Second * 1,
-		}
-	}
 
 	return env, nil
 }

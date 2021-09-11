@@ -11,5 +11,6 @@ func (c *Controller) RegisterHealthRoutes(r *chi.Mux) {
 }
 
 func (c *Controller) health(w http.ResponseWriter, r *http.Request) {
+	c.log.Debug("health check")
 	c.respond(w, struct{}{}, http.StatusOK)
 }
