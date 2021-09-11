@@ -37,6 +37,8 @@ func (ef ErrorFlag) String() string {
 		"NotValidRequest",
 		"NotValidRequestData",
 		"NotValidInternalData",
+		"NotDeserializable",
+		"NotSerializable",
 	}[ef]
 }
 
