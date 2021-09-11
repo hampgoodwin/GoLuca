@@ -17,6 +17,8 @@ func TestStringer(t *testing.T) {
 		{NotValidRequest, "NotValidRequest"},
 		{NotValidRequestData, "NotValidRequestData"},
 		{NotValidInternalData, "NotValidInternalData"},
+		{NotDeserializable, "NotDeserializable"},
+		{NotSerializable, "NotSerializable"},
 	}
 
 	a := assert.New(t)
