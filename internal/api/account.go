@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/hampgoodwin/GoLuca/internal/data"
+	"github.com/hampgoodwin/GoLuca/internal/errors"
 	"github.com/hampgoodwin/GoLuca/internal/lucalog"
 	"github.com/hampgoodwin/GoLuca/internal/service"
 	"github.com/hampgoodwin/GoLuca/pkg/account"
@@ -34,23 +35,25 @@ func registerAccountRoutes(r *chi.Mux) {
 func getAccount(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	accountID := chi.URLParam(r, "account_id")
-	accIDInt, _ := strconv.ParseInt(accountID, 10, 64) // we ignore the err bc the route regexp filters already
-	account, err := service.GetAccount(ctx, accIDInt)
+	lucalog.Logger.Info("getting account", zap.String("account", accountID))
+	accountIDInt, err := strconv.ParseInt(accountID, 10, 64)
 	if err != nil {
-		encodeError(w, http.StatusInternalServerError, err)
+		err = errors.WrapFlag(err, "parsing account id query parameter", errors.NotValidRequest)
+		respondError(w, err)
+	}
+
+	account, err := service.GetAccount(ctx, accountIDInt)
+	if err != nil {
+		respondError(w, err)
+		return
+	}
+	if err := data.Validate(account); err != nil {
+		respondError(w, errors.WrapFlag(err, "validating account", errors.NotValidInternalData))
 		return
 	}
 
 	res := &accountResponse{Account: account}
-	if err := data.Validate(res); err != nil {
-		encodeError(w, http.StatusInternalServerError, err)
-		return
-	}
-
-	if err := encode(w, res); err != nil {
-		encodeError(w, http.StatusInternalServerError, err)
-		return
-	}
+	respond(w, res, http.StatusOK)
 }
 
 func getAccounts(w http.ResponseWriter, r *http.Request) {
@@ -59,50 +62,44 @@ func getAccounts(w http.ResponseWriter, r *http.Request) {
 	limit, cursor := r.URL.Query().Get("limit"), r.URL.Query().Get("cursor")
 	limitInt, err := strconv.ParseInt(limit, 10, 64)
 	if err != nil {
-		encodeError(w, http.StatusBadRequest, err)
+		respondError(w, errors.WrapFlag(err, "parsing limit query param", errors.NotValidRequest))
 		return
 	}
 	cursorInt, err := strconv.ParseInt(cursor, 10, 64)
 	if err != nil {
-		encodeError(w, http.StatusBadRequest, err)
+		respondError(w, errors.WrapFlag(err, "parsing cursor int query param", errors.NotValidRequest))
 		return
 	}
 
 	accounts, err := service.GetAccounts(ctx, cursorInt, limitInt)
 	if err != nil {
-		encodeError(w, http.StatusInternalServerError, err)
+		respondError(w, errors.Wrap(err, "getting accounts from service"))
+		return
+	}
+	if err := data.Validate(accounts); err != nil {
+		respondError(w, errors.WrapFlag(err, "validating accounts", errors.NotValidInternalData))
 		return
 	}
 
 	res := &accountsResponse{Accounts: accounts}
-	if err := encode(w, res); err != nil {
-		encodeError(w, http.StatusInternalServerError, err)
-		return
-	}
+	respond(w, res, http.StatusOK)
 }
 
 func createAccount(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	req := &accountRequest{}
 	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
-		encodeError(w, http.StatusBadRequest, err)
+		respondError(w, errors.WrapFlag(err, "deserializing request body", errors.NotDeserializable))
 		return
 	}
-	if err := data.Validate(req); err != nil {
-		encodeError(w, http.StatusBadRequest, err)
-		return
-	}
-	acc, err := service.CreateAccount(ctx, req.Account)
+
+	created, err := service.CreateAccount(ctx, req.Account)
 	if err != nil {
-		encodeError(w, http.StatusBadRequest, err)
+		respondError(w, errors.Wrap(err, "creating account in service"))
 		return
 	}
-	res := accountResponse{Account: acc}
+
+	res := accountResponse{Account: created}
 	w.WriteHeader(http.StatusCreated)
-	if err := encode(w, res); err != nil {
-		// TODO split "encodoing" and "responding/writing" code
-		encodeError(w, http.StatusInternalServerError, err)
-		lucalog.Logger.Error("encoding and writing response", zap.Error(err))
-		return
-	}
+	respond(w, res, http.StatusCreated)
 }
