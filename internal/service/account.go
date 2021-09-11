@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/hampgoodwin/GoLuca/internal/data"
+	"github.com/hampgoodwin/GoLuca/internal/errors"
 	"github.com/hampgoodwin/GoLuca/pkg/account"
-	"github.com/pkg/errors"
 )
 
 func GetAccount(ctx context.Context, acctID int64) (*account.Account, error) {

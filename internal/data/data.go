@@ -5,10 +5,10 @@ import (
 	"fmt"
 
 	"github.com/hampgoodwin/GoLuca/internal/config"
+	"github.com/hampgoodwin/GoLuca/internal/errors"
 	"github.com/hampgoodwin/GoLuca/internal/lucalog"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
-	"github.com/pkg/errors"
 )
 
 // DBPool is the app-wide accessible pgx conn pool

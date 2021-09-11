@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/hampgoodwin/GoLuca/internal/data"
+	"github.com/hampgoodwin/GoLuca/internal/errors"
 	"github.com/hampgoodwin/GoLuca/pkg/transaction"
-	"github.com/pkg/errors"
 )
 
 func GetEntries(ctx context.Context, cursor int64, limit int64) ([]transaction.Entry, error) {

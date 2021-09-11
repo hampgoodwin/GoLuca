@@ -2,10 +2,11 @@ package data
 
 import (
 	"context"
+	"database/sql"
 
+	"github.com/hampgoodwin/GoLuca/internal/errors"
 	"github.com/hampgoodwin/GoLuca/pkg/transaction"
 	"github.com/jackc/pgx/v4"
-	"github.com/pkg/errors"
 )
 
 // GetTransaction get's a transaction record, without it's entries, by the transaction ID
@@ -18,7 +19,10 @@ WHERE id=$1
 		&transaction.ID,
 		&transaction.Description,
 	); err != nil {
-		return nil, errors.Wrap(err, "failed to scan row from transaction query result set")
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, errors.WrapFlag(err, "scanning transaction result row", errors.NotFound)
+		}
+		return nil, errors.Wrap(err, "scanning row from transaction query result set")
 	}
 	return transaction, nil
 }
@@ -31,7 +35,7 @@ WHERE transaction.id > $1
 LIMIT $2
 ;`, cursor, limit)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to query db for transactions")
+		return nil, errors.Wrap(err, "querying database for transactions")
 	}
 	defer rows.Close()
 	transactions := []transaction.Transaction{}
@@ -41,7 +45,7 @@ LIMIT $2
 			&transaction.ID,
 			&transaction.Description,
 		); err != nil {
-			return nil, errors.Wrap(err, "failed to scan transactions results set")
+			return nil, errors.Wrap(err, "scanning transactions results set")
 		}
 		transactions = append(transactions, transaction)
 	}
@@ -49,7 +53,7 @@ LIMIT $2
 	for i, transaction := range transactions {
 		entries, err := GetEntriesByTransactionID(ctx, transaction.ID)
 		if err != nil {
-			return nil, errors.Wrap(err, "failed to query db for entries when getting transactions")
+			return nil, errors.Wrap(err, "querying databse for entries while getting transactions")
 		}
 		transactions[i].Entries = append(transactions[i].Entries, entries...)
 	}
@@ -61,14 +65,14 @@ func CreateTransaction(ctx context.Context, trans *transaction.Transaction) (*tr
 	// get a db-transaction
 	tx, err := DBPool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to start db-transaction for creating transaction")
+		return nil, errors.Wrap(err, "starting database transaction for creating transaction")
 	}
 	transactionCreated := &transaction.Transaction{}
 	if err := tx.QueryRow(ctx, `
 INSERT INTO transaction (description) VALUES ($1)
 RETURNING id, description;`, trans.Description).
 		Scan(&transactionCreated.ID, &transactionCreated.Description); err != nil {
-		return nil, errors.Wrap(err, "failed to scan transaction created return result set")
+		return nil, errors.Wrap(err, "scanning transaction created return result set")
 	}
 
 	// insert the entries
@@ -82,12 +86,12 @@ RETURNING id, transaction_id, account_id, amount;`,
 				&entryCreated.TransactionID,
 				&entryCreated.AccountID,
 				&entryCreated.Amount); err != nil {
-			return nil, errors.Wrap(err, "failed to scan transaction entry created return result set")
+			return nil, errors.Wrap(err, "scanning transaction entry created return result set")
 		}
 		transactionCreated.Entries = append(transactionCreated.Entries, entryCreated)
 	}
 	if err := tx.Commit(ctx); err != nil {
-		return nil, errors.Wrap(err, "failed to commit on transaction creation")
+		return nil, errors.Wrap(err, "committing on transaction creation")
 	}
 	return transactionCreated, nil
 }

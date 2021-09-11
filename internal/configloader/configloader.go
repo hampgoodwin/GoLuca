@@ -5,8 +5,8 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/hampgoodwin/GoLuca/internal/config"
+	"github.com/hampgoodwin/GoLuca/internal/errors"
 	"github.com/pelletier/go-toml"
-	"github.com/pkg/errors"
 )
 
 // Load at rest configuration into memory
