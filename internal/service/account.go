@@ -7,15 +7,15 @@ import (
 	"github.com/hampgoodwin/GoLuca/pkg/account"
 )
 
-func (s *Service) GetAccount(ctx context.Context, acctID int64) (*account.Account, error) {
-	account, err := s.repository.GetAccount(ctx, acctID)
+func (s *Service) GetAccount(ctx context.Context, accountID string) (*account.Account, error) {
+	account, err := s.repository.GetAccount(ctx, accountID)
 	if err != nil {
 		return nil, errors.Wrap(err, "getting account from database")
 	}
 	return account, nil
 }
 
-func (s *Service) GetAccounts(ctx context.Context, cursor int64, limit int64) ([]account.Account, error) {
+func (s *Service) GetAccounts(ctx context.Context, cursor string, limit uint64) ([]account.Account, error) {
 	accounts, err := s.repository.GetAccounts(ctx, cursor, limit)
 	if err != nil {
 		return nil, errors.Wrap(err, "getting accounts from database")

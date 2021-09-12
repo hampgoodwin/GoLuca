@@ -11,10 +11,14 @@ import (
 )
 
 // GetAccount gets an account from the database
-func (r *Repository) GetAccount(ctx context.Context, id int64) (*account.Account, error) {
+func (r *Repository) GetAccount(ctx context.Context, accountID string) (*account.Account, error) {
 	account := &account.Account{}
-	if err := r.Database.QueryRow(ctx, `SELECT id, parent_id, name, type, basis
-FROM account WHERE id=$1;`, id).Scan(
+	if err := r.Database.QueryRow(ctx,
+		`SELECT id, parent_id, name, type, basis
+		FROM account
+		WHERE id=$1
+		;`,
+		accountID).Scan(
 		&account.ID, &account.ParentID, &account.Name, &account.Type, &account.Basis,
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -29,12 +33,15 @@ FROM account WHERE id=$1;`, id).Scan(
 }
 
 // GetAccounts get accounts paginated based on a cursor and limit
-func (r *Repository) GetAccounts(ctx context.Context, cursor int64, limit int64) ([]account.Account, error) {
-	rows, err := r.Database.Query(ctx, `SELECT id, parent_id, name, type, basis
-FROM account
-WHERE account.id > $1
-LIMIT $2
-;`, cursor, limit)
+func (r *Repository) GetAccounts(ctx context.Context, cursor string, limit uint64) ([]account.Account, error) {
+	rows, err := r.Database.Query(ctx,
+		`SELECT id, parent_id, name, type, basis
+		FROM account
+		WHERE account.id > $1
+		ORDER BY created_at
+		LIMIT $2
+		;`,
+		cursor, limit)
 	if err != nil {
 		return nil, errors.Wrap(err, "querying database for accounts")
 	}
@@ -62,9 +69,11 @@ func (r *Repository) CreateAccount(ctx context.Context, acc *account.Account) (*
 	}
 
 	account := &account.Account{}
-	if err := tx.QueryRow(ctx, `INSERT INTO account(parent_id, name, type, basis)
-	VALUES($1, $2, $3, $4)
-	RETURNING id, parent_id, name, type, basis;`,
+	if err := tx.QueryRow(ctx, `
+		INSERT INTO account(parent_id, name, type, basis)
+		VALUES($1, $2, $3, $4)
+		RETURNING id, parent_id, name, type, basis
+		;`,
 		acc.ParentID, acc.Name, acc.Type, acc.Basis).Scan(
 		&account.ID,
 		&account.ParentID,

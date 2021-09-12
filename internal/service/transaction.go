@@ -7,7 +7,7 @@ import (
 	"github.com/hampgoodwin/GoLuca/pkg/transaction"
 )
 
-func (s *Service) GetTransactions(ctx context.Context, cursor int64, limit int64) ([]transaction.Transaction, error) {
+func (s *Service) GetTransactions(ctx context.Context, cursor string, limit uint64) ([]transaction.Transaction, error) {
 	transactions, err := s.repository.GetTransactions(ctx, cursor, limit)
 	if err != nil {
 		return nil, errors.Wrap(err, "getting transactions from database")
@@ -15,7 +15,7 @@ func (s *Service) GetTransactions(ctx context.Context, cursor int64, limit int64
 	return transactions, nil
 }
 
-func (s *Service) GetTransaction(ctx context.Context, transactionID int64) (*transaction.Transaction, error) {
+func (s *Service) GetTransaction(ctx context.Context, transactionID string) (*transaction.Transaction, error) {
 	transaction, err := s.repository.GetTransaction(ctx, transactionID)
 	if err != nil {
 		return nil, errors.Wrap(err, "getting transaction from database")
@@ -23,7 +23,7 @@ func (s *Service) GetTransaction(ctx context.Context, transactionID int64) (*tra
 	return transaction, nil
 }
 
-func (s *Service) GetTransactionEntries(ctx context.Context, transactionID int64) ([]transaction.Entry, error) {
+func (s *Service) GetTransactionEntries(ctx context.Context, transactionID string) ([]transaction.Entry, error) {
 	entries, err := s.repository.GetEntriesByTransactionID(ctx, transactionID)
 	if err != nil {
 		return nil, errors.Wrap(err, "getting entries by transaction")

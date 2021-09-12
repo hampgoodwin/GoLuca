@@ -7,7 +7,7 @@ import (
 
 // Transaction ...
 type Transaction struct {
-	ID          int64   `json:"id" validate:"gte=0"`
+	ID          string  `json:"id" validate:"uuid4"`
 	Description string  `json:"description" validate:"required"`
 	Entries     []Entry `json:"entries,omitempty" validate:"dive,gte=2"`
 }
@@ -15,8 +15,8 @@ type Transaction struct {
 // Entry ...
 type Entry struct {
 	// Account account.Account `validate:"required"`
-	ID            int64   `json:"id" validate:"gte=0"`
-	TransactionID int64   `json:"transaction_id" validate:"gte=0"`
+	ID            string  `json:"id" validate:"uuid4"`
+	TransactionID string  `json:"transaction_id" validate:"uudi4"`
 	AccountID     int64   `json:"account_id"  validate:"required,gte=0"`
 	Amount        float64 `json:"amount" validate:"required,ne=0"`
 }

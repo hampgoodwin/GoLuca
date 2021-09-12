@@ -10,12 +10,13 @@ import (
 )
 
 // GetTransaction get's a transaction record, without it's entries, by the transaction ID
-func (r *Repository) GetTransaction(ctx context.Context, transactionID int64) (*transaction.Transaction, error) {
+func (r *Repository) GetTransaction(ctx context.Context, transactionID string) (*transaction.Transaction, error) {
 	transaction := &transaction.Transaction{}
-	if err := r.Database.QueryRow(ctx, `SELECT id, description
-FROM transaction
-WHERE id=$1
-;`, transactionID).Scan(
+	if err := r.Database.QueryRow(ctx,
+		`SELECT id, description
+		FROM transaction
+		WHERE id=$1
+		;`, transactionID).Scan(
 		&transaction.ID,
 		&transaction.Description,
 	); err != nil {
@@ -28,12 +29,13 @@ WHERE id=$1
 }
 
 // GetTransactions get's transactions paginaged by cursor and limit
-func (r *Repository) GetTransactions(ctx context.Context, cursor int64, limit int64) ([]transaction.Transaction, error) {
-	rows, err := r.Database.Query(ctx, `SELECT id, description
-FROM transaction
-WHERE transaction.id > $1
-LIMIT $2
-;`, cursor, limit)
+func (r *Repository) GetTransactions(ctx context.Context, cursor string, limit uint64) ([]transaction.Transaction, error) {
+	rows, err := r.Database.Query(ctx,
+		`SELECT id, description
+		FROM transaction
+		WHERE transaction.id > $1
+		LIMIT $2
+		;`, cursor, limit)
 	if err != nil {
 		return nil, errors.Wrap(err, "querying database for transactions")
 	}
@@ -68,24 +70,26 @@ func (r *Repository) CreateTransaction(ctx context.Context, trans *transaction.T
 		return nil, errors.Wrap(err, "starting database transaction for creating transaction")
 	}
 	transactionCreated := &transaction.Transaction{}
-	if err := tx.QueryRow(ctx, `
-INSERT INTO transaction (description) VALUES ($1)
-RETURNING id, description;`, trans.Description).
-		Scan(&transactionCreated.ID, &transactionCreated.Description); err != nil {
+	if err := tx.QueryRow(ctx,
+		`INSERT INTO transaction (description) VALUES ($1)
+		RETURNING id, description;`, trans.Description).Scan(
+		&transactionCreated.ID, &transactionCreated.Description,
+	); err != nil {
 		return nil, errors.Wrap(err, "scanning transaction created return result set")
 	}
 
 	// insert the entries
 	for _, entry := range trans.Entries {
 		entryCreated := transaction.Entry{}
-		if err := tx.QueryRow(ctx, `
-INSERT INTO entry(transaction_id, account_id, amount) VALUES ($1, $2, $3)
-RETURNING id, transaction_id, account_id, amount;`,
-			transactionCreated.ID, entry.AccountID, entry.Amount).
-			Scan(&entryCreated.ID,
-				&entryCreated.TransactionID,
-				&entryCreated.AccountID,
-				&entryCreated.Amount); err != nil {
+		if err := tx.QueryRow(ctx,
+			`INSERT INTO entry(transaction_id, account_id, amount) VALUES ($1, $2, $3)
+			RETURNING id, transaction_id, account_id, amount;`,
+			transactionCreated.ID, entry.AccountID, entry.Amount).Scan(
+			&entryCreated.ID,
+			&entryCreated.TransactionID,
+			&entryCreated.AccountID,
+			&entryCreated.Amount,
+		); err != nil {
 			return nil, errors.Wrap(err, "scanning transaction entry created return result set")
 		}
 		transactionCreated.Entries = append(transactionCreated.Entries, entryCreated)

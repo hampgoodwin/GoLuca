@@ -38,17 +38,12 @@ func (c *Controller) getTransactions(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	// Get query strings for pagination
 	limit, cursor := r.URL.Query().Get("limit"), r.URL.Query().Get("cursor")
-	limitInt, err := strconv.ParseInt(limit, 10, 64)
+	limitInt, err := strconv.ParseUint(limit, 10, 64)
 	if err != nil {
 		c.respondError(w, c.log, errors.WrapFlag(err, "parsing limit query parameter", errors.NotValidRequest))
 		return
 	}
-	cursorInt, err := strconv.ParseInt(cursor, 10, 64)
-	if err != nil {
-		c.respondError(w, c.log, errors.WrapFlag(err, "parsing cursor query parameter", errors.NotValidRequest))
-		return
-	}
-	transactions, err := c.service.GetTransactions(ctx, cursorInt, limitInt)
+	transactions, err := c.service.GetTransactions(ctx, cursor, limitInt)
 	if err != nil {
 		c.respondError(w, c.log, errors.Wrap(err, "getting transactions from service"))
 		return
@@ -60,12 +55,7 @@ func (c *Controller) getTransactions(w http.ResponseWriter, r *http.Request) {
 func (c *Controller) getTransaction(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	transactionID := chi.URLParam(r, "transaction_id")
-	transactionIDInt, err := strconv.ParseInt(transactionID, 10, 64) // the route regexp handles err cases
-	if err != nil {
-		c.respondError(w, c.log, errors.WrapFlag(err, "parsing transactionID URL parameter", errors.NotValidRequest))
-		return
-	}
-	transaction, err := c.service.GetTransaction(ctx, transactionIDInt)
+	transaction, err := c.service.GetTransaction(ctx, transactionID)
 	if err != nil {
 		c.respondError(w, c.log, errors.Wrap(err, "getting transaction from service"))
 		return
@@ -77,12 +67,7 @@ func (c *Controller) getTransaction(w http.ResponseWriter, r *http.Request) {
 func (c *Controller) getTransactionEntries(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	transactionID := chi.URLParam(r, "transaction_id")
-	transactionIDInt, err := strconv.ParseInt(transactionID, 10, 64) // the route regexp handles err cases
-	if err != nil {
-		c.respondError(w, c.log, errors.WrapFlag(err, "parsing transactionID URL parameter", errors.NotValidRequest))
-		return
-	}
-	entries, err := c.service.GetTransactionEntries(ctx, transactionIDInt)
+	entries, err := c.service.GetTransactionEntries(ctx, transactionID)
 	if err != nil {
 		c.respondError(w, c.log, errors.Wrap(err, "getting transaction entries from service"))
 		return

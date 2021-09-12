@@ -6,8 +6,8 @@ import (
 
 // Account represents a collection of entries into a logical grouping
 type Account struct {
-	ID       int64  `json:"id" validate:"gte=0"`
-	ParentID int64  `json:"parentId" validate:"gte=0"`
+	ID       int64  `json:"id" validate:"uuid4"`
+	ParentID int64  `json:"parentId" validate:"uuid4"`
 	Name     string `json:"name" validate:"required"`
 	Type     Type   `json:"type" validate:"required,oneof=asset liability equity revenue expense gain loss"`
 	Basis    string `json:"basis" validate:"required,oneof=debit credit"`
