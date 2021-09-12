@@ -11,8 +11,8 @@ import (
 )
 
 type errorResponse struct {
-	Description      string                     `json:"description"`
-	ValidationErrors validator.ValidationErrors `json:"validationErrors,omitempty"`
+	Description      string `json:"description"`
+	ValidationErrors string `json:"validationErrors,omitempty"`
 }
 
 func (c *Controller) respond(w http.ResponseWriter, i interface{}, statuseCode int) {
@@ -55,7 +55,7 @@ func (c *Controller) respondError(w http.ResponseWriter, log *zap.Logger, err er
 func (c *Controller) respondOnValidationErrors(w http.ResponseWriter, err error, description string) bool {
 	var validationErrors validator.ValidationErrors
 	if errors.As(err, &validationErrors) {
-		c.respond(w, errorResponse{Description: description, ValidationErrors: validationErrors}, http.StatusBadRequest)
+		c.respond(w, errorResponse{Description: description, ValidationErrors: validationErrors.Error()}, http.StatusBadRequest)
 		return true
 	}
 	return false

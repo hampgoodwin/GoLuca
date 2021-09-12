@@ -3,22 +3,25 @@ package transaction
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 )
 
 // Transaction ...
 type Transaction struct {
-	ID          int64   `json:"id" validate:"gte=0"`
-	Description string  `json:"description" validate:"required"`
-	Entries     []Entry `json:"entries,omitempty" validate:"dive,gte=2"`
+	ID          string    `json:"id" validate:"required,uuid4"`
+	Description string    `json:"description" validate:"required"`
+	Entries     []Entry   `json:"entries,omitempty" validate:"dive,gte=2"`
+	CreatedAt   time.Time `json:"createdAt" validate:"required"`
 }
 
 // Entry ...
 type Entry struct {
 	// Account account.Account `validate:"required"`
-	ID            int64   `json:"id" validate:"gte=0"`
-	TransactionID int64   `json:"transaction_id" validate:"gte=0"`
-	AccountID     int64   `json:"account_id"  validate:"required,gte=0"`
-	Amount        float64 `json:"amount" validate:"required,ne=0"`
+	ID            string    `json:"id" validate:"required,uuid4"`
+	TransactionID string    `json:"transaction_id" validate:"required,uuid4"`
+	AccountID     string    `json:"accountId"  validate:"required,uuid4"`
+	Amount        float64   `json:"amount" validate:"required,ne=0"`
+	CreatedAt     time.Time `json:"createdAt" validate:"required"`
 }
 
 func (t Transaction) String() string {

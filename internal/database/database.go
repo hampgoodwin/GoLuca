@@ -38,13 +38,12 @@ func Migrate(DBPool *pgxpool.Pool, log *zap.Logger) error {
 	}
 	_, err = tx.Exec(ctx, `
 CREATE TABLE IF NOT EXISTS account(
-	id BIGSERIAL PRIMARY KEY,
-	parent_id INT,
+	id VARCHAR(36) PRIMARY KEY,
+	parent_id VARCHAR(36),
 	name VARCHAR(255) UNIQUE,
-	type SMALLINT,
+	type VARCHAR(64),
 	basis VARCHAR(6),
-	created_at TIMESTAMP DEFAULT NOW(),
-	modified_at TIMESTAMP DEFAULT NOW()
+	created_at TIMESTAMP DEFAULT NOW()
 )
 ;`)
 	if err != nil {
@@ -52,7 +51,7 @@ CREATE TABLE IF NOT EXISTS account(
 	}
 	_, err = tx.Exec(ctx, `
 CREATE TABLE IF NOT EXISTS transaction(
-	id BIGSERIAL PRIMARY KEY,
+	id VARCHAR(36) PRIMARY KEY,
 	description TEXT,
 	created_at TIMESTAMP DEFAULT NOW()
 )
@@ -62,9 +61,9 @@ CREATE TABLE IF NOT EXISTS transaction(
 	}
 	_, err = tx.Exec(ctx, `
 CREATE TABLE IF NOT EXISTS entry(
-	id BIGSERIAL PRIMARY KEY,
-	transaction_id int,
-	account_id int,
+	id VARCHAR(36) PRIMARY KEY,
+	transaction_id VARCHAR(36),
+	account_id VARCHAR(36),
 	amount DOUBLE PRECISION,
 	created_at TIMESTAMP DEFAULT NOW(),
 	CONSTRAINT fk_transaction FOREIGN KEY(transaction_id) REFERENCES transaction(id),

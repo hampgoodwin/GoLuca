@@ -12,10 +12,11 @@ import (
 )
 
 func (c *Controller) RegisterTransactionRoutes(r *chi.Mux) {
-	r.Get("/transactions", c.getTransactions)
-	r.Get("/transactions/{transaction_id:[0-9]+}", c.getTransaction)
-	r.Get("/transactions/{transaction_id:[0-9]+}/entries", c.getTransactionEntries)
-	r.Post("/transactions", c.createTransaction)
+	r.Route("/transactions", func(r chi.Router) {
+		r.Get("/", c.getTransactions)
+		r.Get(fmt.Sprintf("/{transactionId:%s}", uuidRegexp), c.getTransaction)
+		r.Post("/", c.createTransactionAndEntries)
+	})
 }
 
 type transactionRequest struct {
@@ -30,25 +31,16 @@ type transactionsResponse struct {
 	Transactions []transaction.Transaction `json:"transactions" validate:"required"`
 }
 
-type transactionEntriesResponse struct {
-	Entries []transaction.Entry `json:"entries" validate:"required"`
-}
-
 func (c *Controller) getTransactions(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	// Get query strings for pagination
 	limit, cursor := r.URL.Query().Get("limit"), r.URL.Query().Get("cursor")
-	limitInt, err := strconv.ParseInt(limit, 10, 64)
+	limitInt, err := strconv.ParseUint(limit, 10, 64)
 	if err != nil {
 		c.respondError(w, c.log, errors.WrapFlag(err, "parsing limit query parameter", errors.NotValidRequest))
 		return
 	}
-	cursorInt, err := strconv.ParseInt(cursor, 10, 64)
-	if err != nil {
-		c.respondError(w, c.log, errors.WrapFlag(err, "parsing cursor query parameter", errors.NotValidRequest))
-		return
-	}
-	transactions, err := c.service.GetTransactions(ctx, cursorInt, limitInt)
+	transactions, err := c.service.GetTransactions(ctx, cursor, limitInt)
 	if err != nil {
 		c.respondError(w, c.log, errors.Wrap(err, "getting transactions from service"))
 		return
@@ -59,13 +51,8 @@ func (c *Controller) getTransactions(w http.ResponseWriter, r *http.Request) {
 
 func (c *Controller) getTransaction(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	transactionID := chi.URLParam(r, "transaction_id")
-	transactionIDInt, err := strconv.ParseInt(transactionID, 10, 64) // the route regexp handles err cases
-	if err != nil {
-		c.respondError(w, c.log, errors.WrapFlag(err, "parsing transactionID URL parameter", errors.NotValidRequest))
-		return
-	}
-	transaction, err := c.service.GetTransaction(ctx, transactionIDInt)
+	transactionID := chi.URLParam(r, "transactionId")
+	transaction, err := c.service.GetTransaction(ctx, transactionID)
 	if err != nil {
 		c.respondError(w, c.log, errors.Wrap(err, "getting transaction from service"))
 		return
@@ -74,27 +61,11 @@ func (c *Controller) getTransaction(w http.ResponseWriter, r *http.Request) {
 	c.respond(w, res, http.StatusOK)
 }
 
-func (c *Controller) getTransactionEntries(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	transactionID := chi.URLParam(r, "transaction_id")
-	transactionIDInt, err := strconv.ParseInt(transactionID, 10, 64) // the route regexp handles err cases
-	if err != nil {
-		c.respondError(w, c.log, errors.WrapFlag(err, "parsing transactionID URL parameter", errors.NotValidRequest))
-		return
-	}
-	entries, err := c.service.GetTransactionEntries(ctx, transactionIDInt)
-	if err != nil {
-		c.respondError(w, c.log, errors.Wrap(err, "getting transaction entries from service"))
-		return
-	}
-
-	res := transactionEntriesResponse{entries}
-	c.respond(w, res, http.StatusOK)
-}
-
-func (c *Controller) createTransaction(w http.ResponseWriter, r *http.Request) {
+func (c *Controller) createTransactionAndEntries(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	req := &transactionRequest{}
+	// interf, _ := ioutil.ReadAll(r.Body)
+	// fmt.Println(string(interf))
 	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
 		c.respondError(w, c.log, errors.WrapFlag(err, "deserializing request body", errors.NotValidRequestData))
 		return
@@ -106,7 +77,7 @@ func (c *Controller) createTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	transaction, err := c.service.CreateTransaction(ctx, req.Transaction)
+	transaction, err := c.service.CreateTransactionAndEntries(ctx, req.Transaction)
 	if err != nil {
 		c.respondError(w, c.log, errors.Wrap(err, "creating transaction in service"))
 		return

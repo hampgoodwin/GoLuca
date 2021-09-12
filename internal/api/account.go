@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -25,22 +26,19 @@ type accountsResponse struct {
 }
 
 func (c *Controller) RegisterAccountRoutes(r *chi.Mux) {
-	r.Get("/accounts", c.getAccounts)
-	r.Get("/accounts/{account_id:[0-9]+}", c.getAccount)
-	r.Post("/accounts", c.createAccount)
+	r.Route("/accounts", func(r chi.Router) {
+		r.Get("/", c.getAccounts)
+		r.Get(fmt.Sprintf("/{accountId:%s}", uuidRegexp), c.getAccount)
+		r.Post("/", c.createAccount)
+	})
 }
 
 func (c *Controller) getAccount(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	accountID := chi.URLParam(r, "account_id")
+	accountID := chi.URLParam(r, "accountId")
 	c.log.Info("getting account", zap.String("account", accountID))
-	accountIDInt, err := strconv.ParseInt(accountID, 10, 64)
-	if err != nil {
-		err = errors.WrapFlag(err, "parsing account id query parameter", errors.NotValidRequest)
-		c.respondError(w, c.log, err)
-	}
 
-	account, err := c.service.GetAccount(ctx, accountIDInt)
+	account, err := c.service.GetAccount(ctx, accountID)
 	if err != nil {
 		c.respondError(w, c.log, err)
 		return
@@ -58,18 +56,13 @@ func (c *Controller) getAccounts(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	// Get query strings for pagination
 	limit, cursor := r.URL.Query().Get("limit"), r.URL.Query().Get("cursor")
-	limitInt, err := strconv.ParseInt(limit, 10, 64)
+	limitInt, err := strconv.ParseUint(limit, 10, 64)
 	if err != nil {
 		c.respondError(w, c.log, errors.WrapFlag(err, "parsing limit query param", errors.NotValidRequest))
 		return
 	}
-	cursorInt, err := strconv.ParseInt(cursor, 10, 64)
-	if err != nil {
-		c.respondError(w, c.log, errors.WrapFlag(err, "parsing cursor int query param", errors.NotValidRequest))
-		return
-	}
 
-	accounts, err := c.service.GetAccounts(ctx, cursorInt, limitInt)
+	accounts, err := c.service.GetAccounts(ctx, cursor, limitInt)
 	if err != nil {
 		c.respondError(w, c.log, errors.Wrap(err, "getting accounts from service"))
 		return
