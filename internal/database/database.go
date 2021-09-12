@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS account(
 	id BIGSERIAL PRIMARY KEY,
 	parent_id INT,
 	name VARCHAR(255) UNIQUE,
-	type SMALLINT,
+	type VARCHAR(64),
 	basis VARCHAR(6),
 	created_at TIMESTAMP DEFAULT NOW(),
 	modified_at TIMESTAMP DEFAULT NOW()

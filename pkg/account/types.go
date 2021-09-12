@@ -7,9 +7,9 @@ import (
 // Account represents a collection of entries into a logical grouping
 type Account struct {
 	ID       int64  `json:"id" validate:"gte=0"`
-	ParentID int64  `json:"parent_id" validate:"gte=0"`
+	ParentID int64  `json:"parentId" validate:"gte=0"`
 	Name     string `json:"name" validate:"required"`
-	Type     Type   `json:"type" validate:"required,gt=0,lte=7"`
+	Type     Type   `json:"type" validate:"required,oneof=asset liability equity revenue expense gain loss"`
 	Basis    string `json:"basis" validate:"required,oneof=debit credit"`
 }
 
@@ -22,19 +22,19 @@ func (a Account) String() string {
 }
 
 // Type represents the type of account
-type Type int
+type Type string
 
 // iota const's for account Type
 const (
-	Asset = iota
-	Liability
-	Equity
-	Revenue
-	Expense
-	Gain
-	Loss
+	Asset     Type = "asset"
+	Liability Type = "liablity"
+	Equity    Type = "equity"
+	Revenue   Type = "revenue"
+	Expense   Type = "expense"
+	Gain      Type = "gain"
+	Loss      Type = "loss"
 )
 
 func (t Type) String() string {
-	return [...]string{"Asset", "Liability", "Equity", "Revenue", "Expense", "Gain", "Loss"}[t-1]
+	return string(t)
 }
