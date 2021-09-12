@@ -10,7 +10,7 @@ import (
 )
 
 func (c *Controller) RegisterEntryRoutes(r *chi.Mux) {
-	r.Get("/entries", c.getEntries) // GET /entries
+	r.Get("/entry", c.getEntries)
 }
 
 type entriesResponse struct {

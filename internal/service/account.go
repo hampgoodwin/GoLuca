@@ -2,8 +2,11 @@ package service
 
 import (
 	"context"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/hampgoodwin/GoLuca/internal/errors"
+	"github.com/hampgoodwin/GoLuca/internal/validate"
 	"github.com/hampgoodwin/GoLuca/pkg/account"
 )
 
@@ -24,6 +27,12 @@ func (s *Service) GetAccounts(ctx context.Context, cursor string, limit uint64) 
 }
 
 func (s *Service) CreateAccount(ctx context.Context, account *account.Account) (*account.Account, error) {
+	account.ID = uuid.New().String()
+	account.CreatedAt = time.Now().UTC()
+	if err := validate.Validate(account); err != nil {
+		return nil, errors.WrapFlag(err, "validating account before persisting to database", errors.NotValidRequestData)
+	}
+
 	created, err := s.repository.CreateAccount(ctx, account)
 	if err != nil {
 		return nil, errors.Wrap(err, "persisting account to database")

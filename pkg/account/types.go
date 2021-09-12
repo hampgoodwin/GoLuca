@@ -2,15 +2,17 @@ package account
 
 import (
 	"encoding/json"
+	"time"
 )
 
 // Account represents a collection of entries into a logical grouping
 type Account struct {
-	ID       int64  `json:"id" validate:"uuid4"`
-	ParentID int64  `json:"parentId" validate:"uuid4"`
-	Name     string `json:"name" validate:"required"`
-	Type     Type   `json:"type" validate:"required,oneof=asset liability equity revenue expense gain loss"`
-	Basis    string `json:"basis" validate:"required,oneof=debit credit"`
+	ID        string    `json:"id" validate:"required,uuid4"`
+	ParentID  string    `json:"parentId" validate:"omitempty,uuid4"`
+	Name      string    `json:"name" validate:"required"`
+	Type      Type      `json:"type" validate:"required,oneof=asset liability equity revenue expense gain loss"`
+	Basis     string    `json:"basis" validate:"required,oneof=debit credit"`
+	CreatedAt time.Time `json:"createdAt" validate:"required"`
 }
 
 func (a Account) String() string {

@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -25,14 +26,16 @@ type accountsResponse struct {
 }
 
 func (c *Controller) RegisterAccountRoutes(r *chi.Mux) {
-	r.Get("/accounts", c.getAccounts)
-	r.Get("/accounts/{account_id:[0-9]+}", c.getAccount)
-	r.Post("/accounts", c.createAccount)
+	r.Route("/accounts", func(r chi.Router) {
+		r.Get("/", c.getAccounts)
+		r.Get(fmt.Sprintf("/{accountId:%s}", uuidRegexp), c.getAccount)
+		r.Post("/", c.createAccount)
+	})
 }
 
 func (c *Controller) getAccount(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	accountID := chi.URLParam(r, "account_id")
+	accountID := chi.URLParam(r, "accountId")
 	c.log.Info("getting account", zap.String("account", accountID))
 
 	account, err := c.service.GetAccount(ctx, accountID)

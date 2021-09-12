@@ -5,6 +5,7 @@ go 1.17
 require (
 	github.com/go-chi/chi v4.0.2+incompatible
 	github.com/go-playground/validator/v10 v10.9.0
+	github.com/google/uuid v1.3.0
 	github.com/jackc/pgx/v4 v4.10.1
 	github.com/pelletier/go-toml v1.8.1
 	github.com/pkg/errors v0.9.1 // indirect

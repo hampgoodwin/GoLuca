@@ -39,12 +39,11 @@ func Migrate(DBPool *pgxpool.Pool, log *zap.Logger) error {
 	_, err = tx.Exec(ctx, `
 CREATE TABLE IF NOT EXISTS account(
 	id VARCHAR(36) PRIMARY KEY,
-	parent_id INT,
+	parent_id VARCHAR(36),
 	name VARCHAR(255) UNIQUE,
 	type VARCHAR(64),
 	basis VARCHAR(6),
-	created_at TIMESTAMP DEFAULT NOW(),
-	modified_at TIMESTAMP DEFAULT NOW()
+	created_at TIMESTAMP DEFAULT NOW()
 )
 ;`)
 	if err != nil {

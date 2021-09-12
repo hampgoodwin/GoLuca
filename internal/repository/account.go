@@ -14,12 +14,12 @@ import (
 func (r *Repository) GetAccount(ctx context.Context, accountID string) (*account.Account, error) {
 	account := &account.Account{}
 	if err := r.Database.QueryRow(ctx,
-		`SELECT id, parent_id, name, type, basis
+		`SELECT id, parent_id, name, type, basis, created_at
 		FROM account
 		WHERE id=$1
 		;`,
 		accountID).Scan(
-		&account.ID, &account.ParentID, &account.Name, &account.Type, &account.Basis,
+		&account.ID, &account.ParentID, &account.Name, &account.Type, &account.Basis, &account.CreatedAt,
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, errors.WrapFlag(err, "scanning account result row", errors.NotFound)
@@ -61,29 +61,30 @@ func (r *Repository) GetAccounts(ctx context.Context, cursor string, limit uint6
 }
 
 // CreateAccount creates an account record in the database and returns the created record
-func (r *Repository) CreateAccount(ctx context.Context, acc *account.Account) (*account.Account, error) {
+func (r *Repository) CreateAccount(ctx context.Context, create *account.Account) (*account.Account, error) {
 	// get a db-transaction
 	tx, err := r.Database.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		return nil, errors.Wrap(err, "starting db-transaction for creating transaction")
 	}
 
-	account := &account.Account{}
+	returning := &account.Account{}
 	if err := tx.QueryRow(ctx, `
-		INSERT INTO account(parent_id, name, type, basis)
-		VALUES($1, $2, $3, $4)
-		RETURNING id, parent_id, name, type, basis
+		INSERT INTO account(id, parent_id, name, type, basis, created_at)
+		VALUES($1, $2, $3, $4, $5, $6)
+		RETURNING id, parent_id, name, type, basis, created_at
 		;`,
-		acc.ParentID, acc.Name, acc.Type, acc.Basis).Scan(
-		&account.ID,
-		&account.ParentID,
-		&account.Name,
-		&account.Type,
-		&account.Basis,
+		create.ID, create.ParentID, create.Name, create.Type, create.Basis, create.CreatedAt).Scan(
+		&returning.ID,
+		&returning.ParentID,
+		&returning.Name,
+		&returning.Type,
+		&returning.Basis,
+		&returning.CreatedAt,
 	); err != nil {
 		return nil, errors.Wrap(err, "scanning account creation query returning result set")
 	}
-	if err := validate.Validate(account); err != nil {
+	if err := validate.Validate(returning); err != nil {
 		if err := tx.Rollback(ctx); err != nil {
 			return nil, errors.WrapFlag(err, "rolling back account creation transaction on invalid return data", errors.NotValidInternalData)
 		}
@@ -92,5 +93,5 @@ func (r *Repository) CreateAccount(ctx context.Context, acc *account.Account) (*
 	if err := tx.Commit(ctx); err != nil {
 		return nil, errors.Wrap(err, "committing account creation")
 	}
-	return account, nil
+	return returning, nil
 }

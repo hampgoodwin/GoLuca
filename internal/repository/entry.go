@@ -40,7 +40,7 @@ func (r *Repository) GetEntries(ctx context.Context, cursor string, limit uint64
 // GetEntriesByTransactionID gets entries by transaction ID
 func (r *Repository) GetEntriesByTransactionID(ctx context.Context, transactionID string) ([]transaction.Entry, error) {
 	rows, err := r.Database.Query(ctx,
-		`SELECTid, transaction_id, account_id, amount
+		`SELECT id, transaction_id, account_id, amount, created_at
 		FROM entry
 		WHERE transaction_id=$1
 		;`,
@@ -57,6 +57,7 @@ func (r *Repository) GetEntriesByTransactionID(ctx context.Context, transactionI
 			&entry.TransactionID,
 			&entry.AccountID,
 			&entry.Amount,
+			&entry.CreatedAt,
 		); err != nil {
 			return nil, errors.Wrap(err, "scanning row from entries by transaction id query results set")
 		}
