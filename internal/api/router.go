@@ -5,16 +5,18 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"go.uber.org/zap"
 )
 
 // Register api routes and return the router
-func Register(registers ...func(r *chi.Mux)) *chi.Mux {
+func Register(log *zap.Logger, registers ...func(r *chi.Mux)) *chi.Mux {
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
-	r.Use(middleware.Logger)
+	r.Use(httplogger(log))
 	r.Use(middleware.Recoverer)
+	r.Use(middleware.Heartbeat("/ping"))
 
 	// Set a timeout value on the request context (ctx), that will signal
 	// through ctx.Done() that the request has timed out and further

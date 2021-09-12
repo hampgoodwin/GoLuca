@@ -95,7 +95,7 @@ func NewEnvironment(e *Environment) (*Environment, error) {
 	}
 	// register routes
 	env.Server.Handler = api.Register(
-		env.controller.RegisterHealthRoutes,
+		env.Log,
 		env.controller.RegisterAccountRoutes,
 		env.controller.RegisterTransactionRoutes,
 		env.controller.RegisterEntryRoutes,
