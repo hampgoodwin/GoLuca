@@ -16,7 +16,7 @@ func httplogger(log *zap.Logger) func(http.Handler) http.Handler {
 
 			t1 := time.Now()
 			defer func() {
-				log.Info("Served",
+				log.Info("served",
 					zap.String("proto", r.Proto),
 					zap.String("path", r.URL.Path),
 					zap.Duration("lat", time.Since(t1)),
