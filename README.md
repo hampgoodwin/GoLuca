@@ -12,6 +12,7 @@ TODO
 - [ ] change limit and cursor to optional values
 - [ ] swap to nubanks balanced by design transaction model
     - [ ] replace transaction with single value and debit/credit accounts; balanced by design
+    - [ ] change the amount in oas to string, and change amount values to uint64
 - [ ] implement standard api response and error response to simplify api handler functions
     - [ ] more elegant error response handling
 - [ ] implement golang-migrate or similar db migration strategy
