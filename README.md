@@ -8,7 +8,6 @@ A Simple Accounting Ledger
 
 TODO
 
-- [ ] swap go-chi router logger to use zap logger stored in environment; log more.
 - [ ] add delete request response with message that this ledger is append only and records cannot be deleted
 - [ ] fix timestamp for created_at to be utc time zone
 - [ ] change limit and cursor to optional values
@@ -41,4 +40,5 @@ TODO
 - [x] implement a separate errors package like unto nate finches error flags solution
 - [x] split api encode and write code
 - [x] swap to uuid over auto incr values for id's
+- [x] swap go-chi router logger to use zap logger stored in environment; log more.
 
