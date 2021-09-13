@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"database/sql"
 
 	"github.com/hampgoodwin/GoLuca/internal/errors"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
@@ -21,7 +20,7 @@ func (r *Repository) GetAccount(ctx context.Context, accountID string) (*account
 		accountID).Scan(
 		&account.ID, &account.ParentID, &account.Name, &account.Type, &account.Basis, &account.CreatedAt,
 	); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, errors.WrapFlag(err, "scanning account result row", errors.NotFound)
 		}
 		return nil, errors.Wrap(err, "scanning account result row")

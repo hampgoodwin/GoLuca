@@ -28,7 +28,7 @@ func (s *Service) GetAccounts(ctx context.Context, cursor string, limit uint64) 
 
 func (s *Service) CreateAccount(ctx context.Context, account *account.Account) (*account.Account, error) {
 	account.ID = uuid.New().String()
-	account.CreatedAt = time.Now().UTC()
+	account.CreatedAt = time.Now()
 	if err := validate.Validate(account); err != nil {
 		return nil, errors.WrapFlag(err, "validating account before persisting to database", errors.NotValidRequestData)
 	}
