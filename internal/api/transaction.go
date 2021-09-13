@@ -34,6 +34,9 @@ type transactionsResponse struct {
 func (c *Controller) getTransactions(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	limit, cursor := r.URL.Query().Get("limit"), r.URL.Query().Get("cursor")
+	if limit == "" {
+		limit = "3"
+	}
 	transactions, nextCursor, err := c.service.GetTransactions(ctx, cursor, limit)
 	if err != nil {
 		c.respondError(w, c.log, errors.Wrap(err, "getting transactions from service"))

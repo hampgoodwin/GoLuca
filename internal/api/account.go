@@ -54,9 +54,10 @@ func (c *Controller) getAccount(w http.ResponseWriter, r *http.Request) {
 
 func (c *Controller) getAccounts(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	// Get query strings for pagination
 	limit, cursor := r.URL.Query().Get("limit"), r.URL.Query().Get("cursor")
-
+	if limit == "" {
+		limit = "3"
+	}
 	accounts, nextCursor, err := c.service.GetAccounts(ctx, cursor, limit)
 	if err != nil {
 		c.respondError(w, c.log, errors.Wrap(err, "getting accounts from service"))
