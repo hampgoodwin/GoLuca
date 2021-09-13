@@ -8,8 +8,7 @@ A Simple Accounting Ledger
 
 TODO
 
-- [ ] change limit and cursor to optional values
-    - [ ] use [stable pagination](http://morningcoffee.io/stable-pagination.html) for uuid
+- [ ] Optimize the get transactions call to use a single query; full join, order and then iterate to make transactions object
 - [ ] swap to nubanks balanced by design transaction model
     - [ ] replace transaction with single value and debit/credit accounts; balanced by design
     - [ ] change the amount in oas to string, and change amount values to uint64
@@ -42,4 +41,6 @@ TODO
 - [x] swap go-chi router logger to use zap logger stored in environment; log more.
 - [x] ~~add delete request response with message that this ledger is append only and records cannot be deleted~~ 404 is fine
 - [x] fix timestamp for created_at to be utc time zone
+- [x] change limit and cursor to optional values
+    - [x] use [stable pagination](http://morningcoffee.io/stable-pagination.html) for uuid
 

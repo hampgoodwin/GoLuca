@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/go-chi/chi"
 	"github.com/hampgoodwin/GoLuca/internal/errors"
@@ -22,7 +21,8 @@ type accountResponse struct {
 }
 
 type accountsResponse struct {
-	Accounts []account.Account `json:"accounts" validated:"required"`
+	Accounts   []account.Account `json:"accounts" validated:"required"`
+	NextCursor string            `json:"nextCursor,omitempty" validated:"base64"`
 }
 
 func (c *Controller) RegisterAccountRoutes(r *chi.Mux) {
@@ -54,15 +54,11 @@ func (c *Controller) getAccount(w http.ResponseWriter, r *http.Request) {
 
 func (c *Controller) getAccounts(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	// Get query strings for pagination
 	limit, cursor := r.URL.Query().Get("limit"), r.URL.Query().Get("cursor")
-	limitInt, err := strconv.ParseUint(limit, 10, 64)
-	if err != nil {
-		c.respondError(w, c.log, errors.WrapFlag(err, "parsing limit query param", errors.NotValidRequest))
-		return
+	if limit == "" {
+		limit = "3"
 	}
-
-	accounts, err := c.service.GetAccounts(ctx, cursor, limitInt)
+	accounts, nextCursor, err := c.service.GetAccounts(ctx, cursor, limit)
 	if err != nil {
 		c.respondError(w, c.log, errors.Wrap(err, "getting accounts from service"))
 		return
@@ -72,7 +68,7 @@ func (c *Controller) getAccounts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res := &accountsResponse{Accounts: accounts}
+	res := &accountsResponse{Accounts: accounts, NextCursor: *nextCursor}
 	c.respond(w, res, http.StatusOK)
 }
 

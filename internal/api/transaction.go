@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/go-chi/chi"
 	"github.com/hampgoodwin/GoLuca/internal/errors"
@@ -29,23 +28,21 @@ type transactionResponse struct {
 
 type transactionsResponse struct {
 	Transactions []transaction.Transaction `json:"transactions" validate:"required"`
+	NextCursor   string                    `json:"nextCursor,omitempty" validate:"base64"`
 }
 
 func (c *Controller) getTransactions(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	// Get query strings for pagination
 	limit, cursor := r.URL.Query().Get("limit"), r.URL.Query().Get("cursor")
-	limitInt, err := strconv.ParseUint(limit, 10, 64)
-	if err != nil {
-		c.respondError(w, c.log, errors.WrapFlag(err, "parsing limit query parameter", errors.NotValidRequest))
-		return
+	if limit == "" {
+		limit = "3"
 	}
-	transactions, err := c.service.GetTransactions(ctx, cursor, limitInt)
+	transactions, nextCursor, err := c.service.GetTransactions(ctx, cursor, limit)
 	if err != nil {
 		c.respondError(w, c.log, errors.Wrap(err, "getting transactions from service"))
 		return
 	}
-	res := &transactionsResponse{Transactions: transactions}
+	res := &transactionsResponse{Transactions: transactions, NextCursor: *nextCursor}
 	c.respond(w, res, http.StatusOK)
 }
 
