@@ -8,7 +8,6 @@ A Simple Accounting Ledger
 
 TODO
 
-- [ ] fix timestamp for created_at to be utc time zone
 - [ ] change limit and cursor to optional values
     - [ ] use [stable pagination](http://morningcoffee.io/stable-pagination.html) for uuid
 - [ ] swap to nubanks balanced by design transaction model
@@ -42,4 +41,5 @@ TODO
 - [x] swap to uuid over auto incr values for id's
 - [x] swap go-chi router logger to use zap logger stored in environment; log more.
 - [x] ~~add delete request response with message that this ledger is append only and records cannot be deleted~~ 404 is fine
+- [x] fix timestamp for created_at to be utc time zone
 
