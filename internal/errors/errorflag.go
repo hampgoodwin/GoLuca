@@ -30,6 +30,9 @@ const (
 	// NotSerializable indicates provided or internals data was not successfully serialized to
 	// application interface data structures
 	NotSerializable
+	// NoRelationshipFound indicates that a process which assumes a data relationship did not find
+	// the assumed relationship
+	NoRelationshipFound
 )
 
 func (ef ErrorFlag) String() string {
@@ -42,6 +45,7 @@ func (ef ErrorFlag) String() string {
 		"NotValidInternalData",
 		"NotDeserializable",
 		"NotSerializable",
+		"NotRelationshipFound",
 	}[ef]
 }
 

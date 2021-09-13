@@ -2,11 +2,12 @@ package repository
 
 import (
 	"context"
-	"database/sql"
 
 	"github.com/hampgoodwin/GoLuca/internal/errors"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
 	"github.com/hampgoodwin/GoLuca/pkg/transaction"
+	"github.com/jackc/pgconn"
+	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v4"
 )
 
@@ -22,7 +23,7 @@ func (r *Repository) GetTransaction(ctx context.Context, transactionID string) (
 		&returningTransaction.Description,
 		&returningTransaction.CreatedAt,
 	); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, errors.WrapFlag(err, "scanning transaction result row", errors.NotFound)
 		}
 		return nil, errors.Wrap(err, "scanning row from transaction query result set")
@@ -110,6 +111,12 @@ func (r *Repository) CreateTransactionAndEntries(ctx context.Context, create *tr
 			&returningEntry.Amount,
 			&returningEntry.CreatedAt,
 		); err != nil {
+			var pgErr *pgconn.PgError
+			if errors.As(err, &pgErr) {
+				if pgErr.Code == pgerrcode.ForeignKeyViolation {
+					return nil, errors.WrapFlag(err, "scanning transaction entry created return result set", errors.NoRelationshipFound)
+				}
+			}
 			return nil, errors.Wrap(err, "scanning transaction entry created return result set")
 		}
 		returningTransaction.Entries = append(returningTransaction.Entries, returningEntry)

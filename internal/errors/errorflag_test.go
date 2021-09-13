@@ -22,6 +22,7 @@ func TestStringer(t *testing.T) {
 		{NotValidInternalData, "NotValidInternalData"},
 		{NotDeserializable, "NotDeserializable"},
 		{NotSerializable, "NotSerializable"},
+		{NoRelationshipFound, "NotRelationshipFound"},
 	}
 
 	for i, tc := range testCases {

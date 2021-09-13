@@ -6,11 +6,16 @@ lint:
 
 check: lint test
 
+run:
+	go run $$(pwd)/cmd/goluca/main.go
+
 up:
 	docker-compose -f $$(pwd)/build/package/docker-compose.yml up -d
 
 down:
 	docker-compose -f $$(pwd)/build/package/docker-compose.yml down
+
+downup: down up
 
 dbup:
 	docker-compose -f $$(pwd)/build/package/docker-compose.yml up -d db

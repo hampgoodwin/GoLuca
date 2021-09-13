@@ -26,29 +26,31 @@ func (c *Controller) respond(w http.ResponseWriter, i interface{}, statuseCode i
 func (c *Controller) respondError(w http.ResponseWriter, log *zap.Logger, err error) {
 	switch {
 	case errors.HasFlag(err, errors.NotValidRequest):
-		c.respond(w, errorResponse{Description: "bad data in request, check request meta data"}, http.StatusBadRequest)
+		c.respond(w, errorResponse{Description: "bad request data, check request meta data"}, http.StatusBadRequest)
 		return
 	case errors.HasFlag(err, errors.NotValidRequestData):
-		if c.respondOnValidationErrors(w, err, "bad request data") {
+		if c.respondOnValidationErrors(w, err, "bad request data.") {
 			return
 		}
-		c.respond(w, errorResponse{Description: "bad request data"}, http.StatusBadRequest)
+		c.respond(w, errorResponse{Description: "bad request data."}, http.StatusBadRequest)
 		log.Error("incorrect error flag used for case",
 			zap.String("error", fmt.Sprint(errors.NotValidRequestData)))
 		return
 	case errors.HasFlag(err, errors.NotFound):
-		c.respond(w, errorResponse{}, http.StatusNotFound)
+		c.respond(w, nil, http.StatusNotFound)
 		return
 	case errors.HasFlag(err, errors.NotValidInternalData):
-		c.respond(w, errorResponse{Description: "internal data is invalid and failed validation"}, http.StatusInternalServerError)
+		c.respond(w, errorResponse{Description: "internal data is invalid and failed validation."}, http.StatusInternalServerError)
 	case errors.HasFlag(err, errors.NotDeserializable):
-		c.respond(w, errorResponse{Description: "provided data passed validation but failed deserialization to internal type"}, http.StatusInternalServerError)
+		c.respond(w, errorResponse{Description: "provided data passed validation but failed deserialization to internal type."}, http.StatusInternalServerError)
 	case errors.HasFlag(err, errors.NotSerializable):
-		c.respond(w, errorResponse{Description: "either provided or internal data passed validation, but failed serialization"}, http.StatusInternalServerError)
+		c.respond(w, errorResponse{Description: "either provided or internal data passed validation, but failed serialization."}, http.StatusInternalServerError)
+	case errors.HasFlag(err, errors.NoRelationshipFound):
+		c.respond(w, errorResponse{Description: "process which assumed existence of a relationship between data found no relationship. If you are creating data with related data id, those id's do not exist."}, http.StatusBadRequest)
 	default:
 		log.Error("respondError", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = w.Write([]byte("unhandled error response"))
+		_, _ = w.Write([]byte("unhandled error response."))
 	}
 }
 
