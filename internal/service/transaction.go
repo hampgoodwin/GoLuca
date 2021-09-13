@@ -36,7 +36,7 @@ func (s *Service) GetTransactionEntries(ctx context.Context, transactionID strin
 
 func (s *Service) CreateTransactionAndEntries(ctx context.Context, transaction *transaction.Transaction) (*transaction.Transaction, error) {
 	transaction.ID = uuid.New().String()
-	transaction.CreatedAt = time.Now().UTC()
+	transaction.CreatedAt = time.Now()
 	for i := 0; i < len(transaction.Entries); i++ {
 		transaction.Entries[i].ID = uuid.New().String()
 		transaction.Entries[i].TransactionID = transaction.ID
