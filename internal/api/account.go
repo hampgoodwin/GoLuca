@@ -22,7 +22,7 @@ type accountResponse struct {
 
 type accountsResponse struct {
 	Accounts   []account.Account `json:"accounts" validated:"required"`
-	NextCursor string            `json:"nextCursor,omitempty"`
+	NextCursor string            `json:"nextCursor,omitempty" validated:"base64"`
 }
 
 func (c *Controller) RegisterAccountRoutes(r *chi.Mux) {

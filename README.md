@@ -9,7 +9,7 @@ A Simple Accounting Ledger
 TODO
 
 - [ ] change limit and cursor to optional values
-    - [ ] use [stable pagination](http://morningcoffee.io/stable-pagination.html) for uuid
+    - [x] use [stable pagination](http://morningcoffee.io/stable-pagination.html) for uuid
 - [ ] Optimize the get transactions call to use a single query; full join, order and then iterate to make transactions object
 - [ ] swap to nubanks balanced by design transaction model
     - [ ] replace transaction with single value and debit/credit accounts; balanced by design

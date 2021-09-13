@@ -28,12 +28,11 @@ type transactionResponse struct {
 
 type transactionsResponse struct {
 	Transactions []transaction.Transaction `json:"transactions" validate:"required"`
-	NextCursor   string                    `json:"nextCursor,omitempty"`
+	NextCursor   string                    `json:"nextCursor,omitempty" validate:"base64"`
 }
 
 func (c *Controller) getTransactions(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	// Get query strings for pagination
 	limit, cursor := r.URL.Query().Get("limit"), r.URL.Query().Get("cursor")
 	transactions, nextCursor, err := c.service.GetTransactions(ctx, cursor, limit)
 	if err != nil {
