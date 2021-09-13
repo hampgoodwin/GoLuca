@@ -2,6 +2,8 @@ package repository
 
 import (
 	"context"
+	"fmt"
+	"time"
 
 	"github.com/hampgoodwin/GoLuca/internal/errors"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
@@ -32,15 +34,24 @@ func (r *Repository) GetAccount(ctx context.Context, accountID string) (*account
 }
 
 // GetAccounts get accounts paginated based on a cursor and limit
-func (r *Repository) GetAccounts(ctx context.Context, cursor string, limit uint64) ([]account.Account, error) {
-	rows, err := r.Database.Query(ctx,
-		`SELECT id, parent_id, name, type, basis
+func (r *Repository) GetAccounts(ctx context.Context, accountID string, createdAt time.Time, limit uint64) ([]account.Account, error) {
+	query := `SELECT id, parent_id, name, type, basis
 		FROM account
-		WHERE account.id > $1
-		ORDER BY created_at
-		LIMIT $2
-		;`,
-		cursor, limit)
+		WHERE 1=1`
+	var params []interface{}
+	if accountID != "" && !createdAt.IsZero() {
+		params = append(params, accountID)
+		query += fmt.Sprintf(" AND account.id <= $%d", len(params))
+		params = append(params, createdAt)
+		query += fmt.Sprintf(" AND account.created_at <= $%d", len(params))
+	}
+	query += " ORDER BY created_at DESC"
+	if limit != 0 {
+		params = append(params, limit)
+		query += fmt.Sprintf(" LIMIT $%d", len(params))
+	}
+	query += ";"
+	rows, err := r.Database.Query(ctx, query, params...)
 	if err != nil {
 		return nil, errors.Wrap(err, "querying database for accounts")
 	}
