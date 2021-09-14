@@ -63,8 +63,10 @@ CREATE TABLE IF NOT EXISTS transaction(
 CREATE TABLE IF NOT EXISTS entry(
 	id VARCHAR(36) PRIMARY KEY,
 	transaction_id VARCHAR(36),
-	account_id VARCHAR(36),
-	amount DOUBLE PRECISION,
+	debit_accont VARCHAR(36),
+	credit_accont VARCHAR(36),
+	amount_value BIGINT,
+	amount_currency CHAR(3),
 	created_at TIMESTAMP DEFAULT NOW(),
 	CONSTRAINT fk_transaction FOREIGN KEY(transaction_id) REFERENCES transaction(id),
 	CONSTRAINT fk_account FOREIGN KEY(account_id) REFERENCES account(id)

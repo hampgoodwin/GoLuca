@@ -10,7 +10,7 @@ import (
 // GetEntries gets a paginated result of db entries
 func (r *Repository) GetEntries(ctx context.Context, cursor string, limit uint64) ([]transaction.Entry, error) {
 	rows, err := r.Database.Query(ctx,
-		`SELECT id, transaction_id, account_id, amount
+		`SELECT id, transaction_id, debit_account, credit_account, amount_value, amount_currency, created_at
 		FROM entry
 		WHERE id > $1
 		ORDER BY created_at
@@ -27,8 +27,11 @@ func (r *Repository) GetEntries(ctx context.Context, cursor string, limit uint64
 		if err := rows.Scan(
 			&entry.ID,
 			&entry.TransactionID,
-			&entry.AccountID,
-			&entry.Amount,
+			&entry.DebitAccount,
+			&entry.CreditAccount,
+			&entry.Amount.Value,
+			&entry.Amount.Currency,
+			&entry.CreatedAt,
 		); err != nil {
 			return nil, errors.Wrap(err, "scanning row from entries query results set")
 		}
@@ -40,7 +43,7 @@ func (r *Repository) GetEntries(ctx context.Context, cursor string, limit uint64
 // GetEntriesByTransactionID gets entries by transaction ID
 func (r *Repository) GetEntriesByTransactionID(ctx context.Context, transactionID string) ([]transaction.Entry, error) {
 	rows, err := r.Database.Query(ctx,
-		`SELECT id, transaction_id, account_id, amount, created_at
+		`SELECT id, transaction_id, debit_account, credit_account, amount_value, amount_currency, created_at
 		FROM entry
 		WHERE transaction_id=$1
 		;`,
@@ -55,8 +58,10 @@ func (r *Repository) GetEntriesByTransactionID(ctx context.Context, transactionI
 		if err := rows.Scan(
 			&entry.ID,
 			&entry.TransactionID,
-			&entry.AccountID,
-			&entry.Amount,
+			&entry.DebitAccount,
+			&entry.CreditAccount,
+			&entry.Amount.Value,
+			&entry.Amount.Currency,
 			&entry.CreatedAt,
 		); err != nil {
 			return nil, errors.Wrap(err, "scanning row from entries by transaction id query results set")

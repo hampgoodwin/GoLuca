@@ -8,7 +8,6 @@ A Simple Accounting Ledger
 
 TODO
 
-- [ ] Optimize the get transactions call to use a single query; full join, order and then iterate to make transactions object
 - [ ] swap to nubanks balanced by design transaction model
     - [ ] replace transaction with single value and debit/credit accounts; balanced by design
     - [ ] change the amount in oas to string, and change amount values to uint64
@@ -16,6 +15,7 @@ TODO
     - [ ] more elegant error response handling
 - [ ] implement golang-migrate or similar db migration strategy
 - [ ] Use https://mermade.github.io/openapi-gui/ to generate OAS and serve it
+- [ ] Optimize the get transactions call to use a single query; full join, order and then iterate to make transactions object
 - [ ] Add a stress testing system
 - [ ] Add fuzzing
 - [ ] Create a seeder for a basic dev environment of data

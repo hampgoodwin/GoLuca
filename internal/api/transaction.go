@@ -61,16 +61,9 @@ func (c *Controller) getTransaction(w http.ResponseWriter, r *http.Request) {
 func (c *Controller) createTransactionAndEntries(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	req := &transactionRequest{}
-	// interf, _ := ioutil.ReadAll(r.Body)
-	// fmt.Println(string(interf))
+
 	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
 		c.respondError(w, c.log, errors.WrapFlag(err, "deserializing request body", errors.NotValidRequestData))
-		return
-	}
-
-	if !req.Transaction.Balanced() {
-		err := fmt.Errorf("transaction entires are not balanced\n%s", req.Transaction.Entries)
-		c.respondError(w, c.log, errors.WrapFlag(err, "validating transaction request is balanced", errors.NotValidRequest))
 		return
 	}
 
