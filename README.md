@@ -8,14 +8,13 @@ A Simple Accounting Ledger
 
 TODO
 
-- [ ] Optimize the get transactions call to use a single query; full join, order and then iterate to make transactions object
-- [ ] swap to nubanks balanced by design transaction model
-    - [ ] replace transaction with single value and debit/credit accounts; balanced by design
-    - [ ] change the amount in oas to string, and change amount values to uint64
+- [ ] change the amount in oas to string, and change amount values to int64 in controller/service
+    - [ ] because postgres (and most dbs) don't OOB implement unsigned ints, use an int 64, which should be more than enough for any needs we'll have. In the case where a string request comes in (upper unbounded), split into multiple entries which will fit into int63's. Probably implement some overflow checks as well.
 - [ ] implement standard api response and error response to simplify api handler functions
     - [ ] more elegant error response handling
 - [ ] implement golang-migrate or similar db migration strategy
 - [ ] Use https://mermade.github.io/openapi-gui/ to generate OAS and serve it
+- [ ] Optimize the get transactions call to use a single query; full join, order and then iterate to make transactions object
 - [ ] Add a stress testing system
 - [ ] Add fuzzing
 - [ ] Create a seeder for a basic dev environment of data
@@ -43,4 +42,6 @@ TODO
 - [x] fix timestamp for created_at to be utc time zone
 - [x] change limit and cursor to optional values
     - [x] use [stable pagination](http://morningcoffee.io/stable-pagination.html) for uuid
+- [x] swap to nubanks balanced by design transaction model
+    - [x] replace transaction with single value and debit/credit accounts; balanced by design
 

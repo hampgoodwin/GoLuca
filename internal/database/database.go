@@ -63,16 +63,25 @@ CREATE TABLE IF NOT EXISTS transaction(
 CREATE TABLE IF NOT EXISTS entry(
 	id VARCHAR(36) PRIMARY KEY,
 	transaction_id VARCHAR(36),
-	account_id VARCHAR(36),
-	amount DOUBLE PRECISION,
+	debit_account VARCHAR(36),
+	credit_account VARCHAR(36),
+	amount_value BIGINT,
+	amount_currency CHAR(3),
 	created_at TIMESTAMP DEFAULT NOW(),
 	CONSTRAINT fk_transaction FOREIGN KEY(transaction_id) REFERENCES transaction(id),
-	CONSTRAINT fk_account FOREIGN KEY(account_id) REFERENCES account(id)
+	CONSTRAINT fk_debit_account FOREIGN KEY(debit_account) REFERENCES account(id),
+	CONSTRAINT fk_credit_account FOREIGN KEY(credit_account) REFERENCES account(id)
 )
 ;`)
 	if err != nil {
 		return errors.Wrap(err, "failed to create entry table")
 	}
+
+	_, err = tx.Exec(ctx, `CREATE UNIQUE INDEX IF NOT EXISTS transaction_created_at_idx ON transaction (id, created_at);`)
+	if err != nil {
+		return errors.Wrap(err, "failed to create index on transaction table")
+	}
+
 	if err := tx.Commit(ctx); err != nil {
 		return errors.Wrap(err, "failed to commit migration")
 	}

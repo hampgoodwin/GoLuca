@@ -117,13 +117,15 @@ func (r *Repository) CreateTransactionAndEntries(ctx context.Context, create *tr
 	for _, entry := range create.Entries {
 		returningEntry := transaction.Entry{}
 		if err := tx.QueryRow(ctx,
-			`INSERT INTO entry(id, transaction_id, account_id, amount, created_at) VALUES ($1, $2, $3, $4, $5)
-			RETURNING id, transaction_id, account_id, amount, created_at;`,
-			entry.ID, returningTransaction.ID, entry.AccountID, entry.Amount, entry.CreatedAt).Scan(
+			`INSERT INTO entry(id, transaction_id, debit_account, credit_account, amount_value, amount_currency, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7)
+			RETURNING id, transaction_id, debit_account, credit_account, amount_value, amount_currency, created_at;`,
+			entry.ID, returningTransaction.ID, entry.DebitAccount, entry.CreditAccount, entry.Amount.Value, entry.Amount.Currency, entry.CreatedAt).Scan(
 			&returningEntry.ID,
 			&returningEntry.TransactionID,
-			&returningEntry.AccountID,
-			&returningEntry.Amount,
+			&returningEntry.DebitAccount,
+			&returningEntry.CreditAccount,
+			&returningEntry.Amount.Value,
+			&returningEntry.Amount.Currency,
 			&returningEntry.CreatedAt,
 		); err != nil {
 			var pgErr *pgconn.PgError
