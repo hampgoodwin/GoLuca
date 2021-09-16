@@ -8,6 +8,7 @@ A Simple Accounting Ledger
 
 TODO
 
+- [ ] generate zero-dep html file for api docs and create serve w/ makefile commands
 - [ ] implement standard api response and error response to simplify api handler functions
     - [ ] more elegant error response handling
 - [ ] implement golang-migrate or similar db migration strategy
