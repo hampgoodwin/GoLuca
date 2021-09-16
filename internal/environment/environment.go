@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/hampgoodwin/GoLuca/internal/api"
 	"github.com/hampgoodwin/GoLuca/internal/config"
 	"github.com/hampgoodwin/GoLuca/internal/configloader"
+	"github.com/hampgoodwin/GoLuca/internal/controller"
 	"github.com/hampgoodwin/GoLuca/internal/database"
 	"github.com/hampgoodwin/GoLuca/internal/repository"
 	"github.com/hampgoodwin/GoLuca/internal/service"
@@ -20,7 +20,7 @@ type Environment struct {
 
 	// API: Server and controllers
 	Server     *http.Server
-	controller *api.Controller
+	controller *controller.Controller
 
 	// service
 	service *service.Service
@@ -84,7 +84,7 @@ func NewEnvironment(e *Environment) (*Environment, error) {
 
 	// Controllers
 	if env.controller == nil {
-		env.controller = api.NewController(env.Log, env.service)
+		env.controller = controller.NewController(env.Log, env.service)
 	}
 
 	if env.Server == nil {
@@ -94,7 +94,7 @@ func NewEnvironment(e *Environment) (*Environment, error) {
 		}
 	}
 	// register routes
-	env.Server.Handler = api.Register(
+	env.Server.Handler = controller.Register(
 		env.Log,
 		env.controller.RegisterAccountRoutes,
 		env.controller.RegisterTransactionRoutes,
