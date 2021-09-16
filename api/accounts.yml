@@ -3,42 +3,42 @@ info:
   title: Accounts API
   version: '0.0.0'
 servers:
-  - url: https://locahost:3333/accounts
+  - url: https://locahost:3333/
 
 paths:
   /accounts:
     get:
-      summary: 'Get paginated result of accounts by cursor and limit.'
-      description: 'This endpoint returns a list of paginated accounts. A cursor and limit are optional. If the cursor is not provided the results are returned in order of the created at field. If a limit is not provided the default limit is used.'
+      description: List accounts
       parameters: 
-        - $ref: '#/components/parameters/cursor'
-        - $ref: '#/components/parameters/limit'
+        - $ref: 'shared.yml#/components/parameters/cursor'
+        - $ref: 'shared.yml#/components/parameters/limit'
       operationId: listAccounts
       responses:
         '200':
           $ref: '#/components/responses/listAccounts'
     post:
-      summary: 'Create an account'
-      description: 'This endpoints creates an account returns the created resource.'
+      description: Create an account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/requestAccount'
       responses:
         '200':
-          $ref: '#/components/responses/createAccount'
+          $ref: '#/components/responses/createdAccount'
 
   /accounts/{accountId}:
     get:
-      summary: 'Get an account resource by its ID'
-      description: 'This endpoint gets a specific account resource'
+      description: Get an account resource by its ID
       parameters:
         - $ref: '#/components/parameters/accountId'
       responses:
-        '200':
+        '201':
           $ref: '#/components/responses/getAccount'
 
 components:
   schemas:
-      time:
-        type: string
-        format: 'rfc3339/iso8601'
       basis:
         type: object
         enum:
@@ -54,21 +54,13 @@ components:
           - expense
           - gain
           - loss
-      uuid:
-        type: object
-        properties:
-          property:
-            type: string
-            format: 'uuid'
-            maxLength: 36
-            pattern: '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}'
       responseAccount:
         type: object
         properties:
           id:
-            $ref: '#/components/schemas/uuid'
+            $ref: 'shared.yml#/components/schemas/uuid'
           parentId:
-            $ref: '#/components/schemas/uuid'
+            $ref: 'shared.yml#/components/schemas/uuid'
           name:
             type: string
           type:
@@ -76,12 +68,12 @@ components:
           basis:
             $ref: '#/components/schemas/basis'
           createdAt:
-            $ref: '#/components/schemas/time'
+            $ref: 'shared.yml#/components/schemas/time'
       requestAccount:
         type: object
         properties:
           parentId:
-            $ref: '#/components/schemas/uuid'
+            $ref: 'shared.yml#/components/schemas/uuid'
           name:
             type: string
           type:
@@ -110,7 +102,7 @@ components:
                 type: array
                 items:
                   $ref: '#/components/schemas/responseAccount'
-    createAccount:
+    createdAccount:
       description: Created
       content:
         application/json:
@@ -119,7 +111,7 @@ components:
             properties:
               account:
                 $ref: '#/components/schemas/responseAccount'
-
+    
   parameters:
     accountId:
       name: accountId
@@ -127,22 +119,5 @@ components:
       required: true
       description: 'required uuid url parameter to get a specific account resource.'
       schema:
-        $ref: '#/components/schemas/uuid'
-    limit:
-      name: limit
-      in: query
-      required: false
-      description: 'limit is the number of accounts to be returned'
-      schema:
-        type: string
-        format: 'integer'
-        default: '10'
-    cursor:
-      in: 'query'
-      name: 'cursor'
-      required: false
-      schema:
-        type: 'string'
-        format: 'base64'
-      description: 'cursor is a base64 encoded combination of the next account uuid and created at value so that the next page knows where to continue. The value to use is returned as `nextCursor` in the response body of /accounts'
+        $ref: 'shared.yml#/components/schemas/uuid'
   

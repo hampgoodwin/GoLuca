@@ -1,0 +1,20 @@
+openapi: '3.0.2'
+info:
+  title: GoLuca
+  version: '0.0.0'
+servers:
+  - url: https://localhost:3333
+paths:
+# accounts
+  /accounts:
+    $ref: 'accounts.yml#/paths/~1accounts'
+  /accounts/{accountID}:
+    $ref: 'accounts.yml#/paths/~1accounts~1{accountId}'
+# transactions
+  /transaction:
+    $ref: 'transactions.yml#/paths/~1transactions'
+  /transactions/{transactionID}:
+    $ref: 'transactions.yml#/paths/~1transactions~1{transactionId}'
+# entries
+  /entries:
+    $ref:  'entries.yml#/paths/~1entries'

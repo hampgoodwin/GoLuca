@@ -1,0 +1,105 @@
+openapi: '3.0.2'
+info:
+  title: Transfers
+  version: '0.0.0'
+servers:
+  - url: http://localhost:3333
+paths:
+  /transactions:
+    get:
+      description: List transactions
+      parameters:
+        - $ref: 'shared.yml#/components/parameters/cursor'
+        - $ref: 'shared.yml#/components/parameters/limit'
+      operationId: listTransactions
+      responses:
+        '200':
+          $ref: '#/components/responses/listTransactions'
+    post:
+      description: Create a transaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/requestTransaction'
+      responses:
+        '201':
+          $ref: '#/components/responses/createdTransaction'
+
+  /transactions/{transactionId}:
+    get:
+      description: Get a transaction resource by its ID
+      responses:
+        '200':
+          $ref: '#/components/responses/getTransaction'
+
+components:
+  schemas:
+    responseTransaction:
+      type: object
+      properties:
+        id:
+          $ref: 'shared.yml#/components/schemas/uuid'
+        description:
+          type: string
+        entries:
+          type: array
+          items:
+            $ref: 'entries.yml#/components/schemas/entry'
+        createdAt:
+          $ref: 'shared.yml#/components/schemas/time'
+    requestEntry:
+      type: object
+      properties:
+        description:
+          type: string
+        debirAccount:
+          $ref: 'shared.yml#/components/schemas/uuid'
+        creditAccount:
+          $ref: 'shared.yml#/components/schemas/uuid'
+        amount:
+          $ref: 'entries.yml#/components/schemas/amount'
+    requestTransaction:
+      type: object
+      properties:
+        description:
+          type: string
+        entries:
+          type: array
+          minLength: 1
+          items:
+            $ref: '#/components/schemas/requestEntry'
+        createdAt:
+          $ref: 'shared.yml#/components/schemas/time'
+  responses:
+    getTransaction:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              transaction:
+                $ref: '#ref/components/schemas/responseTransaction'
+    listTransactions:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              transaction:
+                type: array
+                items:
+                  $ref: '#ref/components/schemas/responseTransaction'
+    createdTransaction:
+      description: Created
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              transaction:
+                $ref: '#ref/components/schemas/responseTransaction'
+

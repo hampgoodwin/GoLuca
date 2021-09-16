@@ -2,7 +2,6 @@ package api
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/go-chi/chi"
 	"github.com/hampgoodwin/GoLuca/internal/errors"
@@ -10,29 +9,27 @@ import (
 )
 
 func (c *Controller) RegisterEntryRoutes(r *chi.Mux) {
-	r.Get("/entry", c.getEntries)
+	r.Get("/entries", c.getEntries)
 }
 
 type entriesResponse struct {
-	Entries []transaction.Entry `json:"entries" validated:"required"`
+	Entries    []transaction.Entry `json:"entries" validated:"required"`
+	NextCursor string              `json:"nextCursor,omitempty" validated:"base64"`
 }
 
 func (c *Controller) getEntries(w http.ResponseWriter, r *http.Request) {
-	c.log.Info("getting entries")
 	ctx := r.Context()
-
 	limit, cursor := r.URL.Query().Get("limit"), r.URL.Query().Get("cursor")
-	limitInt, err := strconv.ParseUint(limit, 10, 64)
+	if limit == "" {
+		limit = "3"
+	}
+
+	entries, nextCursor, err := c.service.GetEntries(ctx, cursor, limit)
 	if err != nil {
-		c.respondError(w, c.log, errors.WrapFlag(err, "parsing limit query param", errors.NotValidRequest))
+		c.respondError(w, c.log, errors.Wrap(err, "getting entries from service"))
 		return
 	}
 
-	entries, err := c.service.GetEntries(ctx, cursor, limitInt)
-	if err != nil {
-		c.respondError(w, c.log, errors.Wrap(err, "getting entries from service"))
-	}
-
-	res := &entriesResponse{Entries: entries}
+	res := &entriesResponse{Entries: entries, NextCursor: *nextCursor}
 	c.respond(w, res, http.StatusOK)
 }
