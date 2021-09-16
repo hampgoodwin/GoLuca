@@ -1,0 +1,60 @@
+openapi: '3.0.2'
+info:
+  title: Entries API
+  version: '0.0.0'
+servers:
+  - url: https://locahost:3333/
+
+paths:
+  /entries:
+    get:
+      description: List entries
+      parameters:
+        - $ref: 'shared.yml#/components/parameters/cursor'
+        - $ref: 'shared.yml#/components/parameters/limit'
+      operationId: listEntries
+      responses:
+        '200':
+          $ref: '#/components/responses/listEntries'
+
+components:
+  schemas:
+    amount:
+      type: object
+      properties:
+        value:
+          type: string
+          format: int64
+        currency:
+          type: string
+          maxLength: 3
+          minLength: 3
+    entry:
+      type: object
+      properties:
+        id:
+          $ref: 'shared.yml#/components/schemas/uuid'
+        transactionID:
+          $ref: 'shared.yml#/components/schemas/uuid'
+        description:
+          type: string
+        debirAccount:
+          $ref: 'shared.yml#/components/schemas/uuid'
+        creditAccount:
+          $ref: 'shared.yml#/components/schemas/uuid'
+        amount:
+          $ref: '#/components/schemas/amount'
+        createdAt:
+          $ref: 'shared.yml#/components/schemas/time'
+  responses:
+    listEntries:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              entries:
+                type: array
+                items:
+                  $ref: '#/components/schemas/entry'

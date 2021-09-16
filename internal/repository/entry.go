@@ -2,21 +2,23 @@ package repository
 
 import (
 	"context"
+	"time"
 
 	"github.com/hampgoodwin/GoLuca/internal/errors"
 	"github.com/hampgoodwin/GoLuca/pkg/transaction"
 )
 
 // GetEntries gets a paginated result of db entries
-func (r *Repository) GetEntries(ctx context.Context, cursor string, limit uint64) ([]transaction.Entry, error) {
+func (r *Repository) GetEntries(ctx context.Context, id string, createdAt time.Time, limit uint64) ([]transaction.Entry, error) {
 	rows, err := r.Database.Query(ctx,
 		`SELECT id, transaction_id, debit_account, credit_account, amount_value, amount_currency, created_at
 		FROM entry
-		WHERE id > $1
-		ORDER BY created_at
+		WHERE id <= $1
+			AND created_at <= $2
+		ORDER BY created_at DESC
 		LIMIT $2
 		;`,
-		cursor, limit)
+		id, createdAt, limit)
 	if err != nil {
 		return nil, errors.Wrap(err, "getting entries from database")
 	}

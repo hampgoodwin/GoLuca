@@ -1,4 +1,4 @@
-package api
+package controller
 
 import (
 	"encoding/json"
@@ -42,7 +42,7 @@ func (c *Controller) respondError(w http.ResponseWriter, log *zap.Logger, err er
 	case errors.HasFlag(err, errors.NotValidInternalData):
 		c.respond(w, errorResponse{Description: "internal data is invalid and failed validation."}, http.StatusInternalServerError)
 	case errors.HasFlag(err, errors.NotDeserializable):
-		c.respond(w, errorResponse{Description: "provided data passed validation but failed deserialization to internal type."}, http.StatusInternalServerError)
+		c.respond(w, errorResponse{Description: "provided data passed failed deserialization. If creating a resource, check the request body types."}, http.StatusInternalServerError)
 	case errors.HasFlag(err, errors.NotSerializable):
 		c.respond(w, errorResponse{Description: "either provided or internal data passed validation, but failed serialization."}, http.StatusInternalServerError)
 	case errors.HasFlag(err, errors.NoRelationshipFound):

@@ -1,0 +1,123 @@
+openapi: '3.0.2'
+info:
+  title: Accounts API
+  version: '0.0.0'
+servers:
+  - url: https://locahost:3333/
+
+paths:
+  /accounts:
+    get:
+      description: List accounts
+      parameters: 
+        - $ref: 'shared.yml#/components/parameters/cursor'
+        - $ref: 'shared.yml#/components/parameters/limit'
+      operationId: listAccounts
+      responses:
+        '200':
+          $ref: '#/components/responses/listAccounts'
+    post:
+      description: Create an account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/requestAccount'
+      responses:
+        '200':
+          $ref: '#/components/responses/createdAccount'
+
+  /accounts/{accountId}:
+    get:
+      description: Get an account resource by its ID
+      parameters:
+        - $ref: '#/components/parameters/accountId'
+      responses:
+        '201':
+          $ref: '#/components/responses/getAccount'
+
+components:
+  schemas:
+      basis:
+        type: object
+        enum:
+          - debit
+          - credit
+      type:
+        type: string
+        enum:
+          - asset
+          - liability
+          - equity
+          - revenue
+          - expense
+          - gain
+          - loss
+      responseAccount:
+        type: object
+        properties:
+          id:
+            $ref: 'shared.yml#/components/schemas/uuid'
+          parentId:
+            $ref: 'shared.yml#/components/schemas/uuid'
+          name:
+            type: string
+          type:
+            $ref: '#/components/schemas/type'
+          basis:
+            $ref: '#/components/schemas/basis'
+          createdAt:
+            $ref: 'shared.yml#/components/schemas/time'
+      requestAccount:
+        type: object
+        properties:
+          parentId:
+            $ref: 'shared.yml#/components/schemas/uuid'
+          name:
+            type: string
+          type:
+            $ref: '#/components/schemas/type'
+          basis:
+            $ref: '#/components/schemas/basis'
+
+  responses:
+    getAccount:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              account:
+                $ref: '#/components/schemas/responseAccount'
+    listAccounts:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              accounts:
+                type: array
+                items:
+                  $ref: '#/components/schemas/responseAccount'
+    createdAccount:
+      description: Created
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              account:
+                $ref: '#/components/schemas/responseAccount'
+    
+  parameters:
+    accountId:
+      name: accountId
+      in: path
+      required: true
+      description: 'required uuid url parameter to get a specific account resource.'
+      schema:
+        $ref: 'shared.yml#/components/schemas/uuid'
+  

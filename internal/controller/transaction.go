@@ -1,4 +1,4 @@
-package api
+package controller
 
 import (
 	"encoding/json"
@@ -7,6 +7,9 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/hampgoodwin/GoLuca/internal/errors"
+	"github.com/hampgoodwin/GoLuca/internal/httpapi"
+	"github.com/hampgoodwin/GoLuca/internal/transformer"
+	"github.com/hampgoodwin/GoLuca/internal/validate"
 	"github.com/hampgoodwin/GoLuca/pkg/transaction"
 )
 
@@ -19,7 +22,7 @@ func (c *Controller) RegisterTransactionRoutes(r *chi.Mux) {
 }
 
 type transactionRequest struct {
-	*transaction.Transaction `json:"transaction" validate:"required"`
+	httpapi.Transaction `json:"transaction" validate:"required"`
 }
 
 type transactionResponse struct {
@@ -63,16 +66,27 @@ func (c *Controller) createTransactionAndEntries(w http.ResponseWriter, r *http.
 	req := &transactionRequest{}
 
 	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
-		c.respondError(w, c.log, errors.WrapFlag(err, "deserializing request body", errors.NotValidRequestData))
+		c.respondError(w, c.log, errors.WrapFlag(err, "deserializing request body", errors.NotDeserializable))
 		return
 	}
 
-	transaction, err := c.service.CreateTransactionAndEntries(ctx, req.Transaction)
+	if err := validate.Validate(req); err != nil {
+		c.respondError(w, c.log, errors.WrapFlag(err, "validating http api transaction request", errors.NotValidRequestData))
+		return
+	}
+
+	create, err := transformer.NewTransactionFromHTTPTransaction(req.Transaction)
+	if err != nil {
+		c.respondError(w, c.log, errors.Wrap(err, "transforming http api transaction to transaction"))
+		return
+	}
+
+	rtrn, err := c.service.CreateTransactionAndEntries(ctx, &create)
 	if err != nil {
 		c.respondError(w, c.log, errors.Wrap(err, "creating transaction in service"))
 		return
 	}
 
-	res := &transactionResponse{Transaction: transaction}
+	res := &transactionResponse{Transaction: rtrn}
 	c.respond(w, res, http.StatusCreated)
 }
