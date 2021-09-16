@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi"
 	"github.com/hampgoodwin/GoLuca/internal/errors"
@@ -18,8 +19,27 @@ func (c *Controller) RegisterTransactionRoutes(r *chi.Mux) {
 	})
 }
 
+type Transaction struct {
+	Description string    `json:"description" validate:"required"`
+	Entries     []Entry   `json:"entries,omitempty" validate:"dive,gte=1"`
+	CreatedAt   time.Time `json:"createdAt" validate:"required"`
+}
+
+type Entry struct {
+	Description   string    `json:"description"`
+	DebitAccount  string    `json:"debitAccount" validate:"required,uuid4"`
+	CreditAccount string    `json:"creditAccount" validate:"required,uuid4"`
+	Amount        Amount    `json:"amount" validate:"required"`
+	CreatedAt     time.Time `json:"createdAt" validate:"required"`
+}
+
+type Amount struct {
+	Value    string `json:"value" validate:"gte=0"`
+	Currency string `json:"currency" validate:"len=3,alpha"`
+}
+
 type transactionRequest struct {
-	*transaction.Transaction `json:"transaction" validate:"required"`
+	Transaction `json:"transaction" validate:"required"`
 }
 
 type transactionResponse struct {

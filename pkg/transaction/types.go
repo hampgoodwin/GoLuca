@@ -16,7 +16,6 @@ type Transaction struct {
 
 // Entry ...
 type Entry struct {
-	// Account account.Account `validate:"required"`
 	ID            string        `json:"id" validate:"required,uuid4"`
 	TransactionID string        `json:"transaction_id" validate:"required,uuid4"`
 	Description   string        `json:"description"`
