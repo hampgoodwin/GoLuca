@@ -23,3 +23,6 @@ dbup:
 # OPEN API COMMANDS
 apilint:
 	docker run --rm -v $$PWD/api:/spec redocly/openapi-cli lint /spec/openapi.yml
+
+apipreview:
+	sh ./scripts/openapi_previewdocs.sh
