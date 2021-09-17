@@ -1,6 +1,10 @@
 openapi: '3.0.2'
 info:
   title: Entries API
+  description: API for fetching entries in a ledger.
+  license:
+    name: LGPL-3.0
+    url: https://www.gnu.org/licenses/gpl-3.0.en.html
   version: '0.0.0'
 servers:
   - url: https://locahost:3333/
@@ -8,6 +12,7 @@ servers:
 paths:
   /entries:
     get:
+      summary: List entries
       description: List entries
       parameters:
         - $ref: 'shared.yml#/components/parameters/cursor'

@@ -1,6 +1,10 @@
 openapi: '3.0.2'
 info:
   title: Accounts API
+  description: API for CRuD Accounts in a ledger.
+  license:
+    name: LGPL-3.0
+    url: https://www.gnu.org/licenses/gpl-3.0.en.html
   version: '0.0.0'
 servers:
   - url: https://locahost:3333/
@@ -8,6 +12,7 @@ servers:
 paths:
   /accounts:
     get:
+      summary: List accounts
       description: List accounts
       parameters: 
         - $ref: 'shared.yml#/components/parameters/cursor'
@@ -17,7 +22,9 @@ paths:
         '200':
           $ref: '#/components/responses/listAccounts'
     post:
+      summary: Create an account
       description: Create an account
+      operationId: createAccount
       requestBody:
         required: true
         content:
@@ -30,9 +37,11 @@ paths:
 
   /accounts/{accountId}:
     get:
+      summary: Get an account resource by its ID
       description: Get an account resource by its ID
       parameters:
         - $ref: '#/components/parameters/accountId'
+      operationId: getAccount
       responses:
         '201':
           $ref: '#/components/responses/getAccount'
@@ -40,7 +49,7 @@ paths:
 components:
   schemas:
       basis:
-        type: object
+        type: string
         enum:
           - debit
           - credit

@@ -1,12 +1,17 @@
 openapi: '3.0.2'
 info:
-  title: Transfers
+  title: Transactions API
+  description: API for CRuD operations in a ledger.
+  license:
+    name: LGPL-3.0
+    url: https://www.gnu.org/licenses/gpl-3.0.en.html
   version: '0.0.0'
 servers:
   - url: http://localhost:3333
 paths:
   /transactions:
     get:
+      summary: List transactions
       description: List transactions
       parameters:
         - $ref: 'shared.yml#/components/parameters/cursor'
@@ -16,7 +21,9 @@ paths:
         '200':
           $ref: '#/components/responses/listTransactions'
     post:
+      summary: Create a transaction
       description: Create a transaction
+      operationId: createTransaction
       requestBody:
         required: true
         content:
@@ -29,7 +36,11 @@ paths:
 
   /transactions/{transactionId}:
     get:
+      summary: Get a transaction resource by its ID
       description: Get a transaction resource by its ID
+      operationId: getTransaction
+      parameters:
+        - $ref: '#/components/parameters/transactionId'
       responses:
         '200':
           $ref: '#/components/responses/getTransaction'
@@ -72,6 +83,7 @@ components:
             $ref: '#/components/schemas/requestEntry'
         createdAt:
           $ref: 'shared.yml#/components/schemas/time'
+
   responses:
     getTransaction:
       description: OK
@@ -81,7 +93,7 @@ components:
             type: object
             properties:
               transaction:
-                $ref: '#ref/components/schemas/responseTransaction'
+                $ref: '#/components/schemas/responseTransaction'
     listTransactions:
       description: OK
       content:
@@ -92,7 +104,7 @@ components:
               transaction:
                 type: array
                 items:
-                  $ref: '#ref/components/schemas/responseTransaction'
+                  $ref: '#/components/schemas/responseTransaction'
     createdTransaction:
       description: Created
       content:
@@ -101,5 +113,13 @@ components:
             type: object
             properties:
               transaction:
-                $ref: '#ref/components/schemas/responseTransaction'
+                $ref: '#/components/schemas/responseTransaction'
+  parameters:
+    transactionId:
+      name: transactionId
+      in: path
+      required: true
+      description: 'required uuid url parameter to get a specific transaction resource.'
+      schema:
+        $ref: 'shared.yml#/components/schemas/uuid'
 
