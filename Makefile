@@ -19,3 +19,10 @@ downup: down up
 
 dbup:
 	docker-compose -f $$(pwd)/build/package/docker-compose.yml up -d db
+
+# OPEN API COMMANDS
+apilint:
+	docker run --rm -v $$PWD/api:/spec redocly/openapi-cli lint /spec/openapi.yml
+
+apipreview:
+	sh ./scripts/openapi_previewdocs.sh
