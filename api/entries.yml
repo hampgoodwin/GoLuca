@@ -14,6 +14,8 @@ paths:
     get:
       summary: List entries
       description: List entries
+      tags:
+        - Entries
       parameters:
         - $ref: 'shared.yml#/components/parameters/cursor'
         - $ref: 'shared.yml#/components/parameters/limit'

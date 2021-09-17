@@ -11,19 +11,11 @@ servers:
 
 paths:
   /accounts:
-    get:
-      summary: List accounts
-      description: List accounts
-      parameters: 
-        - $ref: 'shared.yml#/components/parameters/cursor'
-        - $ref: 'shared.yml#/components/parameters/limit'
-      operationId: listAccounts
-      responses:
-        '200':
-          $ref: '#/components/responses/listAccounts'
     post:
       summary: Create an account
       description: Create an account
+      tags:
+        - Accounts
       operationId: createAccount
       requestBody:
         required: true
@@ -34,11 +26,25 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/createdAccount'
+    get:
+      summary: List accounts
+      description: List accounts
+      tags:
+        - Accounts
+      parameters: 
+        - $ref: 'shared.yml#/components/parameters/cursor'
+        - $ref: 'shared.yml#/components/parameters/limit'
+      operationId: listAccounts
+      responses:
+        '200':
+          $ref: '#/components/responses/listAccounts'
 
   /accounts/{accountId}:
     get:
       summary: Get an account resource by its ID
       description: Get an account resource by its ID
+      tags:
+        - Accounts
       parameters:
         - $ref: '#/components/parameters/accountId'
       operationId: getAccount

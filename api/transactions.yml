@@ -10,19 +10,11 @@ servers:
   - url: http://localhost:3333
 paths:
   /transactions:
-    get:
-      summary: List transactions
-      description: List transactions
-      parameters:
-        - $ref: 'shared.yml#/components/parameters/cursor'
-        - $ref: 'shared.yml#/components/parameters/limit'
-      operationId: listTransactions
-      responses:
-        '200':
-          $ref: '#/components/responses/listTransactions'
     post:
       summary: Create a transaction
       description: Create a transaction
+      tags:
+        - Transactions
       operationId: createTransaction
       requestBody:
         required: true
@@ -33,11 +25,25 @@ paths:
       responses:
         '201':
           $ref: '#/components/responses/createdTransaction'
+    get:
+      summary: List transactions
+      description: List transactions
+      tags:
+        - Transactions
+      parameters:
+        - $ref: 'shared.yml#/components/parameters/cursor'
+        - $ref: 'shared.yml#/components/parameters/limit'
+      operationId: listTransactions
+      responses:
+        '200':
+          $ref: '#/components/responses/listTransactions'
 
   /transactions/{transactionId}:
     get:
       summary: Get a transaction resource by its ID
       description: Get a transaction resource by its ID
+      tags:
+        - Transactions
       operationId: getTransaction
       parameters:
         - $ref: '#/components/parameters/transactionId'
