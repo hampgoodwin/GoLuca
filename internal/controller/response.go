@@ -30,11 +30,14 @@ func (c *Controller) respondError(w http.ResponseWriter, log *zap.Logger, err er
 		return
 	case errors.HasFlag(err, errors.NotValidRequestData):
 		if c.respondOnValidationErrors(w, err, "bad request data.") {
+			log.Error("respondError", zap.Error(err))
 			return
 		}
 		c.respond(w, errorResponse{Description: "bad request data."}, http.StatusBadRequest)
-		log.Error("incorrect error flag used for case",
-			zap.String("error", fmt.Sprint(errors.NotValidRequestData)))
+		log.Error(
+			"incorrect error flag used for case",
+			zap.Error(err), zap.String("error_flag", fmt.Sprint(errors.NotValidRequestData)),
+		)
 		return
 	case errors.HasFlag(err, errors.NotFound):
 		c.respond(w, nil, http.StatusNotFound)

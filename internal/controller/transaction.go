@@ -38,7 +38,7 @@ func (c *Controller) getTransactions(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	limit, cursor := r.URL.Query().Get("limit"), r.URL.Query().Get("cursor")
 	if limit == "" {
-		limit = "3"
+		limit = "10"
 	}
 	transactions, nextCursor, err := c.service.GetTransactions(ctx, cursor, limit)
 	if err != nil {
@@ -66,12 +66,12 @@ func (c *Controller) createTransactionAndEntries(w http.ResponseWriter, r *http.
 	req := &transactionRequest{}
 
 	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
-		c.respondError(w, c.log, errors.WrapFlag(err, "deserializing request body", errors.NotDeserializable))
+		c.respondError(w, c.log, errors.FlagWrap(err, errors.NotDeserializable, "deserializing request body"))
 		return
 	}
 
 	if err := validate.Validate(req); err != nil {
-		c.respondError(w, c.log, errors.WrapFlag(err, "validating http api transaction request", errors.NotValidRequestData))
+		c.respondError(w, c.log, errors.FlagWrap(err, errors.NotValidRequestData, "validating http api transaction request"))
 		return
 	}
 

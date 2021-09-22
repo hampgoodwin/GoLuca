@@ -15,7 +15,7 @@ import (
 func (s *Service) GetTransactions(ctx context.Context, cursor, limit string) ([]transaction.Transaction, *string, error) {
 	limitInt, err := strconv.ParseUint(limit, 10, 64)
 	if err != nil {
-		return nil, nil, errors.WrapFlag(err, "parsing limit query parameter", errors.NotValidRequest)
+		return nil, nil, errors.FlagWrap(err, errors.NotValidRequest, "parsing limit query parameter")
 	}
 	limitInt++ // we always want one more than the size of the page, the extra at the end of the resultset serves as starting record for the next page
 	var id string
@@ -23,7 +23,7 @@ func (s *Service) GetTransactions(ctx context.Context, cursor, limit string) ([]
 	if cursor != "" {
 		id, createdAt, err = pagination.DecodeCursor(cursor)
 		if err != nil {
-			return nil, nil, errors.WrapFlag(err, "decoding base64 cursor", errors.NotValidRequest)
+			return nil, nil, errors.FlagWrap(err, errors.NotValidRequest, "decoding base64 cursor")
 		}
 	}
 	transactions, err := s.repository.GetTransactions(ctx, id, createdAt, limitInt)
@@ -66,7 +66,7 @@ func (s *Service) CreateTransactionAndEntries(ctx context.Context, transaction *
 	}
 
 	if err := validate.Validate(transaction); err != nil {
-		return nil, errors.WrapFlag(err, "validating transaction before persisting to database", errors.NotValidRequestData)
+		return nil, errors.FlagWrap(err, errors.NotValidRequestData, "validating transaction before persisting to database")
 	}
 
 	transaction, err := s.repository.CreateTransactionAndEntries(ctx, transaction)

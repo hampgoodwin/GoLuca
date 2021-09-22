@@ -13,7 +13,7 @@ import (
 func (s *Service) GetEntries(ctx context.Context, cursor string, limit string) ([]transaction.Entry, *string, error) {
 	limitInt, err := strconv.ParseUint(limit, 10, 64)
 	if err != nil {
-		return nil, nil, errors.WrapFlag(err, "parsing limit query parameter", errors.NotValidRequest)
+		return nil, nil, errors.FlagWrap(err, errors.NotValidRequest, "parsing limit query parameter")
 	}
 	limitInt++ // we always want one more than the size of the page, the extra at the end of the resultset serves as starting record for the next page
 	var id string
@@ -21,7 +21,7 @@ func (s *Service) GetEntries(ctx context.Context, cursor string, limit string) (
 	if cursor != "" {
 		id, createdAt, err = pagination.DecodeCursor(cursor)
 		if err != nil {
-			return nil, nil, errors.WrapFlag(err, "decoding base64 cursor", errors.NotValidRequest)
+			return nil, nil, errors.FlagWrap(err, errors.NotValidRequest, "decoding base64 cursor")
 		}
 	}
 

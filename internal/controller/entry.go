@@ -21,7 +21,7 @@ func (c *Controller) getEntries(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	limit, cursor := r.URL.Query().Get("limit"), r.URL.Query().Get("cursor")
 	if limit == "" {
-		limit = "3"
+		limit = "10"
 	}
 
 	entries, nextCursor, err := c.service.GetEntries(ctx, cursor, limit)

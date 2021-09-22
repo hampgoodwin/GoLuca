@@ -83,12 +83,12 @@ func Wrapf(err error, msg string, a ...interface{}) error {
 	return flagged{error: fmt.Errorf("%s: %w", fmt.Sprintf(msg, a...), err), flag: zero}
 }
 
-func WrapFlag(err error, msg string, flag ErrorFlag) error {
-	return Flag(fmt.Errorf("%s: %w", msg, err), flag)
+func FlagWrap(err error, flag ErrorFlag, msg string) error {
+	return Wrap(Flag(err, flag), msg)
 }
 
-func WrapfFlag(err error, msg string, flag ErrorFlag, a ...interface{}) error {
-	return Flag(fmt.Errorf("%s: %w", fmt.Sprintf(msg, a...), err), flag)
+func FlagWrapf(err error, msg string, flag ErrorFlag, a ...interface{}) error {
+	return Wrapf(Flag(err, flag), msg, a...)
 }
 
 type flagged struct {
