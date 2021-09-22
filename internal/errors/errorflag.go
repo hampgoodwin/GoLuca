@@ -9,7 +9,7 @@ import (
 type ErrorFlag int
 
 const (
-	zero = iota
+	zero ErrorFlag = iota
 	// NotFound is used when a resource is not found
 	NotFound
 	// NotValid indidcates a general invalid flagging
@@ -49,7 +49,7 @@ func (ef ErrorFlag) String() string {
 	}[ef]
 }
 
-// Flag wraps err with an error that will return true from HasFlag(err, flag).
+// Flag "flags" err with an ErrorFlag that will return true from HasFlag(err, flag).
 func Flag(err error, flag ErrorFlag) error {
 	if err == nil {
 		return nil
@@ -69,6 +69,8 @@ func HasFlag(err error, flag ErrorFlag) bool {
 	}
 }
 
+// Wrap encapsulates an error in another descriptive error allowing meaningful
+// error chains.
 func Wrap(err error, msg string) error {
 	if f, ok := err.(flagged); ok {
 		return flagged{error: fmt.Errorf("%s: %w", msg, f), flag: f.flag}
@@ -76,17 +78,21 @@ func Wrap(err error, msg string) error {
 	return flagged{error: fmt.Errorf("%s: %w", msg, err), flag: zero}
 }
 
+// Wrapf is a convenience function which combines print formatting using
+// standard go print directives and Wrap to create more descriptive
+// wrapped errors
 func Wrapf(err error, msg string, a ...interface{}) error {
-	if f, ok := err.(flagged); ok {
-		return flagged{error: fmt.Errorf("%s: %w", fmt.Sprintf(msg, a...), f), flag: f.flag}
-	}
-	return flagged{error: fmt.Errorf("%s: %w", fmt.Sprintf(msg, a...), err), flag: zero}
+	return Wrap(err, fmt.Sprintf(msg, a...))
 }
 
+// FlagWrap is a convenience function which is equivalent to calling
+// Wrap(Flag(error, flag), msg)
 func FlagWrap(err error, flag ErrorFlag, msg string) error {
 	return Wrap(Flag(err, flag), msg)
 }
 
+// FlagWrapf is a convenience function which is equivalent to calling
+// Wrapf(Flag(err, flag), msg, a...)
 func FlagWrapf(err error, msg string, flag ErrorFlag, a ...interface{}) error {
 	return Wrapf(Flag(err, flag), msg, a...)
 }
