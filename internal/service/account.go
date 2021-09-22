@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -23,7 +24,10 @@ func (s *Service) GetAccount(ctx context.Context, accountID string) (*account.Ac
 func (s *Service) GetAccounts(ctx context.Context, cursor, limit string) ([]account.Account, *string, error) {
 	limitInt, err := strconv.ParseUint(limit, 10, 64)
 	if err != nil {
-		return nil, nil, errors.FlagWrap(err, errors.NotValidRequest, "parsing limit query param")
+		return nil, nil, errors.FlagWrap(
+			err, errors.NotValidRequest,
+			fmt.Sprintf("failed parsing provided limit query parameter %q", limit),
+			"parsing limit query param")
 	}
 	limitInt++ // we always want one more than the size of the page, the extra at the end of the resultset serves as starting record for the next page
 	var id string
@@ -50,8 +54,12 @@ func (s *Service) GetAccounts(ctx context.Context, cursor, limit string) ([]acco
 func (s *Service) CreateAccount(ctx context.Context, account *account.Account) (*account.Account, error) {
 	account.ID = uuid.New().String()
 	account.CreatedAt = time.Now()
+
 	if err := validate.Validate(account); err != nil {
-		return nil, errors.FlagWrap(err, errors.NotValidRequestData, "validating account before persisting to database")
+		return nil, errors.FlagWrap(
+			err, errors.NotValidRequestData,
+			"provided request body with account failed validation",
+			"validating account before persisting to database")
 	}
 
 	created, err := s.repository.CreateAccount(ctx, account)

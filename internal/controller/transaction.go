@@ -66,12 +66,12 @@ func (c *Controller) createTransactionAndEntries(w http.ResponseWriter, r *http.
 	req := &transactionRequest{}
 
 	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
-		c.respondError(w, c.log, errors.FlagWrap(err, errors.NotDeserializable, "deserializing request body"))
+		c.respondError(w, c.log, errors.FlagWrap(err, errors.NotDeserializable, err.Error(), "deserializing request body"))
 		return
 	}
 
 	if err := validate.Validate(req); err != nil {
-		c.respondError(w, c.log, errors.FlagWrap(err, errors.NotValidRequestData, "validating http api transaction request"))
+		c.respondError(w, c.log, errors.FlagWrap(err, errors.NotValidRequestData, "", "validating http api transaction request"))
 		return
 	}
 

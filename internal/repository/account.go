@@ -23,12 +23,12 @@ func (r *Repository) GetAccount(ctx context.Context, accountID string) (*account
 		&account.ID, &account.ParentID, &account.Name, &account.Type, &account.Basis, &account.CreatedAt,
 	); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, errors.FlagWrap(err, errors.NotFound, "scanning account result row")
+			return nil, errors.FlagWrap(err, errors.NotFound, "", "scanning account result row")
 		}
 		return nil, errors.Wrap(err, "scanning account result row")
 	}
 	if err := validate.Validate(account); err != nil {
-		return nil, errors.FlagWrap(err, errors.NotValidInternalData, "validating account retrieved from datastore")
+		return nil, errors.FlagWrap(err, errors.NotValidInternalData, "", "validating account retrieved from datastore")
 	}
 	return account, nil
 }
@@ -65,7 +65,10 @@ func (r *Repository) GetAccounts(ctx context.Context, accountID string, createdA
 		accounts = append(accounts, account)
 	}
 	if err := validate.Validate(accounts); err != nil {
-		return nil, errors.FlagWrap(err, errors.NotValidInternalData, "validating accounts retrieved from datastore")
+		return nil, errors.FlagWrap(
+			err, errors.NotValidInternalData,
+			"accounts fetched from datastore failed validation",
+			"validating accounts retrieved from datastore")
 	}
 	return accounts, nil
 }
@@ -96,9 +99,12 @@ func (r *Repository) CreateAccount(ctx context.Context, create *account.Account)
 	}
 	if err := validate.Validate(returning); err != nil {
 		if err := tx.Rollback(ctx); err != nil {
-			return nil, errors.FlagWrap(err, errors.NotValidInternalData, "rolling back account creation transaction on invalid return data")
+			return nil, errors.Wrap(err, "rolling back account creation transaction on invalid return data")
 		}
-		return nil, errors.FlagWrap(err, errors.NotValidInternalData, "validating account created in datastore")
+		return nil, errors.FlagWrap(
+			err, errors.NotValidInternalData,
+			"account returned from data store persistence failed validation",
+			"validating account created in datastore")
 	}
 	if err := tx.Commit(ctx); err != nil {
 		return nil, errors.Wrap(err, "committing account creation")

@@ -49,12 +49,14 @@ func (ef ErrorFlag) String() string {
 	}[ef]
 }
 
-// Flag "flags" err with an ErrorFlag that will return true from HasFlag(err, flag).
-func Flag(err error, flag ErrorFlag) error {
+// Flag "flags" err with an ErrorFlag that will return true from HasFlag(err, flag)
+// and if the optional msg is provided, can return a msg from GetMessage(err) if set
+// to exclude setting a message, provide a string zero-value of ""
+func Flag(err error, flag ErrorFlag, msg string) error {
 	if err == nil {
 		return nil
 	}
-	return flagged{error: err, flag: flag}
+	return flagged{error: err, flag: flag, msg: msg}
 }
 
 // HasFlag reports if err has been flagged with the given flag.
@@ -65,6 +67,19 @@ func HasFlag(err error, flag ErrorFlag) bool {
 		}
 		if err = errors.Unwrap(err); err == nil {
 			return false
+		}
+	}
+}
+
+// GetMessage returns an error message if it was set
+// if no message was set, a string zero-value of "" is returned
+func GetMessage(err error) string {
+	for {
+		if f, ok := err.(flagged); ok && f.msg != "" {
+			return f.msg
+		}
+		if err = errors.Unwrap(err); err == nil {
+			return ""
 		}
 	}
 }
@@ -87,19 +102,20 @@ func Wrapf(err error, msg string, a ...interface{}) error {
 
 // FlagWrap is a convenience function which is equivalent to calling
 // Wrap(Flag(error, flag), msg)
-func FlagWrap(err error, flag ErrorFlag, msg string) error {
-	return Wrap(Flag(err, flag), msg)
+func FlagWrap(err error, flag ErrorFlag, errMsg, msg string) error {
+	return Wrap(Flag(err, flag, errMsg), msg)
 }
 
 // FlagWrapf is a convenience function which is equivalent to calling
 // Wrapf(Flag(err, flag), msg, a...)
-func FlagWrapf(err error, msg string, flag ErrorFlag, a ...interface{}) error {
-	return Wrapf(Flag(err, flag), msg, a...)
+func FlagWrapf(err error, flag ErrorFlag, errMsg, msg string, a ...interface{}) error {
+	return Wrapf(Flag(err, flag, errMsg), msg, a...)
 }
 
 type flagged struct {
 	error
 	flag ErrorFlag
+	msg  string
 }
 
 func (f flagged) Unwrap() error {
