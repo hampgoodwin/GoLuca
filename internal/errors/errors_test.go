@@ -11,18 +11,18 @@ func TestWithErrorWithMessage(t *testing.T) {
 	rootErr := New("root error")
 	withError := WithError(rootErr, NotValid)
 
-	a.Equal("not valid: root error", withError.Error())
+	a.Equal("root error, with error \"not valid\"", withError.Error())
 	a.True(Is(withError, NotValid))
 
 	withMessage := WithMessage(withError, "error message")
-	a.Equal("not valid: root error", withError.Error())
+	a.Equal("root error, with error \"not valid\"", withError.Error())
 	a.True(Is(withError, NotValid))
 	var m Message
 	a.True(As(withMessage, &m))
 	a.Equal("error message", m.Value)
 
 	wrap1 := Wrap(withMessage, "wrap1")
-	a.Equal("wrap1: not valid: root error, with message \"error message\"", wrap1.Error())
+	a.Equal("wrap1: root error, with error \"not valid\", with message \"error message\"", wrap1.Error())
 }
 
 type customError struct {
