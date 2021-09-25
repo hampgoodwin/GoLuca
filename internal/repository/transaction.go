@@ -26,22 +26,19 @@ func (r *Repository) GetTransaction(ctx context.Context, transactionID string) (
 		&returningTransaction.CreatedAt,
 	); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, errors.FlagWrap(err, errors.NotFound, "", "scanning transaction result row")
+			return nil, err
 		}
-		return nil, errors.Wrap(err, "scanning row from transaction query result set")
+		return nil, err
 	}
 
 	var err error
 	returningTransaction.Entries, err = r.GetEntriesByTransactionID(ctx, transactionID)
 	if err != nil {
-		return nil, errors.Wrap(err, "querying databse for entries while getting transaction")
+		return nil, err
 	}
 
 	if err := validate.Validate(returningTransaction); err != nil {
-		return nil, errors.FlagWrap(
-			err, errors.NotValidInternalData,
-			"transaction fetched from datastore failed validation",
-			"validating transactions retrieved from database")
+		return nil, err
 	}
 
 	return returningTransaction, nil
@@ -68,7 +65,7 @@ func (r *Repository) GetTransactions(ctx context.Context, transactionID string, 
 
 	rows, err := r.Database.Query(ctx, query, params...)
 	if err != nil {
-		return nil, errors.Wrap(err, "querying database for transactions")
+		return nil, err
 	}
 	defer rows.Close()
 	returningTransactions := []transaction.Transaction{}
@@ -79,7 +76,7 @@ func (r *Repository) GetTransactions(ctx context.Context, transactionID string, 
 			&transaction.Description,
 			&transaction.CreatedAt,
 		); err != nil {
-			return nil, errors.Wrap(err, "scanning transactions results set")
+			return nil, err
 		}
 		returningTransactions = append(returningTransactions, transaction)
 	}
@@ -87,16 +84,13 @@ func (r *Repository) GetTransactions(ctx context.Context, transactionID string, 
 	for i, transaction := range returningTransactions {
 		entries, err := r.GetEntriesByTransactionID(ctx, transaction.ID)
 		if err != nil {
-			return nil, errors.Wrap(err, "querying databse for entries while getting transactions")
+			return nil, err
 		}
 		returningTransactions[i].Entries = append(returningTransactions[i].Entries, entries...)
 	}
 
 	if err := validate.Validate(returningTransactions); err != nil {
-		return nil, errors.FlagWrap(
-			err, errors.NotValidInternalData,
-			"transactions fetched from datastore failed validation",
-			"validating transactions retrieved from database")
+		return nil, err
 	}
 
 	return returningTransactions, nil
@@ -107,7 +101,7 @@ func (r *Repository) CreateTransactionAndEntries(ctx context.Context, create *tr
 	// get a db-transaction
 	tx, err := r.Database.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
-		return nil, errors.Wrap(err, "starting database transaction for creating transaction")
+		return nil, err
 	}
 	returningTransaction := &transaction.Transaction{}
 	if err := tx.QueryRow(ctx,
@@ -116,7 +110,7 @@ func (r *Repository) CreateTransactionAndEntries(ctx context.Context, create *tr
 		;`, create.ID, create.Description, create.CreatedAt).Scan(
 		&returningTransaction.ID, &returningTransaction.Description, &returningTransaction.CreatedAt,
 	); err != nil {
-		return nil, errors.Wrap(err, "scanning transaction created return result set")
+		return nil, err
 	}
 
 	// insert the entries
@@ -137,29 +131,23 @@ func (r *Repository) CreateTransactionAndEntries(ctx context.Context, create *tr
 			var pgErr *pgconn.PgError
 			if errors.As(err, &pgErr) {
 				if pgErr.Code == pgerrcode.ForeignKeyViolation {
-					return nil, errors.FlagWrap(
-						err, errors.NoRelationshipFound,
-						"failed persisting entry to datastore on failed relational constraint to transaction id",
-						"scanning transaction entry created return result set")
+					return nil, err
 				}
 			}
-			return nil, errors.Wrap(err, "scanning transaction entry created return result set")
+			return nil, err
 		}
 		returningTransaction.Entries = append(returningTransaction.Entries, returningEntry)
 	}
 
 	if err := validate.Validate(returningTransaction); err != nil {
 		if err := tx.Rollback(ctx); err != nil {
-			return nil, errors.Wrap(err, "rolling back transaction creation db-transaction on invalid return data")
+			return nil, err
 		}
-		return nil, errors.FlagWrap(
-			err, errors.NotValidInternalData,
-			"transaction returned from data store persistence failed validation",
-			"validating transaction created in datastore")
+		return nil, err
 	}
 
 	if err := tx.Commit(ctx); err != nil {
-		return nil, errors.Wrap(err, "committing transaction creation")
+		return nil, err
 	}
 	return returningTransaction, nil
 }

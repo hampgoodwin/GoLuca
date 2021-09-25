@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestWith(t *testing.T) {
+func TestWithError(t *testing.T) {
 	testCases := []struct {
 		description string
 		err         error

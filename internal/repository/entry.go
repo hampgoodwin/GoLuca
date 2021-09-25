@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/hampgoodwin/GoLuca/internal/errors"
 	"github.com/hampgoodwin/GoLuca/pkg/transaction"
 )
 
@@ -20,7 +19,7 @@ func (r *Repository) GetEntries(ctx context.Context, id string, createdAt time.T
 		;`,
 		id, createdAt, limit)
 	if err != nil {
-		return nil, errors.Wrap(err, "getting entries from database")
+		return nil, err
 	}
 	defer rows.Close()
 	var entries []transaction.Entry
@@ -35,7 +34,7 @@ func (r *Repository) GetEntries(ctx context.Context, id string, createdAt time.T
 			&entry.Amount.Currency,
 			&entry.CreatedAt,
 		); err != nil {
-			return nil, errors.Wrap(err, "scanning row from entries query results set")
+			return nil, err
 		}
 		entries = append(entries, entry)
 	}
@@ -51,7 +50,7 @@ func (r *Repository) GetEntriesByTransactionID(ctx context.Context, transactionI
 		;`,
 		transactionID)
 	if err != nil {
-		return nil, errors.Wrap(err, "getting entries by transaction id from database")
+		return nil, err
 	}
 	defer rows.Close()
 	var entries []transaction.Entry
@@ -66,7 +65,7 @@ func (r *Repository) GetEntriesByTransactionID(ctx context.Context, transactionI
 			&entry.Amount.Currency,
 			&entry.CreatedAt,
 		); err != nil {
-			return nil, errors.Wrap(err, "scanning row from entries by transaction id query results set")
+			return nil, err
 		}
 		entries = append(entries, entry)
 	}

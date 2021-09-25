@@ -1,11 +1,13 @@
 package errors
 
+import "fmt"
+
 type Message struct {
 	error
 	Value string
 }
 
-func (m Message) Error() string { return m.error.Error() }
+func (m Message) Error() string { return fmt.Sprintf("%s, with message %q", m.error.Error(), m.Value) }
 
 func (m Message) Unwrap() error { return m.error }
 

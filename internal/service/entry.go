@@ -2,11 +2,9 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 	"time"
 
-	"github.com/hampgoodwin/GoLuca/internal/errors"
 	"github.com/hampgoodwin/GoLuca/pkg/pagination"
 	"github.com/hampgoodwin/GoLuca/pkg/transaction"
 )
@@ -14,10 +12,7 @@ import (
 func (s *Service) GetEntries(ctx context.Context, cursor string, limit string) ([]transaction.Entry, *string, error) {
 	limitInt, err := strconv.ParseUint(limit, 10, 64)
 	if err != nil {
-		return nil, nil, errors.FlagWrap(
-			err, errors.NotValidRequest,
-			fmt.Sprintf("failed parsing provided limit query parameter %q", limit),
-			"parsing limit query param")
+		return nil, nil, err
 	}
 	limitInt++ // we always want one more than the size of the page, the extra at the end of the resultset serves as starting record for the next page
 	var id string
@@ -25,13 +20,13 @@ func (s *Service) GetEntries(ctx context.Context, cursor string, limit string) (
 	if cursor != "" {
 		id, createdAt, err = pagination.DecodeCursor(cursor)
 		if err != nil {
-			return nil, nil, errors.FlagWrap(err, errors.NotValidRequest, err.Error(), "decoding base64 cursor")
+			return nil, nil, err
 		}
 	}
 
 	entries, err := s.repository.GetEntries(ctx, id, createdAt, limitInt)
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "getting entries from database")
+		return nil, nil, err
 	}
 
 	encodedCursor := ""

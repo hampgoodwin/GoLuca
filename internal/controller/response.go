@@ -24,11 +24,12 @@ func (c *Controller) respond(w http.ResponseWriter, i interface{}, statuseCode i
 }
 
 func (c *Controller) respondError(w http.ResponseWriter, log *zap.Logger, err error) {
+	log.Error("responding", zap.Error(err))
 	switch {
-	case errors.HasFlag(err, errors.NotValidRequest):
-		c.respond(w, errorResponse{Description: "bad request data, check request meta data"}, http.StatusBadRequest)
+	case errors.Is(err, errors.NotValidRequest):
+		c.respond(w, errorResponse{Description: "bad request data, check request meta data."}, http.StatusBadRequest)
 		return
-	case errors.HasFlag(err, errors.NotValidRequestData):
+	case errors.Is(err, errors.NotValidRequestData):
 		if c.respondOnValidationErrors(w, err, "bad request data.") {
 			log.Error("respondError", zap.Error(err))
 			return
@@ -39,16 +40,16 @@ func (c *Controller) respondError(w http.ResponseWriter, log *zap.Logger, err er
 			zap.Error(err), zap.String("error_flag", fmt.Sprint(errors.NotValidRequestData)),
 		)
 		return
-	case errors.HasFlag(err, errors.NotFound):
+	case errors.Is(err, errors.NotFound):
 		c.respond(w, nil, http.StatusNotFound)
 		return
-	case errors.HasFlag(err, errors.NotValidInternalData):
+	case errors.Is(err, errors.NotValidInternalData):
 		c.respond(w, errorResponse{Description: "internal data is invalid and failed validation."}, http.StatusInternalServerError)
-	case errors.HasFlag(err, errors.NotDeserializable):
+	case errors.Is(err, errors.NotDeserializable):
 		c.respond(w, errorResponse{Description: "provided data passed failed deserialization. If creating a resource, check the request body types."}, http.StatusInternalServerError)
-	case errors.HasFlag(err, errors.NotSerializable):
+	case errors.Is(err, errors.NotSerializable):
 		c.respond(w, errorResponse{Description: "either provided or internal data passed validation, but failed serialization."}, http.StatusInternalServerError)
-	case errors.HasFlag(err, errors.NoRelationshipFound):
+	case errors.Is(err, errors.NoRelationshipFound):
 		c.respond(w, errorResponse{Description: "process which assumed existence of a relationship between data found no relationship. If you are creating data with related data id, those id's do not exist."}, http.StatusBadRequest)
 	default:
 		log.Error("respondError", zap.Error(err))

@@ -22,5 +22,5 @@ func TestWithErrorWithMessage(t *testing.T) {
 	a.Equal("error message", m.Value)
 
 	wrap1 := Wrap(withMessage, "wrap1")
-	a.Equal("wrap1: not valid: root error", wrap1.Error())
+	a.Equal("wrap1: not valid: root error, with message \"error message\"", wrap1.Error())
 }

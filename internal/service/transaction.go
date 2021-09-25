@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -16,10 +15,7 @@ import (
 func (s *Service) GetTransactions(ctx context.Context, cursor, limit string) ([]transaction.Transaction, *string, error) {
 	limitInt, err := strconv.ParseUint(limit, 10, 64)
 	if err != nil {
-		return nil, nil, errors.FlagWrap(
-			err, errors.NotValidRequest,
-			fmt.Sprintf("failed parsing provided limit query parameter %q", limit),
-			"parsing limit query param")
+		return nil, nil, err
 	}
 	limitInt++ // we always want one more than the size of the page, the extra at the end of the resultset serves as starting record for the next page
 	var id string
@@ -27,12 +23,12 @@ func (s *Service) GetTransactions(ctx context.Context, cursor, limit string) ([]
 	if cursor != "" {
 		id, createdAt, err = pagination.DecodeCursor(cursor)
 		if err != nil {
-			return nil, nil, errors.FlagWrap(err, errors.NotValidRequest, err.Error(), "decoding base64 cursor")
+			return nil, nil, err
 		}
 	}
 	transactions, err := s.repository.GetTransactions(ctx, id, createdAt, limitInt)
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "getting transactions from database")
+		return nil, nil, err
 	}
 
 	encodedCursor := ""
@@ -47,7 +43,7 @@ func (s *Service) GetTransactions(ctx context.Context, cursor, limit string) ([]
 func (s *Service) GetTransaction(ctx context.Context, transactionID string) (*transaction.Transaction, error) {
 	transaction, err := s.repository.GetTransaction(ctx, transactionID)
 	if err != nil {
-		return nil, errors.Wrap(err, "getting transaction from database")
+		return nil, err
 	}
 	return transaction, nil
 }
@@ -55,7 +51,7 @@ func (s *Service) GetTransaction(ctx context.Context, transactionID string) (*tr
 func (s *Service) GetTransactionEntries(ctx context.Context, transactionID string) ([]transaction.Entry, error) {
 	entries, err := s.repository.GetEntriesByTransactionID(ctx, transactionID)
 	if err != nil {
-		return nil, errors.Wrap(err, "getting entries by transaction")
+		return nil, err
 	}
 	return entries, nil
 }
@@ -70,10 +66,7 @@ func (s *Service) CreateTransactionAndEntries(ctx context.Context, transaction *
 	}
 
 	if err := validate.Validate(transaction); err != nil {
-		return nil, errors.FlagWrap(
-			err, errors.NotValidRequestData,
-			"provided request body with transaction failed validation",
-			"validating transaction before persisting to database")
+		return nil, errors.WithErrorMessage(err, errors.NotValidRequestData, "validating transaction before persisting to database")
 	}
 
 	transaction, err := s.repository.CreateTransactionAndEntries(ctx, transaction)

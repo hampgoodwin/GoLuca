@@ -18,7 +18,7 @@ func TestWithMessage(t *testing.T) {
 			description: "root-error-with-message",
 			err:         New("root error"),
 			message:     "message error",
-			expected:    "root error",
+			expected:    "root error, with message \"message error\"",
 		},
 	}
 
