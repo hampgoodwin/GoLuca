@@ -1,5 +1,11 @@
 test:
-	go test ./... -v --bench . --benchmem --covermode=count
+	go test ./... -v --bench . --benchmem -race
+
+testcov:
+	go test ./... -v --bench . --benchmen --coverprofile=count
+
+testcovhttp:
+	go test ./... --coverprofile=cover.out && go tool cover -html=cover.out
 
 lint:
 	docker run --rm -v $$(pwd):/app -w /app golangci/golangci-lint:v1.42.1 golangci-lint run -v
