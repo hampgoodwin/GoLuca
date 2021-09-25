@@ -8,12 +8,15 @@ A Simple Accounting Ledger
 
 TODO
 
-- [ ] implement golang-migrate or similar db migration strategy
-- [ ] Use https://mermade.github.io/openapi-gui/ to generate OAS and serve it
+- [ ] Testing
+    - [ ] Add more unit tests, solitary and sociable
+    - [ ] Add Integration testing
+    - [ ] Add fuzzing
+    - [ ] Create a seeder for a basic dev environment of data
+    - [ ] Do some stress testing; how much data and we throw at & get out of this thing?
 - [ ] Optimize the get transactions call to use a single query; full join, order and then iterate to make transactions object
+- [ ] implement golang-migrate or similar db migration strategy
 - [ ] Add a stress testing system
-- [ ] Add fuzzing
-- [ ] Create a seeder for a basic dev environment of data
 - [ ] set up dev appvault and set secrets
     - [ ] add default limit size as a configurable somewhere
 - [ ] improve pagination by displaying page number of result.
@@ -47,4 +50,5 @@ TODO
 - [x] implement standard api response and error response to simplify controll handler functions
     - [x] more elegant error response handling
     - [x] better logging
+- [x] ~~Use https://mermade.github.io/openapi-gui/ to generate OAS and serve it~~ I went with hand-rolled .yml and redocly serving
 
