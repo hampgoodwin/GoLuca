@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -15,7 +16,7 @@ import (
 func (s *Service) GetTransactions(ctx context.Context, cursor, limit string) ([]transaction.Transaction, *string, error) {
 	limitInt, err := strconv.ParseUint(limit, 10, 64)
 	if err != nil {
-		return nil, nil, errors.WrapFlag(err, "parsing limit query parameter", errors.NotValidRequest)
+		return nil, nil, errors.Wrap(err, "parsing limit query parameter")
 	}
 	limitInt++ // we always want one more than the size of the page, the extra at the end of the resultset serves as starting record for the next page
 	var id string
@@ -23,12 +24,12 @@ func (s *Service) GetTransactions(ctx context.Context, cursor, limit string) ([]
 	if cursor != "" {
 		id, createdAt, err = pagination.DecodeCursor(cursor)
 		if err != nil {
-			return nil, nil, errors.WrapFlag(err, "decoding base64 cursor", errors.NotValidRequest)
+			return nil, nil, errors.Wrap(errors.WithErrorMessage(err, errors.NotKnown, err.Error()), "decoding cursor")
 		}
 	}
 	transactions, err := s.repository.GetTransactions(ctx, id, createdAt, limitInt)
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "getting transactions from database")
+		return nil, nil, errors.Wrap(err, fmt.Sprintf("fetching transactions from database with cursor %q", cursor))
 	}
 
 	encodedCursor := ""
@@ -43,17 +44,9 @@ func (s *Service) GetTransactions(ctx context.Context, cursor, limit string) ([]
 func (s *Service) GetTransaction(ctx context.Context, transactionID string) (*transaction.Transaction, error) {
 	transaction, err := s.repository.GetTransaction(ctx, transactionID)
 	if err != nil {
-		return nil, errors.Wrap(err, "getting transaction from database")
+		return nil, errors.Wrap(err, fmt.Sprintf("getting transaction %q", transactionID))
 	}
 	return transaction, nil
-}
-
-func (s *Service) GetTransactionEntries(ctx context.Context, transactionID string) ([]transaction.Entry, error) {
-	entries, err := s.repository.GetEntriesByTransactionID(ctx, transactionID)
-	if err != nil {
-		return nil, errors.Wrap(err, "getting entries by transaction")
-	}
-	return entries, nil
 }
 
 func (s *Service) CreateTransactionAndEntries(ctx context.Context, transaction *transaction.Transaction) (*transaction.Transaction, error) {
@@ -66,10 +59,10 @@ func (s *Service) CreateTransactionAndEntries(ctx context.Context, transaction *
 	}
 
 	if err := validate.Validate(transaction); err != nil {
-		return nil, errors.WrapFlag(err, "validating transaction before persisting to database", errors.NotValidRequestData)
+		return nil, errors.WithErrorMessage(err, errors.NotValidRequestData, "validating transaction before persisting to database")
 	}
 
-	transaction, err := s.repository.CreateTransactionAndEntries(ctx, transaction)
+	transaction, err := s.repository.CreateTransaction(ctx, transaction)
 	if err != nil {
 		return nil, errors.Wrap(err, "storing transaction")
 	}

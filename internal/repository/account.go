@@ -23,12 +23,12 @@ func (r *Repository) GetAccount(ctx context.Context, accountID string) (*account
 		&account.ID, &account.ParentID, &account.Name, &account.Type, &account.Basis, &account.CreatedAt,
 	); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, errors.WrapFlag(err, "scanning account result row", errors.NotFound)
+			return nil, errors.WithErrorMessage(err, errors.NotFound, fmt.Sprintf("account %q not found", accountID))
 		}
-		return nil, errors.Wrap(err, "scanning account result row")
+		return nil, errors.WithErrorMessage(err, errors.NotKnown, "scanning account result row")
 	}
 	if err := validate.Validate(account); err != nil {
-		return nil, errors.WrapFlag(err, "validating account retrieved from datastore", errors.NotValidInternalData)
+		return nil, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating account fetched from database")
 	}
 	return account, nil
 }
@@ -53,19 +53,19 @@ func (r *Repository) GetAccounts(ctx context.Context, accountID string, createdA
 	query += ";"
 	rows, err := r.Database.Query(ctx, query, params...)
 	if err != nil {
-		return nil, errors.Wrap(err, "querying database for accounts")
+		return nil, errors.WithErrorMessage(err, errors.NotKnown, "fetching accounts from data store")
 	}
 	defer rows.Close()
 	accounts := []account.Account{}
 	for rows.Next() {
 		account := account.Account{}
 		if err := rows.Scan(&account.ID, &account.ParentID, &account.Name, &account.Type, &account.Basis); err != nil {
-			return nil, errors.Wrap(err, "scanning row from accounts query result set")
+			return nil, errors.WithErrorMessage(err, errors.NotKnown, "scanning account result row")
 		}
 		accounts = append(accounts, account)
 	}
 	if err := validate.Validate(accounts); err != nil {
-		return nil, errors.WrapFlag(err, "validating accounts retrieved from datastore", errors.NotValidInternalData)
+		return nil, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating accounts fetched from data store")
 	}
 	return accounts, nil
 }
@@ -75,7 +75,7 @@ func (r *Repository) CreateAccount(ctx context.Context, create *account.Account)
 	// get a db-transaction
 	tx, err := r.Database.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
-		return nil, errors.Wrap(err, "starting db-transaction for creating transaction")
+		return nil, errors.WithErrorMessage(err, errors.NotKnown, "beginning create account db transaction")
 	}
 
 	returning := &account.Account{}
@@ -92,16 +92,16 @@ func (r *Repository) CreateAccount(ctx context.Context, create *account.Account)
 		&returning.Basis,
 		&returning.CreatedAt,
 	); err != nil {
-		return nil, errors.Wrap(err, "scanning account creation query returning result set")
+		return nil, errors.WithErrorMessage(err, errors.NotKnown, "scanning account returned from insert")
 	}
 	if err := validate.Validate(returning); err != nil {
 		if err := tx.Rollback(ctx); err != nil {
-			return nil, errors.WrapFlag(err, "rolling back account creation transaction on invalid return data", errors.NotValidInternalData)
+			return nil, errors.WithErrorMessage(err, errors.NotValidInternalData, "rolling back transaction on failed validating account returned from insert")
 		}
-		return nil, errors.WrapFlag(err, "validating account created in datastore", errors.NotValidInternalData)
+		return nil, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating account returned from insert")
 	}
 	if err := tx.Commit(ctx); err != nil {
-		return nil, errors.Wrap(err, "committing account creation")
+		return nil, errors.WithErrorMessage(err, errors.NotKnown, "committing account insert transaction")
 	}
 	return returning, nil
 }

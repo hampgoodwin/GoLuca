@@ -47,14 +47,11 @@ func NewEnvironment(e *Environment) (*Environment, error) {
 	switch env.Config.EnvType {
 	case "PROD":
 		env.Log = logger
-
 	case "STAGING":
 		env.Log = logger.WithOptions(zap.AddCaller())
-
 	case "DEV":
 		env.Log, _ = zap.NewDevelopment()
 		env.Log = env.Log.WithOptions(zap.AddCaller())
-
 	case "LOCAL":
 		env.Log, _ = zap.NewDevelopment()
 		env.Log = env.Log.WithOptions(zap.AddCaller())
@@ -98,7 +95,6 @@ func NewEnvironment(e *Environment) (*Environment, error) {
 		env.Log,
 		env.controller.RegisterAccountRoutes,
 		env.controller.RegisterTransactionRoutes,
-		env.controller.RegisterEntryRoutes,
 	)
 
 	return env, nil

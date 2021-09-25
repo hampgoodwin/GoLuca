@@ -25,7 +25,7 @@ func Load(c *config.Config) (*config.Config, error) {
 	loadEnvironmentVariables(cfg)
 	// TODO: Load command line flags
 	if err := validate.Validate(cfg); err != nil {
-		return nil, errors.WrapFlag(err, "validating configuration", errors.NotValid)
+		return nil, errors.WithErrorMessage(err, errors.NotValid, "validating configuration")
 	}
 	return cfg, nil
 }

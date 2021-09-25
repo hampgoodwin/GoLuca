@@ -17,7 +17,7 @@ func (c *Controller) RegisterTransactionRoutes(r *chi.Mux) {
 	r.Route("/transactions", func(r chi.Router) {
 		r.Get("/", c.getTransactions)
 		r.Get(fmt.Sprintf("/{transactionId:%s}", uuidRegexp), c.getTransaction)
-		r.Post("/", c.createTransactionAndEntries)
+		r.Post("/", c.createTransaction)
 	})
 }
 
@@ -38,7 +38,7 @@ func (c *Controller) getTransactions(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	limit, cursor := r.URL.Query().Get("limit"), r.URL.Query().Get("cursor")
 	if limit == "" {
-		limit = "3"
+		limit = "10"
 	}
 	transactions, nextCursor, err := c.service.GetTransactions(ctx, cursor, limit)
 	if err != nil {
@@ -61,17 +61,17 @@ func (c *Controller) getTransaction(w http.ResponseWriter, r *http.Request) {
 	c.respond(w, res, http.StatusOK)
 }
 
-func (c *Controller) createTransactionAndEntries(w http.ResponseWriter, r *http.Request) {
+func (c *Controller) createTransaction(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	req := &transactionRequest{}
 
 	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
-		c.respondError(w, c.log, errors.WrapFlag(err, "deserializing request body", errors.NotDeserializable))
+		c.respondError(w, c.log, errors.Wrap(errors.WithErrorMessage(err, errors.NotDeserializable, err.Error()), "deserializing request body"))
 		return
 	}
 
 	if err := validate.Validate(req); err != nil {
-		c.respondError(w, c.log, errors.WrapFlag(err, "validating http api transaction request", errors.NotValidRequestData))
+		c.respondError(w, c.log, errors.WithErrorMessage(err, errors.NotValidRequestData, "validating http api transaction request"))
 		return
 	}
 

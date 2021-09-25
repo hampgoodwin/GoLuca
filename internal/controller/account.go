@@ -44,7 +44,7 @@ func (c *Controller) getAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := validate.Validate(account); err != nil {
-		c.respondError(w, c.log, errors.WrapFlag(err, "validating account", errors.NotValidInternalData))
+		c.respondError(w, c.log, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating account"))
 		return
 	}
 
@@ -56,7 +56,7 @@ func (c *Controller) getAccounts(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	limit, cursor := r.URL.Query().Get("limit"), r.URL.Query().Get("cursor")
 	if limit == "" {
-		limit = "3"
+		limit = "10"
 	}
 	accounts, nextCursor, err := c.service.GetAccounts(ctx, cursor, limit)
 	if err != nil {
@@ -64,7 +64,7 @@ func (c *Controller) getAccounts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := validate.Validate(accounts); err != nil {
-		c.respondError(w, c.log, errors.WrapFlag(err, "validating accounts", errors.NotValidInternalData))
+		c.respondError(w, c.log, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating accounts"))
 		return
 	}
 
@@ -76,7 +76,7 @@ func (c *Controller) createAccount(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	req := &accountRequest{}
 	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
-		c.respondError(w, c.log, errors.WrapFlag(err, "deserializing request body", errors.NotDeserializable))
+		c.respondError(w, c.log, errors.Wrap(errors.WithErrorMessage(err, errors.NotDeserializable, err.Error()), "deserializing request body"))
 		return
 	}
 
