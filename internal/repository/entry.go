@@ -2,55 +2,25 @@ package repository
 
 import (
 	"context"
-	"time"
+	"fmt"
 
+	"github.com/hampgoodwin/GoLuca/internal/errors"
+	"github.com/hampgoodwin/GoLuca/internal/validate"
 	"github.com/hampgoodwin/GoLuca/pkg/transaction"
+	"github.com/jackc/pgx/v4"
 )
 
-// GetEntries gets a paginated result of db entries
-func (r *Repository) GetEntries(ctx context.Context, id string, createdAt time.Time, limit uint64) ([]transaction.Entry, error) {
-	rows, err := r.Database.Query(ctx,
-		`SELECT id, transaction_id, debit_account, credit_account, amount_value, amount_currency, created_at
-		FROM entry
-		WHERE id <= $1
-			AND created_at <= $2
-		ORDER BY created_at DESC
-		LIMIT $2
-		;`,
-		id, createdAt, limit)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var entries []transaction.Entry
-	for rows.Next() {
-		entry := transaction.Entry{}
-		if err := rows.Scan(
-			&entry.ID,
-			&entry.TransactionID,
-			&entry.DebitAccount,
-			&entry.CreditAccount,
-			&entry.Amount.Value,
-			&entry.Amount.Currency,
-			&entry.CreatedAt,
-		); err != nil {
-			return nil, err
-		}
-		entries = append(entries, entry)
-	}
-	return entries, nil
-}
-
 // GetEntriesByTransactionID gets entries by transaction ID
-func (r *Repository) GetEntriesByTransactionID(ctx context.Context, transactionID string) ([]transaction.Entry, error) {
-	rows, err := r.Database.Query(ctx,
+func getEntriesByTransactionID(ctx context.Context, tx pgx.Tx, transactionID string) ([]transaction.Entry, error) {
+	rows, err := tx.Query(ctx,
 		`SELECT id, transaction_id, debit_account, credit_account, amount_value, amount_currency, created_at
 		FROM entry
 		WHERE transaction_id=$1
 		;`,
 		transactionID)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithErrorMessage(err, errors.NotKnown,
+			fmt.Sprintf("fetching entries by transaction id %q from datastore", transactionID))
 	}
 	defer rows.Close()
 	var entries []transaction.Entry
@@ -65,9 +35,14 @@ func (r *Repository) GetEntriesByTransactionID(ctx context.Context, transactionI
 			&entry.Amount.Currency,
 			&entry.CreatedAt,
 		); err != nil {
-			return nil, err
+			return nil, errors.WithErrorMessage(err, errors.NotKnown, "scanning entry result row")
 		}
 		entries = append(entries, entry)
 	}
+
+	if err := validate.Validate(entries); err != nil {
+		return nil, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating entries fetched from database")
+	}
+
 	return entries, nil
 }

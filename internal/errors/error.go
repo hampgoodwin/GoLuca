@@ -15,9 +15,11 @@ type with struct {
 	err error
 }
 
-func (w with) Error() string { return fmt.Sprintf("%s: %s", w.err.Error(), w.error.Error()) }
+func (w with) Error() string { return fmt.Sprintf("%s, with error %q", w.error.Error(), w.err.Error()) }
 
-func (w *with) Unwrap() error { return w.error }
+func (w with) Unwrap() error {
+	return w.error
+}
 
 func (w with) Is(err error) bool {
 	return w.error == err || w.err == err

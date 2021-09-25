@@ -8,9 +8,6 @@ A Simple Accounting Ledger
 
 TODO
 
-- [ ] implement standard api response and error response to simplify controll handler functions
-    - [ ] more elegant error response handling
-    - [ ] better logging
 - [ ] implement golang-migrate or similar db migration strategy
 - [ ] Use https://mermade.github.io/openapi-gui/ to generate OAS and serve it
 - [ ] Optimize the get transactions call to use a single query; full join, order and then iterate to make transactions object
@@ -47,4 +44,7 @@ TODO
 - [x] change the amount in oas to string, and change amount values to int64 in controller/service
     - [x] because postgres (and most dbs) don't OOB implement unsigned ints, use an int 64, which should be more than enough for any needs we'll have. In the case where a string request comes in (upper unbounded), split into multiple entries which will fit into int63's. Probably implement some overflow checks as well.
 - [x] generate zero-dep html file for api docs and create serve w/ makefile commands
+- [x] implement standard api response and error response to simplify controll handler functions
+    - [x] more elegant error response handling
+    - [x] better logging
 

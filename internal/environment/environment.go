@@ -95,7 +95,6 @@ func NewEnvironment(e *Environment) (*Environment, error) {
 		env.Log,
 		env.controller.RegisterAccountRoutes,
 		env.controller.RegisterTransactionRoutes,
-		env.controller.RegisterEntryRoutes,
 	)
 
 	return env, nil

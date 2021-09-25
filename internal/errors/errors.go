@@ -24,8 +24,14 @@ var (
 	// NoRelationshipFound indicates that a process which assumes a data relationship did not find
 	// the assumed relationship
 	NoRelationshipFound = New("not relationship found")
+	// NotKnown indicates an application failure for which the failure is not known
+	NotKnown = New("not known")
 )
 
 func WithErrorMessage(rootErr, withErr error, message string) error {
 	return WithMessage(WithError(rootErr, withErr), message)
+}
+
+func WrapWithErrorMessage(rootErr, withErr error, message, wrap string) error {
+	return Wrap(WithErrorMessage(rootErr, withErr, message), wrap)
 }

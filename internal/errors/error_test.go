@@ -18,7 +18,7 @@ func TestWithError(t *testing.T) {
 			description: "root-error-with-named-error",
 			err:         New("root error"),
 			named:       NotValid,
-			expected:    "not valid: root error",
+			expected:    "root error, with error \"not valid\"",
 		},
 	}
 

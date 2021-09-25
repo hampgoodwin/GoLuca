@@ -17,7 +17,7 @@ func (c *Controller) RegisterTransactionRoutes(r *chi.Mux) {
 	r.Route("/transactions", func(r chi.Router) {
 		r.Get("/", c.getTransactions)
 		r.Get(fmt.Sprintf("/{transactionId:%s}", uuidRegexp), c.getTransaction)
-		r.Post("/", c.createTransactionAndEntries)
+		r.Post("/", c.createTransaction)
 	})
 }
 
@@ -61,12 +61,12 @@ func (c *Controller) getTransaction(w http.ResponseWriter, r *http.Request) {
 	c.respond(w, res, http.StatusOK)
 }
 
-func (c *Controller) createTransactionAndEntries(w http.ResponseWriter, r *http.Request) {
+func (c *Controller) createTransaction(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	req := &transactionRequest{}
 
 	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
-		c.respondError(w, c.log, errors.WithErrorMessage(err, errors.NotDeserializable, "deserializing request body"))
+		c.respondError(w, c.log, errors.Wrap(errors.WithErrorMessage(err, errors.NotDeserializable, err.Error()), "deserializing request body"))
 		return
 	}
 
