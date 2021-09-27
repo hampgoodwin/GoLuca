@@ -32,7 +32,7 @@ func (s *Service) GetAccounts(ctx context.Context, cursor, limit string) ([]acco
 	if cursor != "" {
 		id, createdAt, err = pagination.DecodeCursor(cursor)
 		if err != nil {
-			return nil, nil, errors.Wrap(errors.WithErrorMessage(err, errors.NotKnown, err.Error()), "decoding cursor")
+			return nil, nil, errors.WrapWithErrorMessage(err, errors.NotKnown, err.Error(), "decoding cursor")
 		}
 	}
 	accounts, err := s.repository.GetAccounts(ctx, id, createdAt, limitInt)

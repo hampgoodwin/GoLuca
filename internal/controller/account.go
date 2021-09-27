@@ -76,7 +76,7 @@ func (c *Controller) createAccount(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	req := &accountRequest{}
 	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
-		c.respondError(w, c.log, errors.Wrap(errors.WithErrorMessage(err, errors.NotDeserializable, err.Error()), "deserializing request body"))
+		c.respondError(w, c.log, errors.WrapWithErrorMessage(err, errors.NotDeserializable, err.Error(), "deserializing request body"))
 		return
 	}
 

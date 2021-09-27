@@ -53,3 +53,31 @@ func TestWithErrorWithMessage_CustomRootError(t *testing.T) {
 	wrap1 := Wrap(withMessage, "wrap1")
 	a.Equal("wrap1: custom error, with error \"not valid\", with message \"error message\"", wrap1.Error())
 }
+
+func TestWithErrorMessage(t *testing.T) {
+	a := require.New(t)
+	rootErr := New("root error")
+	withErrorMessage := WithErrorMessage(rootErr, NotValid, "message")
+
+	a.Equal("root error, with error \"not valid\", with message \"message\"",
+		withErrorMessage.Error())
+}
+func TestWithErrorMessage_CustomRootError(t *testing.T) {
+	a := require.New(t)
+	rootErr := customError{Val: "custom error"}
+	withErrorMessage := WithErrorMessage(rootErr, NotValid, "message")
+
+	a.Equal("custom error, with error \"not valid\", with message \"message\"",
+		withErrorMessage.Error())
+}
+
+func TestWrapWithErrorMessage(t *testing.T) {
+	a := require.New(t)
+	rootErr := New("root error")
+	errorMsg := "message"
+	wrapMsg := "wrap"
+	withErrorMessage := WrapWithErrorMessage(rootErr, NotValid, errorMsg, wrapMsg)
+
+	a.Equal("wrap: root error, with error \"not valid\", with message \"message\"",
+		withErrorMessage.Error())
+}

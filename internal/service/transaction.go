@@ -24,7 +24,7 @@ func (s *Service) GetTransactions(ctx context.Context, cursor, limit string) ([]
 	if cursor != "" {
 		id, createdAt, err = pagination.DecodeCursor(cursor)
 		if err != nil {
-			return nil, nil, errors.Wrap(errors.WithErrorMessage(err, errors.NotKnown, err.Error()), "decoding cursor")
+			return nil, nil, errors.WrapWithErrorMessage(err, errors.NotKnown, err.Error(), "decoding cursor")
 		}
 	}
 	transactions, err := s.repository.GetTransactions(ctx, id, createdAt, limitInt)

@@ -66,7 +66,7 @@ func (c *Controller) createTransaction(w http.ResponseWriter, r *http.Request) {
 	req := &transactionRequest{}
 
 	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
-		c.respondError(w, c.log, errors.Wrap(errors.WithErrorMessage(err, errors.NotDeserializable, err.Error()), "deserializing request body"))
+		c.respondError(w, c.log, errors.WrapWithErrorMessage(err, errors.NotDeserializable, err.Error(), "deserializing request body"))
 		return
 	}
 

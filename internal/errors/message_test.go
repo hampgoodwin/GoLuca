@@ -20,6 +20,10 @@ func TestWithMessage(t *testing.T) {
 			message:     "message error",
 			expected:    "root error, with message \"message error\"",
 		},
+		{
+			description: "nil-error-returns-nil",
+			err:         nil,
+		},
 	}
 
 	a := assert.New(t)
@@ -28,7 +32,13 @@ func TestWithMessage(t *testing.T) {
 		t.Run(fmt.Sprintf("%d:%s", i, tc.description), func(t *testing.T) {
 			t.Parallel()
 			actual := WithMessage(tc.err, tc.message)
+			if tc.err == nil {
+				a.Nil(actual)
+				return
+			}
 			a.Equal(tc.expected, actual.Error())
+			unwrapped := actual.(Message).Unwrap()
+			a.Equal(tc.err, unwrapped)
 			var m Message
 			a.True(As(actual, &m))
 			a.Equal(tc.message, m.Value)
