@@ -15,7 +15,7 @@ import (
 )
 
 type Environment struct {
-	Config *config.Config
+	Config config.Config
 	Log    *zap.Logger
 
 	// API: Server and controllers
@@ -39,7 +39,7 @@ func NewEnvironment(e *Environment) (*Environment, error) {
 	logger, _ := zap.NewProduction()
 
 	var err error
-	env.Config, err = configloader.Load(env.Config)
+	env.Config, err = configloader.Load(env.Config, "/etc/goluca/.env.toml")
 	if err != nil {
 		logger.Fatal("loading configuration", zap.Error(err))
 	}
