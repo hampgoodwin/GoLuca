@@ -8,6 +8,9 @@ import (
 
 func NewTransactionFromHTTPTransaction(t httpapi.Transaction) (transaction.Transaction, error) {
 	out := transaction.Transaction{}
+	if t.IsZero() {
+		return out, nil
+	}
 	out.Description = t.Description
 	for _, entry := range t.Entries {
 		inEntry, err := NewEntryFromHTTPEntry(entry)
@@ -21,6 +24,9 @@ func NewTransactionFromHTTPTransaction(t httpapi.Transaction) (transaction.Trans
 
 func NewEntryFromHTTPEntry(e httpapi.Entry) (transaction.Entry, error) {
 	out := transaction.Entry{}
+	if e == (httpapi.Entry{}) {
+		return out, nil
+	}
 	out.Description = e.Description
 	out.DebitAccount = e.DebitAccount
 	out.CreditAccount = e.CreditAccount

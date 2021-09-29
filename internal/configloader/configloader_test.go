@@ -163,33 +163,33 @@ func TestLoadConfigurationFile(t *testing.T) {
 			filepath:    "../../test/data/configloader/json.env.toml",
 			err:         true,
 		},
-		// {
-		// 	description: "empty-file-empty-config",
-		// 	filepath:    "../../test/data/configloader/empty.env.toml",
-		// },
-		// {
-		// 	description: "full-file-full-config",
-		// 	filepath:    "../../.env.toml.example",
-		// 	expected: config.Config{
-		// 		EnvType:    "DEV",
-		// 		DBHost:     "127.0.0.1",
-		// 		DBUser:     "user",
-		// 		DBPass:     "password",
-		// 		DBDatabase: "goluca",
-		// 		DBPort:     "5432",
-		// 		APIHost:    "localhost",
-		// 		APIPort:    "3333",
-		// 	},
-		// },
-		// {
-		// 	description: "partial-file-partial-config",
-		// 	filepath:    "../../test/data/configloader/partial.env.toml",
-		// 	expected: config.Config{
-		// 		EnvType: "DEV",
-		// 		APIHost: "localhost",
-		// 		APIPort: "3333",
-		// 	},
-		// },
+		{
+			description: "empty-file-empty-config",
+			filepath:    "../../test/data/configloader/empty.env.toml",
+		},
+		{
+			description: "full-file-full-config",
+			filepath:    "../../.env.toml.example",
+			expected: config.Config{
+				EnvType:    "DEV",
+				DBHost:     "127.0.0.1",
+				DBUser:     "user",
+				DBPass:     "password",
+				DBDatabase: "goluca",
+				DBPort:     "5432",
+				APIHost:    "localhost",
+				APIPort:    "3333",
+			},
+		},
+		{
+			description: "partial-file-partial-config",
+			filepath:    "../../test/data/configloader/partial.env.toml",
+			expected: config.Config{
+				EnvType: "DEV",
+				APIHost: "localhost",
+				APIPort: "3333",
+			},
+		},
 	}
 
 	a := require.New(t)
