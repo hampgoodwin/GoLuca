@@ -9,8 +9,8 @@ A Simple Accounting Ledger
 TODO
 
 - [ ] Testing
-    - [ ] Add more unit tests, solitary and sociable
-    - [ ] Add Integration testing
+    - [x] Add more unit tests, solitary and sociable
+    - [x] Add Integration testing
     - [ ] Add fuzzing
     - [ ] Create a seeder for a basic dev environment of data
     - [ ] Do some stress testing; how much data and we throw at & get out of this thing?
@@ -51,4 +51,8 @@ TODO
     - [x] more elegant error response handling
     - [x] better logging
 - [x] ~~Use https://mermade.github.io/openapi-gui/ to generate OAS and serve it~~ I went with hand-rolled .yml and redocly serving
+- [x] Give config.Database a method to create a connection string
+    - [x] Replace NewDatabase with a single conn string vs broken out vars?
+- [x] Improve convention for environment variable key constants?
+- [x] set environment types as consts
 

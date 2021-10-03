@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/matryer/is"
 )
 
 func TestWithError(t *testing.T) {
@@ -22,17 +22,17 @@ func TestWithError(t *testing.T) {
 		},
 	}
 
-	a := assert.New(t)
+	is := is.New(t)
 	for i, tc := range testCases {
 		tc := tc
 		t.Run(fmt.Sprintf("%d:%s", i, tc.description), func(t *testing.T) {
 			t.Parallel()
 			actual := WithError(tc.err, tc.named)
-			a.Equal(tc.expected, actual.Error())
-			a.True(Is(actual, tc.named))
+			is.Equal(tc.expected, actual.Error())
+			is.True(Is(actual, tc.named))
 			var w with
-			a.True(As(actual, &w))
-			a.Equal(tc.named, w.err)
+			is.True(As(actual, &w))
+			is.Equal(tc.named, w.err)
 		})
 	}
 }

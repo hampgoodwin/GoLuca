@@ -10,23 +10,31 @@ import (
 	"go.uber.org/zap"
 )
 
-// NewDatabase creates a new DB
-func NewDatabase(DBUser, DBPass, DBHost, DBPort, DBDatabase string) (*pgxpool.Pool, error) {
+// NewDatabasePool creates a new DB
+func NewDatabasePool(connString string) (*pgxpool.Pool, error) {
 	ctx := context.Background()
 	var err error
-	connString := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s",
-		DBUser,
-		DBPass,
-		DBHost,
-		DBPort,
-		DBDatabase,
-	)
-
 	DBPool, err := pgxpool.Connect(ctx, connString)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create pgx connection pool")
 	}
 	return DBPool, nil
+}
+
+func CreateDatabase(conn *pgxpool.Pool, database string) error {
+	_, err := conn.Exec(context.Background(), fmt.Sprintf("CREATE DATABASE %s;", database))
+	if err != nil {
+		return errors.Wrap(err, fmt.Sprintf("creating database %q", database))
+	}
+	return nil
+}
+
+func DropDatabase(conn *pgxpool.Pool, database string) error {
+	_, err := conn.Exec(context.Background(), fmt.Sprintf("DROP DATABASE %s;", database))
+	if err != nil {
+		return errors.Wrap(err, fmt.Sprintf("executing drop database %q", database))
+	}
+	return nil
 }
 
 // Migrate handles the db migration logic. Eventually this should be replaced with a well-tested migration tool

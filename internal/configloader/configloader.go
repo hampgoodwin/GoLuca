@@ -38,6 +38,9 @@ func Load(c config.Config, fp string) (config.Config, error) {
 
 func loadConfigurationFile(fp string) (config.Config, error) {
 	cfg := config.Config{}
+	if fp == "" {
+		return cfg, nil
+	}
 	f, err := os.Open(fp)
 	if err != nil {
 		return config.Config{}, err
@@ -54,10 +57,10 @@ const (
 	DBHost     = "GOLUCA_DBHOST"
 	DBPort     = "GOLUCA_DBPORT"
 	DBUser     = "GOLUCA_DBUSER"
-	DBPass     = "GOLUCA_DBPASS"
-	DBDatabase = "GOLUCA_DBDATABASE"
-	APIHost    = "GOLUCA_APIHOST"
-	APIPort    = "GOLUCA_APIPORT"
+	DBPass     = "GOLUCA_DBPass"
+	DBDatabase = "GOLUCA_DBDatabase"
+	APIHost    = "GOLUCA_APIHost"
+	APIPort    = "GOLUCA_APIPort"
 )
 
 var EnvironmentVariableKeys = []string{
@@ -71,59 +74,60 @@ var EnvironmentVariableKeys = []string{
 	APIPort,
 }
 
-// loadEnvironmentVariables reads environmental variables and stores then into the config.Env
+// loadEnvironmentVariables reads environmental variables and stores then into the
+// named return cfg
 func loadEnvironmentVariables() (cfg config.Config) {
 	if val := os.Getenv(EnvType); val != "" {
-		cfg.EnvType = val
+		cfg.Environment.Type = val
 	}
 	if val := os.Getenv(DBHost); val != "" {
-		cfg.DBHost = val
+		cfg.Database.Host = val
 	}
 	if val := os.Getenv(DBPort); val != "" {
-		cfg.DBPort = val
+		cfg.Database.Port = val
 	}
 	if val := os.Getenv(DBUser); val != "" {
-		cfg.DBUser = val
+		cfg.Database.User = val
 	}
 	if val := os.Getenv(DBPass); val != "" {
-		cfg.DBPass = val
+		cfg.Database.Pass = val
 	}
 	if val := os.Getenv(DBDatabase); val != "" {
-		cfg.DBDatabase = val
+		cfg.Database.Database = val
 	}
 	if val := os.Getenv(APIHost); val != "" {
-		cfg.APIHost = val
+		cfg.HTTPAPI.Host = val
 	}
 	if val := os.Getenv(APIPort); val != "" {
-		cfg.APIPort = val
+		cfg.HTTPAPI.Port = val
 	}
 	return
 }
 
 func merge(a, b config.Config) config.Config {
-	if b.EnvType != "" {
-		a.EnvType = b.EnvType
+	if b.Environment.Type != "" {
+		a.Environment.Type = b.Environment.Type
 	}
-	if b.DBHost != "" {
-		a.DBHost = b.DBHost
+	if b.Database.Host != "" {
+		a.Database.Host = b.Database.Host
 	}
-	if b.DBUser != "" {
-		a.DBUser = b.DBUser
+	if b.Database.Port != "" {
+		a.Database.Port = b.Database.Port
 	}
-	if b.DBPass != "" {
-		a.DBPass = b.DBPass
+	if b.Database.User != "" {
+		a.Database.User = b.Database.User
 	}
-	if b.DBDatabase != "" {
-		a.DBDatabase = b.DBDatabase
+	if b.Database.Pass != "" {
+		a.Database.Pass = b.Database.Pass
 	}
-	if b.DBPort != "" {
-		a.DBPort = b.DBPort
+	if b.Database.Database != "" {
+		a.Database.Database = b.Database.Database
 	}
-	if b.APIHost != "" {
-		a.APIHost = b.APIHost
+	if b.HTTPAPI.Host != "" {
+		a.HTTPAPI.Host = b.HTTPAPI.Host
 	}
-	if b.APIPort != "" {
-		a.APIPort = b.APIPort
+	if b.HTTPAPI.Port != "" {
+		a.HTTPAPI.Port = b.HTTPAPI.Port
 	}
 	return a
 }
