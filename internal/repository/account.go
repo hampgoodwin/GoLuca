@@ -14,7 +14,7 @@ import (
 // GetAccount gets an account from the database
 func (r *Repository) GetAccount(ctx context.Context, accountID string) (*account.Account, error) {
 	account := &account.Account{}
-	if err := r.Database.QueryRow(ctx,
+	if err := r.database.QueryRow(ctx,
 		`SELECT id, parent_id, name, type, basis, created_at
 		FROM account
 		WHERE id=$1
@@ -51,7 +51,7 @@ func (r *Repository) GetAccounts(ctx context.Context, accountID string, createdA
 		query += fmt.Sprintf(" LIMIT $%d", len(params))
 	}
 	query += ";"
-	rows, err := r.Database.Query(ctx, query, params...)
+	rows, err := r.database.Query(ctx, query, params...)
 	if err != nil {
 		return nil, errors.WithErrorMessage(err, errors.NotKnown, "fetching accounts from data store")
 	}
@@ -73,7 +73,7 @@ func (r *Repository) GetAccounts(ctx context.Context, accountID string, createdA
 // CreateAccount creates an account record in the database and returns the created record
 func (r *Repository) CreateAccount(ctx context.Context, create *account.Account) (*account.Account, error) {
 	// get a db-transaction
-	tx, err := r.Database.BeginTx(ctx, pgx.TxOptions{})
+	tx, err := r.database.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		return nil, errors.WithErrorMessage(err, errors.NotKnown, "beginning create account db transaction")
 	}

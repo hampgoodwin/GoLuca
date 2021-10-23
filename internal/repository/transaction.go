@@ -15,7 +15,7 @@ import (
 
 // GetTransaction get's a transaction record, without it's entries, by the transaction ID
 func (r *Repository) GetTransaction(ctx context.Context, transactionID string) (*transaction.Transaction, error) {
-	tx, err := r.Database.BeginTx(ctx, pgx.TxOptions{})
+	tx, err := r.database.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		return nil, errors.WithErrorMessage(err, errors.NotKnown, "beginning get transactions db transactoion")
 	}
@@ -52,7 +52,7 @@ func (r *Repository) GetTransaction(ctx context.Context, transactionID string) (
 
 // GetTransactions get's transactions paginaged by cursor and limit
 func (r *Repository) GetTransactions(ctx context.Context, transactionID string, createdAt time.Time, limit uint64) ([]transaction.Transaction, error) {
-	tx, err := r.Database.BeginTx(ctx, pgx.TxOptions{})
+	tx, err := r.database.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		return nil, errors.WithErrorMessage(err, errors.NotKnown, "beginning get transactions db transactoion")
 	}
@@ -110,7 +110,7 @@ func (r *Repository) GetTransactions(ctx context.Context, transactionID string, 
 // CreateTransaction creates a transaction and associated entries in a single transaction
 func (r *Repository) CreateTransaction(ctx context.Context, create *transaction.Transaction) (*transaction.Transaction, error) {
 	// get a db-transaction
-	tx, err := r.Database.BeginTx(ctx, pgx.TxOptions{})
+	tx, err := r.database.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		return nil, errors.WithErrorMessage(err, errors.NotKnown, "beginning create transaction db transaction")
 	}

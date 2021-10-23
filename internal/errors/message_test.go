@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/matryer/is"
 )
 
 func TestWithMessage(t *testing.T) {
@@ -26,22 +26,22 @@ func TestWithMessage(t *testing.T) {
 		},
 	}
 
-	a := assert.New(t)
+	is := is.New(t)
 	for i, tc := range testCases {
 		tc := tc
 		t.Run(fmt.Sprintf("%d:%s", i, tc.description), func(t *testing.T) {
 			t.Parallel()
 			actual := WithMessage(tc.err, tc.message)
 			if tc.err == nil {
-				a.Nil(actual)
+				is.True(actual == nil)
 				return
 			}
-			a.Equal(tc.expected, actual.Error())
+			is.Equal(tc.expected, actual.Error())
 			unwrapped := actual.(Message).Unwrap()
-			a.Equal(tc.err, unwrapped)
+			is.Equal(tc.err, unwrapped)
 			var m Message
-			a.True(As(actual, &m))
-			a.Equal(tc.message, m.Value)
+			is.True(As(actual, &m))
+			is.Equal(tc.message, m.Value)
 		})
 	}
 }

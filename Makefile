@@ -1,9 +1,12 @@
 .PHONY: test
 test:
-	go test ./... -v --bench . --benchmem --coverprofile=count
+	go test ./... -v --bench . --benchmem --coverprofile=cover.out
+
+testsimple:
+	go test ./... --bench . --benchmem --coverprofile=cover.out
 
 testrace:
-	go test ./... -v --bench . --benchmen -race
+	go test -race ./... -v --bench .
 
 testcovhttp:
 	go test ./... --coverprofile=cover.out && go tool cover -html=cover.out

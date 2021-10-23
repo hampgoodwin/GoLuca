@@ -21,9 +21,9 @@ func TestLoad(t *testing.T) {
 		err         error // TODO add specific err case catches
 	}{
 		{
-			description: "no-file-empty-vars-empty-config-err-reading-file",
-			filepath:    "",
-			err:         &os.PathError{},
+			description: "json-file-empty-vars-empty-config-error-decoding",
+			filepath:    "../../test/data/configloader/json.env.toml",
+			err:         errors.New("(1, 1): parsing error: keys cannot contain { character"),
 		},
 		{
 			description: "empty-file-empty-vars-empty-config-err-validation",
@@ -34,14 +34,18 @@ func TestLoad(t *testing.T) {
 			description: "full-file-empty-vars-empty-config",
 			filepath:    "../../.env.toml.example",
 			expected: config.Config{
-				EnvType:    "DEV",
-				DBHost:     "127.0.0.1",
-				DBUser:     "user",
-				DBPass:     "password",
-				DBDatabase: "goluca",
-				DBPort:     "5432",
-				APIHost:    "localhost",
-				APIPort:    "3333",
+				Environment: config.Environment{Type: "LOCAL"},
+				Database: config.Database{
+					Host:     "127.0.0.1",
+					Port:     "5432",
+					User:     "user",
+					Pass:     "password",
+					Database: "goluca",
+				},
+				HTTPAPI: config.HTTPAPI{
+					Host: "localhost",
+					Port: "3333",
+				},
 			},
 		},
 		{
@@ -58,14 +62,18 @@ func TestLoad(t *testing.T) {
 				APIPort:    "GOLUCA_APIPORT",
 			},
 			expected: config.Config{
-				EnvType:    "DEV",
-				DBHost:     "GOLUCA_DBHOST",
-				DBPort:     "GOLUCA_DBPORT",
-				DBUser:     "GOLUCA_DBUSER",
-				DBPass:     "GOLUCA_DBPASS",
-				DBDatabase: "GOLUCA_DBDATABASE",
-				APIHost:    "GOLUCA_APIHOST",
-				APIPort:    "GOLUCA_APIPORT",
+				Environment: config.Environment{Type: "DEV"},
+				Database: config.Database{
+					Host:     "GOLUCA_DBHOST",
+					Port:     "GOLUCA_DBPORT",
+					User:     "GOLUCA_DBUSER",
+					Pass:     "GOLUCA_DBPASS",
+					Database: "GOLUCA_DBDATABASE",
+				},
+				HTTPAPI: config.HTTPAPI{
+					Host: "GOLUCA_APIHOST",
+					Port: "GOLUCA_APIPORT",
+				},
 			},
 		},
 		{
@@ -77,19 +85,23 @@ func TestLoad(t *testing.T) {
 				APIPort: "GOLUCA_APIPORT",
 			},
 			expected: config.Config{
-				EnvType:    "DEV",
-				DBHost:     "127.0.0.1",
-				DBUser:     "user",
-				DBPass:     "password",
-				DBDatabase: "goluca",
-				DBPort:     "5432",
-				APIHost:    "GOLUCA_APIHOST",
-				APIPort:    "GOLUCA_APIPORT",
+				Environment: config.Environment{Type: "DEV"},
+				Database: config.Database{
+					Host:     "127.0.0.1",
+					Port:     "5432",
+					User:     "user",
+					Pass:     "password",
+					Database: "goluca",
+				},
+				HTTPAPI: config.HTTPAPI{
+					Host: "GOLUCA_APIHOST",
+					Port: "GOLUCA_APIPORT",
+				},
 			},
 		},
 		{
 			description: "full-file-partial-vars-partial-config-overwrite-file",
-			cfg:         config.Config{EnvType: "DEV"},
+			cfg:         config.Config{Environment: config.Environment{Type: "DEV"}},
 			filepath:    "../../.env.toml.example",
 			envVars: map[string]string{
 				EnvType: "LOCAL",
@@ -97,33 +109,41 @@ func TestLoad(t *testing.T) {
 				APIPort: "GOLUCA_APIPORT",
 			},
 			expected: config.Config{
-				EnvType:    "LOCAL",
-				DBHost:     "127.0.0.1",
-				DBUser:     "user",
-				DBPass:     "password",
-				DBDatabase: "goluca",
-				DBPort:     "5432",
-				APIHost:    "GOLUCA_APIHOST",
-				APIPort:    "GOLUCA_APIPORT",
+				Environment: config.Environment{Type: "LOCAL"},
+				Database: config.Database{
+					Host:     "127.0.0.1",
+					Port:     "5432",
+					User:     "user",
+					Pass:     "password",
+					Database: "goluca",
+				},
+				HTTPAPI: config.HTTPAPI{
+					Host: "GOLUCA_APIHOST",
+					Port: "GOLUCA_APIPORT",
+				},
 			},
 		},
 		{
 			description: "full-file-partial-vars-partial-config-persist-merge",
-			cfg:         config.Config{EnvType: "DEV"},
+			cfg:         config.Config{Environment: config.Environment{Type: "DEV"}},
 			filepath:    "../../.env.toml.example",
 			envVars: map[string]string{
 				APIHost: "GOLUCA_APIHOST",
 				APIPort: "GOLUCA_APIPORT",
 			},
 			expected: config.Config{
-				EnvType:    "DEV",
-				DBHost:     "127.0.0.1",
-				DBUser:     "user",
-				DBPass:     "password",
-				DBDatabase: "goluca",
-				DBPort:     "5432",
-				APIHost:    "GOLUCA_APIHOST",
-				APIPort:    "GOLUCA_APIPORT",
+				Environment: config.Environment{Type: "LOCAL"},
+				Database: config.Database{
+					Host:     "127.0.0.1",
+					Port:     "5432",
+					User:     "user",
+					Pass:     "password",
+					Database: "goluca",
+				},
+				HTTPAPI: config.HTTPAPI{
+					Host: "GOLUCA_APIHOST",
+					Port: "GOLUCA_APIPORT",
+				},
 			},
 		},
 	}
@@ -142,7 +162,7 @@ func TestLoad(t *testing.T) {
 			if tc.err != nil {
 				a.NotNil(err)
 				// Using errors.As because it detects validator.ValidationErrors
-				a.True(errors.As(err, &tc.err))
+				a.ErrorAs(err, &tc.err)
 				return
 			}
 			a.NoError(err)
@@ -156,12 +176,12 @@ func TestLoadConfigurationFile(t *testing.T) {
 		description string
 		filepath    string
 		expected    config.Config
-		err         bool
+		err         error
 	}{
 		{
 			description: "not-toml-file",
 			filepath:    "../../test/data/configloader/json.env.toml",
-			err:         true,
+			err:         errors.New(""),
 		},
 		{
 			description: "empty-file-empty-config",
@@ -171,23 +191,29 @@ func TestLoadConfigurationFile(t *testing.T) {
 			description: "full-file-full-config",
 			filepath:    "../../.env.toml.example",
 			expected: config.Config{
-				EnvType:    "DEV",
-				DBHost:     "127.0.0.1",
-				DBUser:     "user",
-				DBPass:     "password",
-				DBDatabase: "goluca",
-				DBPort:     "5432",
-				APIHost:    "localhost",
-				APIPort:    "3333",
+				Environment: config.Environment{Type: "LOCAL"},
+				Database: config.Database{
+					Host:     "127.0.0.1",
+					Port:     "5432",
+					User:     "user",
+					Pass:     "password",
+					Database: "goluca",
+				},
+				HTTPAPI: config.HTTPAPI{
+					Host: "localhost",
+					Port: "3333",
+				},
 			},
 		},
 		{
 			description: "partial-file-partial-config",
 			filepath:    "../../test/data/configloader/partial.env.toml",
 			expected: config.Config{
-				EnvType: "DEV",
-				APIHost: "localhost",
-				APIPort: "3333",
+				Environment: config.Environment{Type: "DEV"},
+				HTTPAPI: config.HTTPAPI{
+					Host: "localhost",
+					Port: "3333",
+				},
 			},
 		},
 	}
@@ -197,8 +223,9 @@ func TestLoadConfigurationFile(t *testing.T) {
 	for i, tc := range testCases {
 		t.Run(fmt.Sprintf("%d:%s", i, tc.description), func(t *testing.T) {
 			actual, err := loadConfigurationFile(tc.filepath)
-			if tc.err {
-				a.Error(err)
+			if tc.err != nil {
+				a.NotNil(err)
+				a.ErrorAs(err, &tc.err)
 				return
 			}
 			a.NoError(err)
@@ -239,14 +266,18 @@ func TestLoadEnvironmentVariables(t *testing.T) {
 				APIPort:    "GOLUCA_APIPORT",
 			},
 			expected: config.Config{
-				EnvType:    "GOLUCA_ENVTYPE",
-				DBHost:     "GOLUCA_DBHOST",
-				DBPort:     "GOLUCA_DBPORT",
-				DBUser:     "GOLUCA_DBUSER",
-				DBPass:     "GOLUCA_DBPASS",
-				DBDatabase: "GOLUCA_DBDATABASE",
-				APIHost:    "GOLUCA_APIHOST",
-				APIPort:    "GOLUCA_APIPORT",
+				Environment: config.Environment{Type: "GOLUCA_ENVTYPE"},
+				Database: config.Database{
+					Host:     "GOLUCA_DBHOST",
+					Port:     "GOLUCA_DBPORT",
+					User:     "GOLUCA_DBUSER",
+					Pass:     "GOLUCA_DBPASS",
+					Database: "GOLUCA_DBDATABASE",
+				},
+				HTTPAPI: config.HTTPAPI{
+					Host: "GOLUCA_APIHOST",
+					Port: "GOLUCA_APIPORT",
+				},
 			},
 		},
 		{
@@ -257,14 +288,11 @@ func TestLoadEnvironmentVariables(t *testing.T) {
 				APIPort: "GOLUCA_APIPORT",
 			},
 			expected: config.Config{
-				EnvType:    "GOLUCA_ENVTYPE",
-				DBHost:     "",
-				DBPort:     "",
-				DBUser:     "",
-				DBPass:     "",
-				DBDatabase: "",
-				APIHost:    "GOLUCA_APIHOST",
-				APIPort:    "GOLUCA_APIPORT",
+				Environment: config.Environment{Type: "GOLUCA_ENVTYPE"},
+				HTTPAPI: config.HTTPAPI{
+					Host: "GOLUCA_APIHOST",
+					Port: "GOLUCA_APIPORT",
+				},
 			},
 		},
 	}

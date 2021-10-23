@@ -3,6 +3,7 @@ module github.com/hampgoodwin/GoLuca
 go 1.17
 
 require (
+	github.com/brianvoe/gofakeit v3.18.0+incompatible
 	github.com/go-chi/chi v4.0.2+incompatible
 	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/go-playground/validator/v10 v10.9.0
@@ -10,6 +11,7 @@ require (
 	github.com/jackc/pgconn v1.8.0
 	github.com/jackc/pgerrcode v0.0.0-20201024163028-a0d42d470451
 	github.com/jackc/pgx/v4 v4.10.1
+	github.com/matryer/is v1.4.0
 	github.com/pelletier/go-toml v1.8.1
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/stretchr/testify v1.7.0
