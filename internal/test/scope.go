@@ -49,7 +49,7 @@ func NewScope(t *testing.T) (Scope, error) {
 	s.HTTPClient = &http.Client{Timeout: time.Second * 30}
 	s.Env.Server = &http.Server{
 		Addr:     s.Env.Config.HTTPAPI.AddressString(),
-		ErrorLog: zap.NewStdLog(s.Env.Log),
+		ErrorLog: zap.NewStdLog(zap.NewNop()),
 	}
 
 	var err error
