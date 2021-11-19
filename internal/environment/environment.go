@@ -44,23 +44,25 @@ func New(e Environment, fp string) (Environment, error) {
 		logger.Fatal("loading configuration", zap.Error(err))
 	}
 
-	switch env.Config.Environment.Type {
-	case "PROD":
-		env.Log = logger
-	case "STAGING":
-		env.Log = logger.WithOptions(zap.AddCaller())
-	case "DEV":
-		env.Log, _ = zap.NewDevelopment()
-		env.Log = env.Log.WithOptions(zap.AddCaller())
-	case "LOCAL":
-		env.Log, _ = zap.NewDevelopment()
-		env.Log = env.Log.WithOptions(zap.AddCaller())
-	default:
-		env.Log = logger
+	if env.Log == nil {
+		switch env.Config.Environment.Type {
+		case "PROD":
+			env.Log = logger
+		case "STAGING":
+			env.Log = logger.WithOptions(zap.AddCaller())
+		case "DEV":
+			env.Log, _ = zap.NewDevelopment()
+			env.Log = env.Log.WithOptions(zap.AddCaller())
+		case "LOCAL":
+			env.Log, _ = zap.NewDevelopment()
+			env.Log = env.Log.WithOptions(zap.AddCaller())
+		default:
+			env.Log = logger
+		}
+		env.Log = env.Log.With(
+			zap.String("application", "goluca"),
+			zap.String("environment", env.Config.Environment.Type))
 	}
-	env.Log = env.Log.With(
-		zap.String("application", "goluca"),
-		zap.String("environment", env.Config.Environment.Type))
 
 	// Database
 	if env.database == nil {
