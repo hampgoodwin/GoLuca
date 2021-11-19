@@ -11,6 +11,8 @@ TODO
 - [ ] Testing
     - [x] Add more unit tests, solitary and sociable
     - [x] Add Integration testing
+    - [ ] Add fail case account controller testing
+    - [ ] Add cursor testing for listing accounts
     - [ ] Add fuzzing
     - [ ] Create a seeder for a basic dev environment of data
     - [ ] Do some stress testing; how much data and we throw at & get out of this thing?
