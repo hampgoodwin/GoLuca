@@ -35,7 +35,7 @@ func (r *Repository) GetAccount(ctx context.Context, accountID string) (*account
 
 // GetAccounts get accounts paginated based on a cursor and limit
 func (r *Repository) GetAccounts(ctx context.Context, accountID string, createdAt time.Time, limit uint64) ([]account.Account, error) {
-	query := `SELECT id, parent_id, name, type, basis
+	query := `SELECT id, parent_id, name, type, basis, created_at
 		FROM account
 		WHERE 1=1`
 	var params []interface{}
@@ -59,7 +59,7 @@ func (r *Repository) GetAccounts(ctx context.Context, accountID string, createdA
 	accounts := []account.Account{}
 	for rows.Next() {
 		account := account.Account{}
-		if err := rows.Scan(&account.ID, &account.ParentID, &account.Name, &account.Type, &account.Basis); err != nil {
+		if err := rows.Scan(&account.ID, &account.ParentID, &account.Name, &account.Type, &account.Basis, &account.CreatedAt); err != nil {
 			return nil, errors.WithErrorMessage(err, errors.NotKnown, "scanning account result row")
 		}
 		accounts = append(accounts, account)
