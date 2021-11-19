@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap"
 )
 
-type errorResponse struct {
+type ErrorResponse struct {
 	Description      string `json:"description"`
 	ValidationErrors string `json:"validationErrors,omitempty"`
 }
@@ -46,7 +46,7 @@ func (c *Controller) respondError(w http.ResponseWriter, log *zap.Logger, err er
 		if c.respondOnValidationErrors(w, err, message) {
 			return
 		}
-		c.respond(w, errorResponse{Description: message}, http.StatusBadRequest)
+		c.respond(w, ErrorResponse{Description: message}, http.StatusBadRequest)
 		log.Error(
 			"incorrect error flag used for case",
 			zap.Error(err), zap.String("error_flag", fmt.Sprint(errors.NotValidRequestData)),
@@ -76,13 +76,13 @@ func (c *Controller) respondError(w http.ResponseWriter, log *zap.Logger, err er
 			message = msg.Value
 		}
 	}
-	c.respond(w, errorResponse{Description: message}, statuscode)
+	c.respond(w, ErrorResponse{Description: message}, statuscode)
 }
 
 func (c *Controller) respondOnValidationErrors(w http.ResponseWriter, err error, message string) bool {
 	var validationErrors validator.ValidationErrors
 	if errors.As(err, &validationErrors) {
-		c.respond(w, errorResponse{Description: message, ValidationErrors: validationErrors.Error()}, http.StatusBadRequest)
+		c.respond(w, ErrorResponse{Description: message, ValidationErrors: validationErrors.Error()}, http.StatusBadRequest)
 		return true
 	}
 	return false
