@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hampgoodwin/GoLuca/internal/errors"
+	"github.com/hampgoodwin/errors"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"go.uber.org/zap"

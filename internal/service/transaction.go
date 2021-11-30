@@ -7,10 +7,10 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/hampgoodwin/GoLuca/internal/errors"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
 	"github.com/hampgoodwin/GoLuca/pkg/pagination"
 	"github.com/hampgoodwin/GoLuca/pkg/transaction"
+	"github.com/hampgoodwin/errors"
 )
 
 func (s *Service) GetTransactions(ctx context.Context, cursor, limit string) ([]transaction.Transaction, *string, error) {

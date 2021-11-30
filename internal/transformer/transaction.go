@@ -1,9 +1,9 @@
 package transformer
 
 import (
-	"github.com/hampgoodwin/GoLuca/internal/errors"
 	"github.com/hampgoodwin/GoLuca/internal/httpapi"
 	"github.com/hampgoodwin/GoLuca/pkg/transaction"
+	"github.com/hampgoodwin/errors"
 )
 
 func NewTransactionFromHTTPTransaction(t httpapi.Transaction) (transaction.Transaction, error) {

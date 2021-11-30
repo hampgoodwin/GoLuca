@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hampgoodwin/GoLuca/internal/errors"
+	"github.com/hampgoodwin/errors"
 
 	"github.com/google/uuid"
 )

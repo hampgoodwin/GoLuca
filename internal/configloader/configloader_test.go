@@ -7,7 +7,7 @@ import (
 
 	"github.com/go-playground/validator"
 	"github.com/hampgoodwin/GoLuca/internal/config"
-	"github.com/hampgoodwin/GoLuca/internal/errors"
+	"github.com/hampgoodwin/errors"
 	"github.com/stretchr/testify/require"
 )
 

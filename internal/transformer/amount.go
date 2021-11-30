@@ -3,10 +3,10 @@ package transformer
 import (
 	"strconv"
 
-	"github.com/hampgoodwin/GoLuca/internal/errors"
 	"github.com/hampgoodwin/GoLuca/internal/httpapi"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
 	"github.com/hampgoodwin/GoLuca/pkg/amount"
+	"github.com/hampgoodwin/errors"
 )
 
 func NewAmountFromHTTPAmount(a httpapi.Amount) (amount.Amount, error) {

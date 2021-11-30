@@ -4,8 +4,8 @@ import (
 	"os"
 
 	"github.com/hampgoodwin/GoLuca/internal/config"
-	"github.com/hampgoodwin/GoLuca/internal/errors"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
+	"github.com/hampgoodwin/errors"
 	"github.com/pelletier/go-toml"
 )
 

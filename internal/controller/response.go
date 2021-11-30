@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/hampgoodwin/GoLuca/internal/errors"
+	"github.com/hampgoodwin/errors"
 	"go.uber.org/zap"
 )
 
