@@ -6,9 +6,9 @@ import (
 	"testing"
 
 	"github.com/go-playground/validator"
-	"github.com/hampgoodwin/GoLuca/internal/errors"
 	"github.com/hampgoodwin/GoLuca/internal/httpapi"
 	"github.com/hampgoodwin/GoLuca/pkg/amount"
+	"github.com/hampgoodwin/errors"
 	"github.com/stretchr/testify/require"
 )
 

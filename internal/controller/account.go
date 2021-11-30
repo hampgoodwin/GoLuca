@@ -6,9 +6,9 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
-	"github.com/hampgoodwin/GoLuca/internal/errors"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
 	"github.com/hampgoodwin/GoLuca/pkg/account"
+	"github.com/hampgoodwin/errors"
 	"go.uber.org/zap"
 )
 

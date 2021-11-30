@@ -7,9 +7,9 @@ import (
 	"github.com/hampgoodwin/GoLuca/internal/configloader"
 	"github.com/hampgoodwin/GoLuca/internal/controller"
 	"github.com/hampgoodwin/GoLuca/internal/database"
-	"github.com/hampgoodwin/GoLuca/internal/errors"
 	"github.com/hampgoodwin/GoLuca/internal/repository"
 	"github.com/hampgoodwin/GoLuca/internal/service"
+	"github.com/hampgoodwin/errors"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"go.uber.org/zap"
 )

@@ -13,7 +13,7 @@ import (
 	"github.com/hampgoodwin/GoLuca/internal/config"
 	"github.com/hampgoodwin/GoLuca/internal/database"
 	"github.com/hampgoodwin/GoLuca/internal/environment"
-	"github.com/hampgoodwin/GoLuca/internal/errors"
+	"github.com/hampgoodwin/errors"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/matryer/is"
 	"go.uber.org/zap"

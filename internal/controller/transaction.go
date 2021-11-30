@@ -6,11 +6,11 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
-	"github.com/hampgoodwin/GoLuca/internal/errors"
 	"github.com/hampgoodwin/GoLuca/internal/httpapi"
 	"github.com/hampgoodwin/GoLuca/internal/transformer"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
 	"github.com/hampgoodwin/GoLuca/pkg/transaction"
+	"github.com/hampgoodwin/errors"
 )
 
 func (c *Controller) RegisterTransactionRoutes(r *chi.Mux) {

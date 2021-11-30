@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hampgoodwin/GoLuca/internal/errors"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
 	"github.com/hampgoodwin/GoLuca/pkg/account"
+	"github.com/hampgoodwin/errors"
 	"github.com/jackc/pgx/v4"
 )
 
