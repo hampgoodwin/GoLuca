@@ -7,7 +7,11 @@ A Simple Accounting Ledger
 - Simple application which writes and reads accounting ledger entries
 
 TODO
-
+- [ ] Events
+    - [ ] Add eventing
+- [ ] 011y
+    - [ ] Add tracing
+    - [ ] Add metrics
 - [ ] Testing
     - [x] Add more unit tests, solitary and sociable
     - [x] Add Integration testing
