@@ -31,15 +31,15 @@ func TestCreateAccount(t *testing.T) {
 
 	var aRes controller.AccountResponse
 	err := json.NewDecoder(res.Body).Decode(&aRes)
-	s.IS.NoErr(err)
+	s.Is.NoErr(err)
 
-	s.IS.True(aRes != (controller.AccountResponse{}))
+	s.Is.True(aRes != (controller.AccountResponse{}))
 
-	s.IS.Equal(aReq.Account.Name, aRes.Account.Name)
-	s.IS.Equal(aReq.Account.Type, aRes.Account.Type)
-	s.IS.Equal(aReq.Account.Basis, aRes.Account.Basis)
-	s.IS.True(aRes.Account.ID != "")
-	s.IS.True(aRes.Account.ParentID == "")
+	s.Is.Equal(aReq.Account.Name, aRes.Account.Name)
+	s.Is.Equal(aReq.Account.Type, aRes.Account.Type)
+	s.Is.Equal(aReq.Account.Basis, aRes.Account.Basis)
+	s.Is.True(aRes.Account.ID != "")
+	s.Is.True(aRes.Account.ParentID == "")
 }
 
 func TestCreateAccount_InvalidRequestBody(t *testing.T) {
@@ -58,10 +58,10 @@ func TestCreateAccount_InvalidRequestBody(t *testing.T) {
 
 	var errRes controller.ErrorResponse
 	err := json.NewDecoder(res.Body).Decode(&errRes)
-	s.IS.NoErr(err)
+	s.Is.NoErr(err)
 
-	s.IS.Equal("validating deserialized account body", errRes.Description)
-	s.IS.Equal("Key: 'Account.Name' Error:Field validation for 'Name' failed on the 'required' tag\nKey: 'Account.Type' Error:Field validation for 'Type' failed on the 'oneof' tag\nKey: 'Account.Basis' Error:Field validation for 'Basis' failed on the 'oneof' tag", errRes.ValidationErrors)
+	s.Is.Equal("validating deserialized account body", errRes.Description)
+	s.Is.Equal("Key: 'Account.Name' Error:Field validation for 'Name' failed on the 'required' tag\nKey: 'Account.Type' Error:Field validation for 'Type' failed on the 'oneof' tag\nKey: 'Account.Basis' Error:Field validation for 'Basis' failed on the 'oneof' tag", errRes.ValidationErrors)
 }
 
 func TestCreateAccount_CannotDeserialize(t *testing.T) {
@@ -74,9 +74,9 @@ func TestCreateAccount_CannotDeserialize(t *testing.T) {
 
 	var errRes controller.ErrorResponse
 	err := json.NewDecoder(res.Body).Decode(&errRes)
-	s.IS.NoErr(err)
+	s.Is.NoErr(err)
 
-	s.IS.Equal("json: cannot unmarshal string into Go value of type controller.AccountRequest", errRes.Description)
+	s.Is.Equal("json: cannot unmarshal string into Go value of type controller.AccountRequest", errRes.Description)
 
 }
 
@@ -97,7 +97,7 @@ func TestGetAccount(t *testing.T) {
 
 	var aRes controller.AccountResponse
 	err := json.NewDecoder(res.Body).Decode(&aRes)
-	s.IS.NoErr(err)
+	s.Is.NoErr(err)
 
 	// Get the created account
 	getRes := getAccount(t, &s, aRes.ID)
@@ -105,9 +105,9 @@ func TestGetAccount(t *testing.T) {
 
 	var getARes controller.AccountResponse
 	err = json.NewDecoder(getRes.Body).Decode(&getARes)
-	s.IS.NoErr(err)
+	s.Is.NoErr(err)
 
-	s.IS.Equal(aRes, getARes)
+	s.Is.Equal(aRes, getARes)
 }
 
 func TestGetAccount_ErrorNotFound(t *testing.T) {
@@ -118,8 +118,8 @@ func TestGetAccount_ErrorNotFound(t *testing.T) {
 
 	var errRes controller.ErrorResponse
 	err := json.NewDecoder(res.Body).Decode(&errRes)
-	s.IS.NoErr(err)
-	s.IS.Equal(fmt.Sprintf("account %q not found", id), errRes.Description)
+	s.Is.NoErr(err)
+	s.Is.Equal(fmt.Sprintf("account %q not found", id), errRes.Description)
 }
 
 func TestGetAccount_InvalidPersistedAccount(t *testing.T) {
@@ -131,16 +131,16 @@ func TestGetAccount_InvalidPersistedAccount(t *testing.T) {
 	typ := gofakeit.Sentence(1)
 	basis := strings.Replace(gofakeit.Sentence(5), " ", "", -1)[0:5]
 
-	_, err := s.DB.Exec(s.CTX, `
+	_, err := s.DB.Exec(s.Ctx, `
 	INSERT INTO account (id, parent_id, name, type, basis)
 		VALUES($1, $2, $3, $4, $5)
 	;`, id, parentID, name, typ, basis)
-	s.IS.NoErr(err)
+	s.Is.NoErr(err)
 
 	res := getAccount(t, &s, id)
 	defer res.Body.Close()
 
-	s.IS.Equal(http.StatusNotFound, res.StatusCode)
+	s.Is.Equal(http.StatusNotFound, res.StatusCode)
 }
 
 func TestGetAccounts(t *testing.T) {
@@ -159,7 +159,7 @@ func TestGetAccounts(t *testing.T) {
 
 	var a1 controller.AccountResponse
 	err := json.NewDecoder(res.Body).Decode(&a1)
-	s.IS.NoErr(err)
+	s.Is.NoErr(err)
 
 	aReq.Name = "accounts receivable"
 	res2 := createAccount(t, &s, aReq)
@@ -167,10 +167,10 @@ func TestGetAccounts(t *testing.T) {
 
 	var a2 controller.AccountResponse
 	err = json.NewDecoder(res2.Body).Decode(&a2)
-	s.IS.NoErr(err)
+	s.Is.NoErr(err)
 
 	aRes := getAccounts(t, &s)
-	s.IS.True(len(aRes.Accounts) == 2)
+	s.Is.True(len(aRes.Accounts) == 2)
 
 	i := 0
 	for _, a := range aRes.Accounts {
@@ -178,7 +178,7 @@ func TestGetAccounts(t *testing.T) {
 			i++
 		}
 	}
-	s.IS.True(i == len(aRes.Accounts))
+	s.Is.True(i == len(aRes.Accounts))
 }
 
 func createAccount(
@@ -190,17 +190,17 @@ func createAccount(
 
 	var body = new(bytes.Buffer)
 	err := json.NewEncoder(body).Encode(e)
-	s.IS.NoErr(err)
+	s.Is.NoErr(err)
 
 	req, err := http.NewRequest(
 		http.MethodPost,
 		"http://"+s.Env.Config.HTTPAPI.AddressString()+"/accounts",
 		body,
 	)
-	s.IS.NoErr(err)
+	s.Is.NoErr(err)
 
 	res, err := s.HTTPClient.Do(req)
-	s.IS.NoErr(err)
+	s.Is.NoErr(err)
 
 	return res
 }
@@ -216,10 +216,10 @@ func getAccount(
 		"http://"+s.Env.Config.HTTPAPI.AddressString()+"/accounts/"+id,
 		nil,
 	)
-	s.IS.NoErr(err)
+	s.Is.NoErr(err)
 
 	res, err := s.HTTPClient.Do(req)
-	s.IS.NoErr(err)
+	s.Is.NoErr(err)
 
 	return res
 }
@@ -234,14 +234,14 @@ func getAccounts(
 		"http://"+s.Env.Config.HTTPAPI.AddressString()+"/accounts",
 		nil,
 	)
-	s.IS.NoErr(err)
+	s.Is.NoErr(err)
 
 	res, err := s.HTTPClient.Do(req)
-	s.IS.NoErr(err)
+	s.Is.NoErr(err)
 
 	var aRes controller.AccountsResponse
 	err = json.NewDecoder(res.Body).Decode(&aRes)
-	s.IS.NoErr(err)
+	s.Is.NoErr(err)
 
 	return aRes
 }

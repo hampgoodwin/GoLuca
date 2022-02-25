@@ -7,28 +7,32 @@ A Simple Accounting Ledger
 - Simple application which writes and reads accounting ledger entries
 
 TODO
-- [ ] Events
-    - [ ] Add eventing
-- [ ] 011y
-    - [ ] Add tracing
-    - [ ] Add metrics
 - [ ] Testing
     - [x] Add more unit tests, solitary and sociable
     - [x] Add Integration testing
     - [x] Add fail case account controller testing
+    - [ ] Use httptest for tests instead of using the actual router...?
+        - [ ] I think there is a bug here; we set up an actual http server for each test; that's bad and costly.
+            - instead provide routes on the environment and then set up an httpserver from the routes; then httptest off the routes.
     - [ ] Add cursor testing for listing accounts
     - [ ] Add fuzzing
     - [ ] Create a seeder for a basic dev environment of data
     - [ ] Do some stress testing; how much data and we throw at & get out of this thing?
-    - [ ] Use httptest for tests instead of using the actual router...?
+    - [ ] Some flaking in controller testing?
 - [ ] Optimize the get transactions call to use a single query; full join, order and then iterate to make transactions object
-- [ ] implement golang-migrate or similar db migration strategy
 - [ ] Add a stress testing system
 - [ ] set up dev appvault and set secrets
     - [ ] add default limit size as a configurable somewhere
 - [ ] improve pagination by displaying page number of result.
     - [ ] set up configuration loader or a new secrets loader to load values from appvault
 - [ ] make a frontend with some dashboard functionality, (vue3 plz) OOOOH!!!
+- [ ] Events
+    - [ ] Add eventing
+- [ ] 011y
+    - [ ] Add tracing
+    - [ ] Add metrics
+- [x] implement golang-migrate or similar db migration strategy
+    - [x] include the sql files as bin data in binary so migrator can run them ez pz
 - [x] Complete the basic CRUD for book-keeping
 - [x] make DB methods for CRUD
 - [x] set up linting

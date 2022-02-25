@@ -9,10 +9,10 @@ testrace:
 	go test -race ./... -v --bench .
 
 testcovhttp:
-	go test ./... --coverprofile=cover.out && go tool cover -html=cover.out
+	go test ./... -v --coverprofile=cover.out && go tool cover -html=cover.out
 
 lint:
-	docker run --rm -v $$(pwd):/app -w /app golangci/golangci-lint:v1.42.1 golangci-lint run -v
+	docker run --rm -v $$(pwd):/app -w /app golangci/golangci-lint:v1.44 golangci-lint run -v
 
 check: lint test
 

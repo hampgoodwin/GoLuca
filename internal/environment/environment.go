@@ -12,6 +12,8 @@ import (
 	"github.com/hampgoodwin/errors"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"go.uber.org/zap"
+
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
 type Environment struct {
@@ -74,7 +76,9 @@ func New(e Environment, fp string) (Environment, error) {
 		if err != nil {
 			env.Log.Fatal("setting new database", zap.Error(err))
 		}
-
+		if err := MigrateDatabase(env); err != nil {
+			env.Log.Fatal("migrating database", zap.Error(err))
+		}
 	}
 
 	if env.repository == nil {
@@ -122,9 +126,10 @@ func SetDatabase(env Environment, db *pgxpool.Pool) (Environment, error) {
 }
 
 func MigrateDatabase(env Environment) error {
-	if err := database.Migrate(env.database, env.Log); err != nil {
+	if err := database.Migrate(env.database); err != nil {
 		env.Log.Fatal("migrating", zap.Error(err))
 	}
+	env.Log.Info("migration successful")
 	return nil
 }
 
