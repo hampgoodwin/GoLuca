@@ -11,7 +11,7 @@ TODO
     - [x] Add more unit tests, solitary and sociable
     - [x] Add Integration testing
     - [x] Add fail case account controller testing
-    - [ ] Use httptest for tests instead of setting up an http server for each test
+    - [x] Use httptest for tests instead of setting up an http server for each test
         - [ ] Fix bug where connection is rejected (I sus due to db+http connection limitations in unix)
     - [ ] Add cursor testing for listing accounts
     - [ ] Add fuzzing

@@ -42,7 +42,7 @@ func New(e Environment, fp string) (Environment, error) {
 
 	logger, _ := zap.NewProduction()
 
-	defer logger.Sync()
+	defer func() { _ = logger.Sync() }()
 
 	var err error
 	env.Config, err = configloader.Load(env.Config, fp)
