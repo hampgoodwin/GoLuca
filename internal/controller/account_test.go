@@ -194,7 +194,7 @@ func createAccount(
 
 	req, err := http.NewRequest(
 		http.MethodPost,
-		"http://"+s.Env.Config.HTTPAPI.AddressString()+"/accounts",
+		s.HTTPTestServer.URL+"/accounts",
 		body,
 	)
 	s.Is.NoErr(err)
@@ -213,7 +213,7 @@ func getAccount(
 	// Get the created account and assert it's equal to the created account
 	req, err := http.NewRequest(
 		http.MethodGet,
-		"http://"+s.Env.Config.HTTPAPI.AddressString()+"/accounts/"+id,
+		s.HTTPTestServer.URL+"/accounts/"+id,
 		nil,
 	)
 	s.Is.NoErr(err)
@@ -231,7 +231,7 @@ func getAccounts(
 	// Get the created account and assert it's equal to the created account
 	req, err := http.NewRequest(
 		http.MethodGet,
-		"http://"+s.Env.Config.HTTPAPI.AddressString()+"/accounts",
+		s.HTTPTestServer.URL+"/accounts",
 		nil,
 	)
 	s.Is.NoErr(err)

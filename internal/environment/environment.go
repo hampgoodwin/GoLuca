@@ -3,6 +3,7 @@ package environment
 import (
 	"net/http"
 
+	"github.com/go-chi/chi"
 	"github.com/hampgoodwin/GoLuca/internal/config"
 	"github.com/hampgoodwin/GoLuca/internal/configloader"
 	"github.com/hampgoodwin/GoLuca/internal/controller"
@@ -13,6 +14,7 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 	"go.uber.org/zap"
 
+	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
@@ -20,8 +22,8 @@ type Environment struct {
 	Config config.Config
 	Log    *zap.Logger
 
-	// API: Server and controllers
-	Server     *http.Server
+	// API: HTTPServer and controllers
+	HTTPMux    *chi.Mux
 	controller *controller.Controller
 
 	// service
@@ -40,6 +42,8 @@ func New(e Environment, fp string) (Environment, error) {
 
 	logger, _ := zap.NewProduction()
 
+	defer logger.Sync()
+
 	var err error
 	env.Config, err = configloader.Load(env.Config, fp)
 	if err != nil {
@@ -53,11 +57,11 @@ func New(e Environment, fp string) (Environment, error) {
 		case "STAGING":
 			env.Log = logger.WithOptions(zap.AddCaller())
 		case "DEV":
-			env.Log, _ = zap.NewDevelopment()
-			env.Log = env.Log.WithOptions(zap.AddCaller())
+			logger.Core().Enabled(zap.ErrorLevel)
+			env.Log = logger.WithOptions(zap.AddCaller())
 		case "LOCAL":
-			env.Log, _ = zap.NewDevelopment()
-			env.Log = env.Log.WithOptions(zap.AddCaller())
+			logger.Core().Enabled(zap.ErrorLevel)
+			env.Log = logger.WithOptions(zap.AddCaller())
 		default:
 			env.Log = logger
 		}
@@ -104,18 +108,14 @@ func New(e Environment, fp string) (Environment, error) {
 		}
 	}
 
-	if env.Server == nil {
-		env.Server = &http.Server{
-			Addr:     env.Config.HTTPAPI.AddressString(),
-			ErrorLog: zap.NewStdLog(env.Log),
-		}
-	}
 	// register routes
-	env.Server.Handler = controller.Register(
-		env.Log,
-		env.controller.RegisterAccountRoutes,
-		env.controller.RegisterTransactionRoutes,
-	)
+	if env.HTTPMux == nil {
+		env.HTTPMux = controller.Register(
+			env.Log,
+			env.controller.RegisterAccountRoutes,
+			env.controller.RegisterTransactionRoutes,
+		)
+	}
 
 	return env, nil
 }
@@ -127,7 +127,11 @@ func SetDatabase(env Environment, db *pgxpool.Pool) (Environment, error) {
 
 func MigrateDatabase(env Environment) error {
 	if err := database.Migrate(env.database); err != nil {
-		env.Log.Fatal("migrating", zap.Error(err))
+		if !errors.Is(err, migrate.ErrNoChange) {
+			env.Log.Fatal("migrating", zap.Error(err))
+		}
+		env.Log.Info("no migration changes")
+		return nil
 	}
 	env.Log.Info("migration successful")
 	return nil
@@ -161,10 +165,11 @@ func SetController(env Environment, s *service.Service) (Environment, error) {
 	return env, nil
 }
 
-func StartHTTPServer(env Environment) func() {
-	if err := env.Server.ListenAndServe(); err != nil {
-		env.Log.Panic("http server failed", zap.Error(err))
+func NewHTTPServer(env Environment) *http.Server {
+	s := &http.Server{
+		Addr:     env.Config.HTTPAPI.AddressString(),
+		ErrorLog: zap.NewStdLog(env.Log),
+		Handler:  env.HTTPMux,
 	}
-	shutdown := func() { _ = env.Server.Shutdown }
-	return shutdown
+	return s
 }
