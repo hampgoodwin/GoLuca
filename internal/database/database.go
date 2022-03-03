@@ -2,13 +2,20 @@ package database
 
 import (
 	"context"
+	"embed"
 	"fmt"
 
+	"github.com/golang-migrate/migrate/v4"
 	"github.com/hampgoodwin/errors"
-	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
-	"go.uber.org/zap"
+
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/golang-migrate/migrate/v4/source/iofs"
 )
+
+//go:embed migrations
+var migrations embed.FS
 
 // NewDatabasePool creates a new DB
 func NewDatabasePool(connString string) (*pgxpool.Pool, error) {
@@ -37,62 +44,30 @@ func DropDatabase(conn *pgxpool.Pool, database string) error {
 	return nil
 }
 
-// Migrate handles the db migration logic. Eventually this should be replaced with a well-tested migration tool
-func Migrate(DBPool *pgxpool.Pool, log *zap.Logger) error {
-	ctx := context.Background()
-	tx, err := DBPool.BeginTx(ctx, pgx.TxOptions{})
+// Migrate handles the db migration logic.
+func Migrate(conn *pgxpool.Pool) error {
+	d, err := iofs.New(migrations, "migrations")
+	if err != nil {
+		return errors.Wrap(err, "opening fs for migrations")
+	}
+
+	m, err := migrate.NewWithSourceInstance("iofs", d, conn.Config().ConnString())
+	if err != nil {
+		return errors.Wrap(err, "migrating database")
+	}
+	if err := m.Up(); err != nil {
+		return errors.Wrap(err, "running migrations")
+	}
+
+	sErr, dbErr := m.Close()
+	if sErr != nil {
+		err = errors.Wrap(sErr, "closing migrator connection")
+	}
+	if dbErr != nil {
+		err = errors.Wrap(err, "closing migrator connection")
+	}
 	if err != nil {
 		return err
 	}
-	_, err = tx.Exec(ctx, `
-CREATE TABLE IF NOT EXISTS account(
-	id VARCHAR(36) PRIMARY KEY,
-	parent_id VARCHAR(36),
-	name VARCHAR(255) UNIQUE,
-	type VARCHAR(64),
-	basis VARCHAR(6),
-	created_at TIMESTAMP DEFAULT NOW()
-)
-;`)
-	if err != nil {
-		return errors.Wrap(err, "failed to create account table")
-	}
-	_, err = tx.Exec(ctx, `
-CREATE TABLE IF NOT EXISTS transaction(
-	id VARCHAR(36) PRIMARY KEY,
-	description TEXT,
-	created_at TIMESTAMP DEFAULT NOW()
-)
-;`)
-	if err != nil {
-		return errors.Wrap(err, "failed to create transaction table")
-	}
-	_, err = tx.Exec(ctx, `
-CREATE TABLE IF NOT EXISTS entry(
-	id VARCHAR(36) PRIMARY KEY,
-	transaction_id VARCHAR(36),
-	debit_account VARCHAR(36),
-	credit_account VARCHAR(36),
-	amount_value BIGINT,
-	amount_currency CHAR(3),
-	created_at TIMESTAMP DEFAULT NOW(),
-	CONSTRAINT fk_transaction FOREIGN KEY(transaction_id) REFERENCES transaction(id),
-	CONSTRAINT fk_debit_account FOREIGN KEY(debit_account) REFERENCES account(id),
-	CONSTRAINT fk_credit_account FOREIGN KEY(credit_account) REFERENCES account(id)
-)
-;`)
-	if err != nil {
-		return errors.Wrap(err, "failed to create entry table")
-	}
-
-	_, err = tx.Exec(ctx, `CREATE UNIQUE INDEX IF NOT EXISTS transaction_created_at_idx ON transaction (id, created_at);`)
-	if err != nil {
-		return errors.Wrap(err, "failed to create index on transaction table")
-	}
-
-	if err := tx.Commit(ctx); err != nil {
-		return errors.Wrap(err, "failed to commit migration")
-	}
-	log.Info("migration successful")
 	return nil
 }

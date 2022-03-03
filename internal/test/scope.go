@@ -3,8 +3,8 @@ package test
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
@@ -20,37 +20,34 @@ import (
 )
 
 type Scope struct {
-	Config     config.Config
-	Server     *http.Server
-	Env        environment.Environment
-	DB         *pgxpool.Pool
-	dbDatabase string
-	IS         *is.I
-	HTTPClient *http.Client
-	CTX        context.Context
+	Config         config.Config
+	Server         *http.Server
+	Env            environment.Environment
+	DB             *pgxpool.Pool
+	dbDatabase     string
+	Is             *is.I
+	HTTPTestServer *httptest.Server
+	HTTPClient     *http.Client
+	Ctx            context.Context
 }
 
 func GetScope(t *testing.T) Scope {
 	t.Helper()
 	s, err := NewScope(t)
 	if err != nil {
-		s.CleanupScope()
-		t.Fatal("creating new scope")
+		s.CleanupScope(t)
+		t.Fatalf("creating new scope: %v", err)
 	}
 	return s
 }
 
 func NewScope(t *testing.T) (Scope, error) {
 	s := Scope{}
-	s.CTX = context.Background()
+	s.Ctx = context.Background()
 	s.Env = environment.TestEnvironment
 	s.Env.Log = zap.NewNop()
-	s.IS = is.New(t)
+	s.Is = is.New(t)
 	s.HTTPClient = &http.Client{Timeout: time.Second * 30}
-	s.Env.Server = &http.Server{
-		Addr:     s.Env.Config.HTTPAPI.AddressString(),
-		ErrorLog: zap.NewStdLog(zap.NewNop()),
-	}
 
 	var err error
 
@@ -97,24 +94,19 @@ func NewScope(t *testing.T) (Scope, error) {
 		return s, errors.Wrap(err, "setting up new environment")
 	}
 
-	go func() {
-		if err := s.Env.Server.ListenAndServe(); err != nil {
-			if errors.Is(err, http.ErrServerClosed) {
-				return
-			}
-			log.Fatal("http api server listening")
-		}
-	}()
+	s.HTTPTestServer = httptest.NewServer(s.Env.HTTPMux)
 
-	t.Cleanup(s.CleanupScope)
+	t.Cleanup(func() { s.CleanupScope(t) })
 	return s, nil
 }
 
-func (s *Scope) CleanupScope() {
+func (s *Scope) CleanupScope(t *testing.T) {
+	t.Helper()
 	environment.CloseDatabase(s.Env)
 
-	db, _ := database.NewDatabasePool(s.Env.Config.Database.ConnectionString())
-	_ = database.DropDatabase(db, s.dbDatabase)
+	s.HTTPTestServer.Close()
 
-	_ = s.Env.Server.Shutdown(s.CTX)
+	db, _ := database.NewDatabasePool(s.Env.Config.Database.ConnectionString())
+	err := database.DropDatabase(db, s.dbDatabase)
+	s.Is.NoErr(err)
 }

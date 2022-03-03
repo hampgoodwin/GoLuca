@@ -19,15 +19,17 @@ type Database struct {
 	User     string
 	Pass     string
 	Database string
+	SSLMode  string
 }
 
 func (d *Database) ConnectionString() string {
-	return fmt.Sprintf("postgresql://%s:%s@%s:%s/%s",
+	return fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=%s",
 		d.User,
 		d.Pass,
 		d.Host,
 		d.Port,
 		d.Database,
+		d.SSLMode,
 	)
 }
 

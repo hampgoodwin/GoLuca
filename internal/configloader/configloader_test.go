@@ -41,6 +41,7 @@ func TestLoad(t *testing.T) {
 					User:     "user",
 					Pass:     "password",
 					Database: "goluca",
+					SSLMode:  "disable",
 				},
 				HTTPAPI: config.HTTPAPI{
 					Host: "localhost",
@@ -58,6 +59,7 @@ func TestLoad(t *testing.T) {
 				DBUser:     "GOLUCA_DBUSER",
 				DBPass:     "GOLUCA_DBPASS",
 				DBDatabase: "GOLUCA_DBDATABASE",
+				DBSSLMode:  "GOLUCA_DBSSLMODE",
 				APIHost:    "GOLUCA_APIHOST",
 				APIPort:    "GOLUCA_APIPORT",
 			},
@@ -69,6 +71,7 @@ func TestLoad(t *testing.T) {
 					User:     "GOLUCA_DBUSER",
 					Pass:     "GOLUCA_DBPASS",
 					Database: "GOLUCA_DBDATABASE",
+					SSLMode:  "GOLUCA_DBSSLMODE",
 				},
 				HTTPAPI: config.HTTPAPI{
 					Host: "GOLUCA_APIHOST",
@@ -92,6 +95,7 @@ func TestLoad(t *testing.T) {
 					User:     "user",
 					Pass:     "password",
 					Database: "goluca",
+					SSLMode:  "disable",
 				},
 				HTTPAPI: config.HTTPAPI{
 					Host: "GOLUCA_APIHOST",
@@ -116,6 +120,7 @@ func TestLoad(t *testing.T) {
 					User:     "user",
 					Pass:     "password",
 					Database: "goluca",
+					SSLMode:  "disable",
 				},
 				HTTPAPI: config.HTTPAPI{
 					Host: "GOLUCA_APIHOST",
@@ -139,6 +144,7 @@ func TestLoad(t *testing.T) {
 					User:     "user",
 					Pass:     "password",
 					Database: "goluca",
+					SSLMode:  "disable",
 				},
 				HTTPAPI: config.HTTPAPI{
 					Host: "GOLUCA_APIHOST",
@@ -198,6 +204,7 @@ func TestLoadConfigurationFile(t *testing.T) {
 					User:     "user",
 					Pass:     "password",
 					Database: "goluca",
+					SSLMode:  "disable",
 				},
 				HTTPAPI: config.HTTPAPI{
 					Host: "localhost",
