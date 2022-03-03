@@ -8,6 +8,7 @@ var Local = Config{
 		User:     "user",
 		Pass:     "password",
 		Database: "goluca",
+		SSLMode:  "disable",
 	},
 	HTTPAPI: HTTPAPI{
 		Host: "localhost",

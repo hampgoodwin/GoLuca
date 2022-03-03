@@ -25,27 +25,27 @@ type Scope struct {
 	Env        environment.Environment
 	DB         *pgxpool.Pool
 	dbDatabase string
-	IS         *is.I
+	Is         *is.I
 	HTTPClient *http.Client
-	CTX        context.Context
+	Ctx        context.Context
 }
 
 func GetScope(t *testing.T) Scope {
 	t.Helper()
 	s, err := NewScope(t)
 	if err != nil {
-		s.CleanupScope()
-		t.Fatal("creating new scope")
+		s.CleanupScope(t)
+		t.Fatalf("creating new scope: %v", err)
 	}
 	return s
 }
 
 func NewScope(t *testing.T) (Scope, error) {
 	s := Scope{}
-	s.CTX = context.Background()
+	s.Ctx = context.Background()
 	s.Env = environment.TestEnvironment
 	s.Env.Log = zap.NewNop()
-	s.IS = is.New(t)
+	s.Is = is.New(t)
 	s.HTTPClient = &http.Client{Timeout: time.Second * 30}
 	s.Env.Server = &http.Server{
 		Addr:     s.Env.Config.HTTPAPI.AddressString(),
@@ -106,15 +106,18 @@ func NewScope(t *testing.T) (Scope, error) {
 		}
 	}()
 
-	t.Cleanup(s.CleanupScope)
+	t.Cleanup(func() { s.CleanupScope(t) })
 	return s, nil
 }
 
-func (s *Scope) CleanupScope() {
+func (s *Scope) CleanupScope(t *testing.T) {
+	t.Helper()
 	environment.CloseDatabase(s.Env)
 
 	db, _ := database.NewDatabasePool(s.Env.Config.Database.ConnectionString())
-	_ = database.DropDatabase(db, s.dbDatabase)
+	err := database.DropDatabase(db, s.dbDatabase)
+	s.Is.NoErr(err)
 
-	_ = s.Env.Server.Shutdown(s.CTX)
+	err = s.Env.Server.Shutdown(s.Ctx)
+	s.Is.NoErr(err)
 }

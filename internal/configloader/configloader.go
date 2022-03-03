@@ -59,6 +59,7 @@ const (
 	DBUser     = "GOLUCA_DBUSER"
 	DBPass     = "GOLUCA_DBPass"
 	DBDatabase = "GOLUCA_DBDatabase"
+	DBSSLMode  = "GOLUCA_DBSSLMode"
 	APIHost    = "GOLUCA_APIHost"
 	APIPort    = "GOLUCA_APIPort"
 )
@@ -70,6 +71,7 @@ var EnvironmentVariableKeys = []string{
 	DBUser,
 	DBPass,
 	DBDatabase,
+	DBSSLMode,
 	APIHost,
 	APIPort,
 }
@@ -94,6 +96,9 @@ func loadEnvironmentVariables() (cfg config.Config) {
 	}
 	if val := os.Getenv(DBDatabase); val != "" {
 		cfg.Database.Database = val
+	}
+	if val := os.Getenv(DBSSLMode); val != "" {
+		cfg.Database.SSLMode = val
 	}
 	if val := os.Getenv(APIHost); val != "" {
 		cfg.HTTPAPI.Host = val
@@ -122,6 +127,9 @@ func merge(a, b config.Config) config.Config {
 	}
 	if b.Database.Database != "" {
 		a.Database.Database = b.Database.Database
+	}
+	if b.Database.SSLMode != "" {
+		a.Database.SSLMode = b.Database.SSLMode
 	}
 	if b.HTTPAPI.Host != "" {
 		a.HTTPAPI.Host = b.HTTPAPI.Host

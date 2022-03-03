@@ -2,7 +2,7 @@ services:
   db:
     image: postgres:latest
     volumes:
-      - db_data:/var/lib/mysql_goluca
+      - db_data:/var/lib/pgdata_goluca
     environment:
       POSTGRES_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
       POSTGRES_DB: goluca
