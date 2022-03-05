@@ -12,7 +12,7 @@ TODO
     - [x] Add Integration testing
     - [x] Add fail case account controller testing
     - [x] Use httptest for tests instead of setting up an http server for each test
-        - [ ] Fix bug where connection is rejected (I sus due to db+http connection limitations in unix)
+        - [x] Fix bug where connection is rejected (I sus due to db+http connection limitations in unix)
     - [ ] Add cursor testing for listing accounts
     - [ ] Add fuzzing
     - [ ] Create a seeder for a basic dev environment of data
