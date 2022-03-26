@@ -8,7 +8,7 @@ import (
 	"github.com/go-playground/validator"
 	"github.com/hampgoodwin/GoLuca/internal/config"
 	"github.com/hampgoodwin/errors"
-	"github.com/stretchr/testify/require"
+	"github.com/matryer/is"
 )
 
 func TestLoad(t *testing.T) {
@@ -154,7 +154,7 @@ func TestLoad(t *testing.T) {
 		},
 	}
 
-	a := require.New(t)
+	a := is.New(t)
 	for i, tc := range testCases {
 		t.Run(fmt.Sprintf("%d:%s", i, tc.description), func(t *testing.T) {
 			resetApplicationEnvironmentVariables()
@@ -166,12 +166,12 @@ func TestLoad(t *testing.T) {
 
 			actual, err := Load(tc.cfg, tc.filepath)
 			if tc.err != nil {
-				a.NotNil(err)
+				a.True(err != nil)
 				// Using errors.As because it detects validator.ValidationErrors
-				a.ErrorAs(err, &tc.err)
+				a.True(errors.As(err, &tc.err))
 				return
 			}
-			a.NoError(err)
+			a.NoErr(err)
 			a.Equal(tc.expected, actual)
 		})
 	}
@@ -225,17 +225,17 @@ func TestLoadConfigurationFile(t *testing.T) {
 		},
 	}
 
-	a := require.New(t)
+	a := is.New(t)
 
 	for i, tc := range testCases {
 		t.Run(fmt.Sprintf("%d:%s", i, tc.description), func(t *testing.T) {
 			actual, err := loadConfigurationFile(tc.filepath)
 			if tc.err != nil {
-				a.NotNil(err)
-				a.ErrorAs(err, &tc.err)
+				a.True(err != nil)
+				a.True(errors.As(err, &tc.err))
 				return
 			}
-			a.NoError(err)
+			a.NoErr(err)
 			a.Equal(tc.expected, actual)
 		})
 	}
@@ -304,7 +304,7 @@ func TestLoadEnvironmentVariables(t *testing.T) {
 		},
 	}
 
-	a := require.New(t)
+	a := is.New(t)
 	for i, tc := range testCases {
 		// clean the
 		t.Run(fmt.Sprintf("%d:%s", i, tc.description), func(t *testing.T) {
