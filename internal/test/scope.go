@@ -94,7 +94,7 @@ func NewScope(t *testing.T) (Scope, error) {
 		return s, errors.Wrap(err, "setting up new environment")
 	}
 
-	s.HTTPTestServer = httptest.NewServer(s.Env.HTTPMux)
+	// s.HTTPTestServer = httptest.NewServer(s.Env.HTTPMux)
 
 	t.Cleanup(func() { s.CleanupScope(t) })
 	return s, nil

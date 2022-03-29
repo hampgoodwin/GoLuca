@@ -1,12 +1,8 @@
 package environment
 
 import (
-	"net/http"
-
-	"github.com/go-chi/chi"
 	"github.com/hampgoodwin/GoLuca/internal/config"
 	"github.com/hampgoodwin/GoLuca/internal/configloader"
-	"github.com/hampgoodwin/GoLuca/internal/controller"
 	"github.com/hampgoodwin/GoLuca/internal/database"
 	"github.com/hampgoodwin/GoLuca/internal/repository"
 	"github.com/hampgoodwin/GoLuca/internal/service"
@@ -23,8 +19,8 @@ type Environment struct {
 	Log    *zap.Logger
 
 	// API: HTTPServer and controllers
-	HTTPMux    *chi.Mux
-	controller *controller.Controller
+	// HTTPMux    *chi.Mux
+	// controller *controller.Controller
 
 	// service
 	service *service.Service
@@ -101,21 +97,21 @@ func New(e Environment, fp string) (Environment, error) {
 	}
 
 	// Controllers
-	if env.controller == nil {
-		env, err = SetController(env, env.service)
-		if err != nil {
-			return env, errors.Wrap(err, "setting environment controller")
-		}
-	}
+	// if env.controller == nil {
+	// 	env, err = SetController(env, env.service)
+	// 	if err != nil {
+	// 		return env, errors.Wrap(err, "setting environment controller")
+	// 	}
+	// }
 
 	// register routes
-	if env.HTTPMux == nil {
-		env.HTTPMux = controller.Register(
-			env.Log,
-			env.controller.RegisterAccountRoutes,
-			env.controller.RegisterTransactionRoutes,
-		)
-	}
+	// if env.HTTPMux == nil {
+	// env.HTTPMux = controller.Register(
+	// 	env.Log,
+	// 	env.controller.RegisterAccountRoutes,
+	// 	env.controller.RegisterTransactionRoutes,
+	// )
+	// }
 
 	return env, nil
 }
@@ -157,19 +153,19 @@ func SetService(env Environment, r *repository.Repository) (Environment, error) 
 	return env, nil
 }
 
-func SetController(env Environment, s *service.Service) (Environment, error) {
-	if s == nil {
-		return env, errors.New("cannot set environment controller without service")
-	}
-	env.controller = controller.NewController(env.Log, s)
-	return env, nil
-}
+// func SetController(env Environment, s *service.Service) (Environment, error) {
+// 	if s == nil {
+// 		return env, errors.New("cannot set environment controller without service")
+// 	}
+// 	env.controller = controller.NewController(env.Log, s)
+// 	return env, nil
+// }
 
-func NewHTTPServer(env Environment) *http.Server {
-	s := &http.Server{
-		Addr:     env.Config.HTTPAPI.AddressString(),
-		ErrorLog: zap.NewStdLog(env.Log),
-		Handler:  env.HTTPMux,
-	}
-	return s
-}
+// func NewHTTPServer(env Environment) *http.Server {
+// 	s := &http.Server{
+// 		Addr:     env.Config.HTTPAPI.AddressString(),
+// 		ErrorLog: zap.NewStdLog(env.Log),
+// 		Handler:  env.HTTPMux,
+// 	}
+// 	return s
+// }
