@@ -12,15 +12,15 @@ import (
 	"go.uber.org/zap"
 )
 
-type AccountRequest struct {
+type accountRequest struct {
 	*account.Account `json:"account" validate:"required"`
 }
 
-type AccountResponse struct {
+type accountResponse struct {
 	*account.Account `json:"account" validate:"required"`
 }
 
-type AccountsResponse struct {
+type accountsResponse struct {
 	Accounts   []account.Account `json:"accounts" validated:"required"`
 	NextCursor string            `json:"nextCursor,omitempty" validated:"base64"`
 }
@@ -48,7 +48,7 @@ func (c *Controller) getAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res := &AccountResponse{Account: account}
+	res := &accountResponse{Account: account}
 	c.respond(w, res, http.StatusOK)
 }
 
@@ -68,13 +68,13 @@ func (c *Controller) getAccounts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res := &AccountsResponse{Accounts: accounts, NextCursor: *nextCursor}
+	res := &accountsResponse{Accounts: accounts, NextCursor: *nextCursor}
 	c.respond(w, res, http.StatusOK)
 }
 
 func (c *Controller) createAccount(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	req := &AccountRequest{}
+	req := &accountRequest{}
 	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
 		c.respondError(w, c.log, errors.WrapWithErrorMessage(err, errors.NotDeserializable, err.Error(), "deserializing request body"))
 		return
@@ -86,7 +86,7 @@ func (c *Controller) createAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res := AccountResponse{Account: created}
+	res := accountResponse{Account: created}
 	w.WriteHeader(http.StatusCreated)
 	c.respond(w, res, http.StatusCreated)
 }

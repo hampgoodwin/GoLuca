@@ -20,15 +20,17 @@ import (
 )
 
 type Scope struct {
-	Config         config.Config
-	Server         *http.Server
-	Env            environment.Environment
-	DB             *pgxpool.Pool
-	dbDatabase     string
-	Is             *is.I
+	Config config.Config
+	Env    environment.Environment
+
+	Ctx context.Context
+	Is  *is.I
+
 	HTTPTestServer *httptest.Server
 	HTTPClient     *http.Client
-	Ctx            context.Context
+
+	DB         *pgxpool.Pool
+	dbDatabase string
 }
 
 func GetScope(t *testing.T) Scope {
@@ -49,62 +51,60 @@ func NewScope(t *testing.T) (Scope, error) {
 	s.Is = is.New(t)
 	s.HTTPClient = &http.Client{Timeout: time.Second * 30}
 
-	var err error
-
-	// swap out the database for a new random one
-	gofakeit.Seed(0)
-	s.dbDatabase = strings.ToLower(strings.Replace(gofakeit.Name(), " ", "", -1))
-	s.DB, err = database.NewDatabasePool(s.Env.Config.Database.ConnectionString())
-	if err != nil {
-		return s, errors.Wrap(err, "opening new database connection")
+	if err := s.NewDatabase(t); err != nil {
+		return s, errors.Wrap(err, "creating new test db")
 	}
-	s.Env, err = environment.SetDatabase(s.Env, s.DB)
-	if err != nil {
-		return s, err
-	}
-
-	// Create the new database with the existing database connection pool
-	if err := database.CreateDatabase(s.DB, s.dbDatabase); err != nil {
-		return s, errors.Wrap(err, "creating test database")
-	}
-	environment.CloseDatabase(s.Env)
-
-	dbCFG := s.Env.Config.Database
-	dbCFG.Database = s.dbDatabase
-	s.DB, err = database.NewDatabasePool(dbCFG.ConnectionString())
-	if err != nil {
-		return s, errors.Wrap(err, "opening new database connection")
-	}
-	s.Env, err = environment.SetDatabase(s.Env, s.DB)
-	if err != nil {
-		return s, errors.Wrap(err, "setting environment database to test database")
-	}
-	// run migration on the new database
-	if err := environment.MigrateDatabase(s.Env); err != nil {
-		return s, errors.Wrap(err, fmt.Sprintf("migrating test database %q", s.dbDatabase))
-	}
-
-	s.Env, err = environment.SetRepository(s.Env, s.DB)
-	if err != nil {
-		return s, errors.Wrap(err, "setting test repository with test database")
-	}
-
-	s.Env, err = environment.New(s.Env, "")
-	if err != nil {
-		return s, errors.Wrap(err, "setting up new environment")
-	}
-
-	// s.HTTPTestServer = httptest.NewServer(s.Env.HTTPMux)
 
 	t.Cleanup(func() { s.CleanupScope(t) })
 	return s, nil
 }
 
+func (s *Scope) NewDatabase(t *testing.T) error {
+	// Get a random name for a database
+	gofakeit.Seed(0)
+	s.dbDatabase = strings.ToLower(strings.Replace(gofakeit.Name(), " ", "", -1))
+	var err error
+	// Create a connection pool on the default database
+	s.DB, err = database.NewDatabasePool(s.Env.Config.Database.ConnectionString())
+	if err != nil {
+		return errors.Wrap(err, "opening new database connection")
+	}
+
+	// Create the new database with the existing database connection pool
+	if err := database.CreateDatabase(s.DB, s.dbDatabase); err != nil {
+		return errors.Wrap(err, "creating test database")
+	}
+	// Close the old connection
+	s.DB.Close()
+
+	// Open a connection to the newly created random database
+	dbCFG := s.Env.Config.Database
+	dbCFG.Database = s.dbDatabase
+	s.DB, err = database.NewDatabasePool(dbCFG.ConnectionString())
+	if err != nil {
+		return errors.Wrap(err, "opening new database connection")
+	}
+
+	// run migration on the new database
+	if err := database.Migrate(s.DB); err != nil {
+		return errors.Wrap(err, fmt.Sprintf("migrating test database %q", s.dbDatabase))
+	}
+
+	return nil
+}
+
+func (s *Scope) SetHTTP(t *testing.T, handler http.Handler) {
+	s.HTTPTestServer = httptest.NewServer(handler)
+	s.HTTPClient = &http.Client{Timeout: time.Second * 30}
+}
+
 func (s *Scope) CleanupScope(t *testing.T) {
 	t.Helper()
-	environment.CloseDatabase(s.Env)
+	s.DB.Close()
 
-	s.HTTPTestServer.Close()
+	if s.HTTPTestServer != nil {
+		s.HTTPTestServer.Close()
+	}
 
 	db, _ := database.NewDatabasePool(s.Env.Config.Database.ConnectionString())
 	err := database.DropDatabase(db, s.dbDatabase)
