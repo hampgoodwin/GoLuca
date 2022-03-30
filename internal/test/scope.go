@@ -60,6 +60,7 @@ func NewScope(t *testing.T) (Scope, error) {
 }
 
 func (s *Scope) NewDatabase(t *testing.T) error {
+	t.Helper()
 	// Get a random name for a database
 	gofakeit.Seed(0)
 	s.dbDatabase = strings.ToLower(strings.Replace(gofakeit.Name(), " ", "", -1))
@@ -94,6 +95,7 @@ func (s *Scope) NewDatabase(t *testing.T) error {
 }
 
 func (s *Scope) SetHTTP(t *testing.T, handler http.Handler) {
+	t.Helper()
 	s.HTTPTestServer = httptest.NewServer(handler)
 	s.HTTPClient = &http.Client{Timeout: time.Second * 30}
 }
