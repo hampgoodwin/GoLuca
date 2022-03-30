@@ -78,7 +78,7 @@ func TestCreateAccount_CannotDeserialize(t *testing.T) {
 	err := json.NewDecoder(res.Body).Decode(&errRes)
 	s.Is.NoErr(err)
 
-	s.Is.Equal("json: cannot unmarshal string into Go value of type AccountRequest", errRes.Description)
+	s.Is.Equal("json: cannot unmarshal string into Go value of type controller.accountRequest", errRes.Description)
 
 }
 
