@@ -71,7 +71,7 @@ components:
       properties:
         description:
           type: string
-        debirAccount:
+        debitAccount:
           $ref: 'shared.yml#/components/schemas/uuid'
         creditAccount:
           $ref: 'shared.yml#/components/schemas/uuid'

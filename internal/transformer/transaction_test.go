@@ -9,7 +9,7 @@ import (
 	"github.com/hampgoodwin/GoLuca/pkg/amount"
 	"github.com/hampgoodwin/GoLuca/pkg/transaction"
 	"github.com/hampgoodwin/errors"
-	"github.com/stretchr/testify/require"
+	"github.com/matryer/is"
 )
 
 func TestNewTransactionFromHTTPTransaction(t *testing.T) {
@@ -57,18 +57,18 @@ func TestNewTransactionFromHTTPTransaction(t *testing.T) {
 		},
 	}
 
-	a := require.New(t)
+	a := is.New(t)
 	for i, tc := range testCases {
 		tc := tc
 		t.Run(fmt.Sprintf("%d:%s", i, tc.description), func(t *testing.T) {
 			t.Parallel()
 			actual, err := NewTransactionFromHTTPTransaction(tc.httpTransaction)
 			if tc.err != nil {
-				a.Error(err)
+				a.True(err != nil)
 				a.True(errors.Is(err, tc.err))
 				return
 			}
-			a.NoError(err)
+			a.NoErr(err)
 			a.Equal(tc.expected, actual)
 		})
 	}

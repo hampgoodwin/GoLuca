@@ -1,4 +1,4 @@
-package controller_test
+package controller
 
 import (
 	"bytes"
@@ -10,15 +10,15 @@ import (
 
 	"github.com/brianvoe/gofakeit"
 	"github.com/google/uuid"
-	"github.com/hampgoodwin/GoLuca/internal/controller"
 	"github.com/hampgoodwin/GoLuca/internal/test"
 	"github.com/hampgoodwin/GoLuca/pkg/account"
 )
 
 func TestCreateAccount(t *testing.T) {
 	s := test.GetScope(t)
+	s.SetHTTP(t, newTestHTTPHandler(s.Env.Log, s.DB))
 
-	aReq := controller.AccountRequest{
+	aReq := accountRequest{
 		Account: &account.Account{
 			Name:  "cash",
 			Type:  account.Asset,
@@ -29,11 +29,11 @@ func TestCreateAccount(t *testing.T) {
 	res := createAccount(t, &s, aReq)
 	defer res.Body.Close()
 
-	var aRes controller.AccountResponse
+	var aRes accountResponse
 	err := json.NewDecoder(res.Body).Decode(&aRes)
 	s.Is.NoErr(err)
 
-	s.Is.True(aRes != (controller.AccountResponse{}))
+	s.Is.True(aRes != (accountResponse{}))
 
 	s.Is.Equal(aReq.Account.Name, aRes.Account.Name)
 	s.Is.Equal(aReq.Account.Type, aRes.Account.Type)
@@ -44,8 +44,9 @@ func TestCreateAccount(t *testing.T) {
 
 func TestCreateAccount_InvalidRequestBody(t *testing.T) {
 	s := test.GetScope(t)
+	s.SetHTTP(t, newTestHTTPHandler(s.Env.Log, s.DB))
 
-	aReq := controller.AccountRequest{
+	aReq := accountRequest{
 		Account: &account.Account{
 			Name:  "",
 			Type:  account.Type("type"),
@@ -56,7 +57,7 @@ func TestCreateAccount_InvalidRequestBody(t *testing.T) {
 	res := createAccount(t, &s, aReq)
 	defer res.Body.Close()
 
-	var errRes controller.ErrorResponse
+	var errRes ErrorResponse
 	err := json.NewDecoder(res.Body).Decode(&errRes)
 	s.Is.NoErr(err)
 
@@ -66,25 +67,27 @@ func TestCreateAccount_InvalidRequestBody(t *testing.T) {
 
 func TestCreateAccount_CannotDeserialize(t *testing.T) {
 	s := test.GetScope(t)
+	s.SetHTTP(t, newTestHTTPHandler(s.Env.Log, s.DB))
 
 	bad := []byte{}
 
 	res := createAccount(t, &s, bad)
 	defer res.Body.Close()
 
-	var errRes controller.ErrorResponse
+	var errRes ErrorResponse
 	err := json.NewDecoder(res.Body).Decode(&errRes)
 	s.Is.NoErr(err)
 
-	s.Is.Equal("json: cannot unmarshal string into Go value of type controller.AccountRequest", errRes.Description)
+	s.Is.Equal("json: cannot unmarshal string into Go value of type controller.accountRequest", errRes.Description)
 
 }
 
 func TestGetAccount(t *testing.T) {
 	s := test.GetScope(t)
+	s.SetHTTP(t, newTestHTTPHandler(s.Env.Log, s.DB))
 
 	// Create an account and assert
-	aReq := controller.AccountRequest{
+	aReq := accountRequest{
 		Account: &account.Account{
 			Name:  "cash",
 			Type:  account.Asset,
@@ -95,7 +98,7 @@ func TestGetAccount(t *testing.T) {
 	res := createAccount(t, &s, aReq)
 	defer res.Body.Close()
 
-	var aRes controller.AccountResponse
+	var aRes accountResponse
 	err := json.NewDecoder(res.Body).Decode(&aRes)
 	s.Is.NoErr(err)
 
@@ -103,7 +106,7 @@ func TestGetAccount(t *testing.T) {
 	getRes := getAccount(t, &s, aRes.ID)
 	res.Body.Close()
 
-	var getARes controller.AccountResponse
+	var getARes accountResponse
 	err = json.NewDecoder(getRes.Body).Decode(&getARes)
 	s.Is.NoErr(err)
 
@@ -112,11 +115,12 @@ func TestGetAccount(t *testing.T) {
 
 func TestGetAccount_ErrorNotFound(t *testing.T) {
 	s := test.GetScope(t)
+	s.SetHTTP(t, newTestHTTPHandler(s.Env.Log, s.DB))
 
 	id := uuid.NewString()
 	res := getAccount(t, &s, id)
 
-	var errRes controller.ErrorResponse
+	var errRes ErrorResponse
 	err := json.NewDecoder(res.Body).Decode(&errRes)
 	s.Is.NoErr(err)
 	s.Is.Equal(fmt.Sprintf("account %q not found", id), errRes.Description)
@@ -124,6 +128,7 @@ func TestGetAccount_ErrorNotFound(t *testing.T) {
 
 func TestGetAccount_InvalidPersistedAccount(t *testing.T) {
 	s := test.GetScope(t)
+	s.SetHTTP(t, newTestHTTPHandler(s.Env.Log, s.DB))
 
 	id := gofakeit.Sentence(1)
 	parentID := gofakeit.Sentence(1)
@@ -145,9 +150,10 @@ func TestGetAccount_InvalidPersistedAccount(t *testing.T) {
 
 func TestGetAccounts(t *testing.T) {
 	s := test.GetScope(t)
+	s.SetHTTP(t, newTestHTTPHandler(s.Env.Log, s.DB))
 
 	// Create an account and assert
-	aReq := controller.AccountRequest{
+	aReq := accountRequest{
 		Account: &account.Account{
 			Name:  "cash",
 			Type:  account.Asset,
@@ -157,7 +163,7 @@ func TestGetAccounts(t *testing.T) {
 	res := createAccount(t, &s, aReq)
 	defer res.Body.Close()
 
-	var a1 controller.AccountResponse
+	var a1 accountResponse
 	err := json.NewDecoder(res.Body).Decode(&a1)
 	s.Is.NoErr(err)
 
@@ -165,7 +171,7 @@ func TestGetAccounts(t *testing.T) {
 	res2 := createAccount(t, &s, aReq)
 	defer res2.Body.Close()
 
-	var a2 controller.AccountResponse
+	var a2 accountResponse
 	err = json.NewDecoder(res2.Body).Decode(&a2)
 	s.Is.NoErr(err)
 
@@ -227,7 +233,7 @@ func getAccount(
 func getAccounts(
 	t *testing.T,
 	s *test.Scope,
-) controller.AccountsResponse {
+) accountsResponse {
 	// Get the created account and assert it's equal to the created account
 	req, err := http.NewRequest(
 		http.MethodGet,
@@ -239,7 +245,7 @@ func getAccounts(
 	res, err := s.HTTPClient.Do(req)
 	s.Is.NoErr(err)
 
-	var aRes controller.AccountsResponse
+	var aRes accountsResponse
 	err = json.NewDecoder(res.Body).Decode(&aRes)
 	s.Is.NoErr(err)
 

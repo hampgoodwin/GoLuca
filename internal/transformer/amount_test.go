@@ -9,7 +9,7 @@ import (
 	"github.com/hampgoodwin/GoLuca/internal/httpapi"
 	"github.com/hampgoodwin/GoLuca/pkg/amount"
 	"github.com/hampgoodwin/errors"
-	"github.com/stretchr/testify/require"
+	"github.com/matryer/is"
 )
 
 func TestNewAmountFromHTTPAmount(t *testing.T) {
@@ -42,7 +42,7 @@ func TestNewAmountFromHTTPAmount(t *testing.T) {
 		},
 	}
 
-	a := require.New(t)
+	a := is.New(t)
 
 	for i, tc := range testCases {
 		tc := tc
@@ -50,11 +50,10 @@ func TestNewAmountFromHTTPAmount(t *testing.T) {
 			t.Parallel()
 			actual, err := NewAmountFromHTTPAmount(tc.httpamount)
 			if err != nil {
-				a.Error(err)
 				a.True(errors.As(err, &tc.err))
 				return
 			}
-			a.NoError(err)
+			a.NoErr(err)
 			a.Equal(tc.expected, actual)
 		})
 	}

@@ -18,8 +18,7 @@ import (
 var migrations embed.FS
 
 // NewDatabasePool creates a new DB
-func NewDatabasePool(connString string) (*pgxpool.Pool, error) {
-	ctx := context.Background()
+func NewDatabasePool(ctx context.Context, connString string) (*pgxpool.Pool, error) {
 	var err error
 	DBPool, err := pgxpool.Connect(ctx, connString)
 	if err != nil {
