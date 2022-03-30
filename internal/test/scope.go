@@ -46,6 +46,7 @@ func GetScope(t *testing.T) Scope {
 func NewScope(t *testing.T) (Scope, error) {
 	s := Scope{}
 	s.Ctx = context.Background()
+
 	s.Env = environment.TestEnvironment
 	s.Env.Log = zap.NewNop()
 	s.Is = is.New(t)
@@ -66,7 +67,7 @@ func (s *Scope) NewDatabase(t *testing.T) error {
 	s.dbDatabase = strings.ToLower(strings.Replace(gofakeit.Name(), " ", "", -1))
 	var err error
 	// Create a connection pool on the default database
-	s.DB, err = database.NewDatabasePool(s.Env.Config.Database.ConnectionString())
+	s.DB, err = database.NewDatabasePool(s.Ctx, s.Env.Config.Database.ConnectionString())
 	if err != nil {
 		return errors.Wrap(err, "opening new database connection")
 	}
@@ -81,7 +82,7 @@ func (s *Scope) NewDatabase(t *testing.T) error {
 	// Open a connection to the newly created random database
 	dbCFG := s.Env.Config.Database
 	dbCFG.Database = s.dbDatabase
-	s.DB, err = database.NewDatabasePool(dbCFG.ConnectionString())
+	s.DB, err = database.NewDatabasePool(s.Ctx, dbCFG.ConnectionString())
 	if err != nil {
 		return errors.Wrap(err, "opening new database connection")
 	}
@@ -108,7 +109,7 @@ func (s *Scope) CleanupScope(t *testing.T) {
 		s.HTTPTestServer.Close()
 	}
 
-	db, _ := database.NewDatabasePool(s.Env.Config.Database.ConnectionString())
+	db, _ := database.NewDatabasePool(s.Ctx, s.Env.Config.Database.ConnectionString())
 	err := database.DropDatabase(db, s.dbDatabase)
 	s.Is.NoErr(err)
 }

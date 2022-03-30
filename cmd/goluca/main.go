@@ -23,7 +23,7 @@ func main() {
 		log.Panic("failed to create new environment")
 	}
 
-	db, err := database.NewDatabasePool(env.Config.Database.ConnectionString())
+	db, err := database.NewDatabasePool(ctx, env.Config.Database.ConnectionString())
 	if err != nil {
 		env.Log.Error("creating new database pool", zap.Error(err))
 		log.Fatal("error creating database pool on application start")
