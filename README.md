@@ -7,6 +7,7 @@ A Simple Accounting Ledger
 - Simple application which writes and reads accounting ledger entries
 
 TODO
+- [ ] use httpapi models for request/response of all resources
 - [ ] Testing
     - [x] Add more unit tests, solitary and sociable
     - [x] Add Integration testing
@@ -29,6 +30,7 @@ TODO
 - [ ] 011y
     - [ ] Add tracing
     - [ ] Add metrics
+- [x] decouple application runtime, environment, controller, and test!
 - [x] implement golang-migrate or similar db migration strategy
     - [x] include the sql files as bin data in binary so migrator can run them ez pz
 - [x] Complete the basic CRUD for book-keeping
