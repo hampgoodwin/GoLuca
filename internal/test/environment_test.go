@@ -7,9 +7,7 @@ import (
 )
 
 func TestNewTestEnvironment(t *testing.T) {
-	s, err := NewScope(t)
-	s.Is.NoErr(err)
+	s := GetScope(t)
 	s.Is.True(s != (Scope{}))
 	s.Is.Equal(config.Local, s.Env.Config)
-	s.Is.NoErr(err)
 }
