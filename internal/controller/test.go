@@ -17,5 +17,9 @@ func newTestHTTPHandler(
 	r := repository.NewRepository(db)
 	s := service.NewService(log, r)
 	c := NewController(log, s)
-	return router.Register(log, c.RegisterAccountRoutes)
+	return router.Register(
+		log,
+		c.RegisterAccountRoutes,
+		c.RegisterTransactionRoutes,
+	)
 }

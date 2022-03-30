@@ -193,7 +193,6 @@ func createAccount(
 	e interface{},
 ) *http.Response {
 	t.Helper()
-	s.SetHTTP(t, newTestHTTPHandler(s.Env.Log, s.DB))
 
 	var body = new(bytes.Buffer)
 	err := json.NewEncoder(body).Encode(e)
