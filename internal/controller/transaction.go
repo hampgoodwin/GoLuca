@@ -77,7 +77,7 @@ func (c *Controller) createTransaction(w http.ResponseWriter, r *http.Request) {
 
 	create, err := transformer.NewTransactionFromHTTPTransaction(req.Transaction)
 	if err != nil {
-		c.respondError(w, c.log, errors.Wrap(err, "transforming http api transaction to transaction"))
+		c.respondError(w, c.log, errors.Wrap(errors.WithError(err, errors.NotValidRequest), "transforming http api transaction to transaction"))
 		return
 	}
 

@@ -6,7 +6,9 @@ import (
 
 // Validate wraps the logic for using go-playground/validator.
 func Validate(i interface{}) error {
-	if err := validator.New().Struct(i); err != nil {
+	v := validator.New()
+	registerCustomerFunctions(v)
+	if err := v.Struct(i); err != nil {
 		if _, ok := err.(*validator.InvalidValidationError); ok {
 			return nil
 		}
@@ -16,4 +18,8 @@ func Validate(i interface{}) error {
 		}
 	}
 	return nil
+}
+
+func registerCustomerFunctions(v *validator.Validate) {
+	v.RegisterValidation("int64", int64)
 }

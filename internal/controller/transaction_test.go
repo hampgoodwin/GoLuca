@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/hampgoodwin/GoLuca/internal/httpapi"
@@ -72,6 +73,75 @@ func TestCreateTransaction(t *testing.T) {
 	s.Is.True(tRes.Entries[0].CreditAccount == revenueAccount.ID)
 	s.Is.True(tRes.Entries[0].DebitAccount == cashAccount.ID)
 	s.Is.True(tRes.Entries[0].Amount == amount.Amount{Value: 100, Currency: "USD"})
+
+	tReq.Entries[0].Amount.Value = "9223372036854775807"
+
+	res4 := createTransaction(t, &s, tReq)
+	defer res4.Body.Close()
+
+	err = json.NewDecoder(res4.Body).Decode(&tRes)
+	s.Is.NoErr(err)
+
+	s.Is.True(tRes.Entries[0].Amount == amount.Amount{Value: 9223372036854775807, Currency: "USD"})
+}
+
+func TestCreateTransaction_int64_overflow(t *testing.T) {
+	s := test.GetScope(t)
+	s.SetHTTP(t, newTestHTTPHandler(s.Env.Log, s.DB))
+
+	aReq := accountRequest{
+		Account: &account.Account{
+			Name:  "cash",
+			Type:  account.Asset,
+			Basis: "debit",
+		},
+	}
+	res := createAccount(t, &s, aReq)
+	defer res.Body.Close()
+	var aRes accountResponse
+	err := json.NewDecoder(res.Body).Decode(&aRes)
+	s.Is.NoErr(err)
+	cashAccount := aRes.Account
+
+	aReq = accountRequest{
+		Account: &account.Account{
+			Name:  "revenue",
+			Type:  account.Asset,
+			Basis: "credit",
+		},
+	}
+	res2 := createAccount(t, &s, aReq)
+	defer res2.Body.Close()
+	err = json.NewDecoder(res2.Body).Decode(&aRes)
+	s.Is.NoErr(err)
+	revenueAccount := aRes.Account
+
+	tReq := transactionRequest{
+		Transaction: httpapi.Transaction{
+			Description: "test",
+			Entries: []httpapi.Entry{
+				{
+					Description:   "",
+					DebitAccount:  cashAccount.ID,
+					CreditAccount: revenueAccount.ID,
+					Amount: httpapi.Amount{
+						Value:    "9223372036854775808",
+						Currency: "USD",
+					},
+				},
+			},
+		},
+	}
+
+	res3 := createTransaction(t, &s, tReq)
+	defer res3.Body.Close()
+
+	var errRes ErrorResponse
+	err = json.NewDecoder(res3.Body).Decode(&errRes)
+	s.Is.NoErr(err)
+
+	s.Is.True(errRes != (ErrorResponse{}))
+	s.Is.True(strings.Contains(errRes.ValidationErrors, "int64"))
 }
 
 func createTransaction(
