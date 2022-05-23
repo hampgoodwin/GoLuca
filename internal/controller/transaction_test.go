@@ -86,6 +86,7 @@ func TestCreateTransaction(t *testing.T) {
 }
 
 func TestGetTransaction(t *testing.T) {
+	t.Skip()
 	s := test.GetScope(t)
 	s.SetHTTP(t, newTestHTTPHandler(s.Env.Log, s.DB))
 
