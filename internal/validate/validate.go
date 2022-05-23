@@ -21,5 +21,5 @@ func Validate(i interface{}) error {
 }
 
 func registerCustomerFunctions(v *validator.Validate) {
-	v.RegisterValidation("int64", int64)
+	_ = v.RegisterValidation("int64", int64)
 }
