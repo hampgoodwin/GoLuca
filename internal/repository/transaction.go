@@ -14,12 +14,12 @@ import (
 )
 
 // GetTransaction get's a transaction record, without it's entries, by the transaction ID
-func (r *Repository) GetTransaction(ctx context.Context, transactionID string) (*transaction.Transaction, error) {
+func (r *Repository) GetTransaction(ctx context.Context, transactionID string) (transaction.Transaction, error) {
 	tx, err := r.database.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
-		return nil, errors.WithErrorMessage(err, errors.NotKnown, "beginning get transactions db transactoion")
+		return transaction.Transaction{}, errors.WithErrorMessage(err, errors.NotKnown, "beginning get transactions db transactoion")
 	}
-	returningTransaction := &transaction.Transaction{}
+	returningTransaction := transaction.Transaction{}
 	if err = tx.QueryRow(ctx,
 		`SELECT id, description, created_at
 		FROM transaction
@@ -30,25 +30,25 @@ func (r *Repository) GetTransaction(ctx context.Context, transactionID string) (
 		&returningTransaction.CreatedAt,
 	); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, errors.WithErrorMessage(err, errors.NotFound, fmt.Sprintf("transaction %q not found", transactionID))
+			return returningTransaction, errors.WithErrorMessage(err, errors.NotFound, fmt.Sprintf("transaction %q not found", transactionID))
 		}
-		return nil, errors.WithErrorMessage(err, errors.NotKnown, "scanning transaction result row")
+		return returningTransaction, errors.WithErrorMessage(err, errors.NotKnown, "scanning transaction result row")
 	}
 
 	returningTransaction.Entries, err = getEntriesByTransactionID(ctx, tx, transactionID)
 	if err != nil {
 		if err := tx.Rollback(ctx); err != nil {
-			return nil, errors.Wrap(err, "rolling back on fetching transaction entries error")
+			return returningTransaction, errors.Wrap(err, "rolling back on fetching transaction entries error")
 		}
-		return nil, errors.Wrap(err, fmt.Sprintf("getting entries by transaction %q", transactionID))
+		return returningTransaction, errors.Wrap(err, fmt.Sprintf("getting entries by transaction %q", transactionID))
 	}
 
 	if err := validate.Validate(returningTransaction); err != nil {
-		return nil, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating transaction fetched from database")
+		return returningTransaction, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating transaction fetched from database")
 	}
 
 	if err := tx.Commit(ctx); err != nil {
-		return nil, errors.WithErrorMessage(err, errors.NotKnown, "committing get transaction query")
+		return returningTransaction, errors.WithErrorMessage(err, errors.NotKnown, "committing get transaction query")
 	}
 
 	return returningTransaction, nil
@@ -115,20 +115,20 @@ func (r *Repository) GetTransactions(ctx context.Context, transactionID string, 
 }
 
 // CreateTransaction creates a transaction and associated entries in a single transaction
-func (r *Repository) CreateTransaction(ctx context.Context, create *transaction.Transaction) (*transaction.Transaction, error) {
+func (r *Repository) CreateTransaction(ctx context.Context, create transaction.Transaction) (transaction.Transaction, error) {
 	// get a db-transaction
 	tx, err := r.database.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
-		return nil, errors.WithErrorMessage(err, errors.NotKnown, "beginning create transaction db transaction")
+		return transaction.Transaction{}, errors.WithErrorMessage(err, errors.NotKnown, "beginning create transaction db transaction")
 	}
-	returningTransaction := &transaction.Transaction{}
+	returningTransaction := transaction.Transaction{}
 	if err := tx.QueryRow(ctx,
 		`INSERT INTO transaction (id, description, created_at) VALUES ($1, $2, $3)
 		RETURNING id, description, created_at
 		;`, create.ID, create.Description, create.CreatedAt).Scan(
 		&returningTransaction.ID, &returningTransaction.Description, &returningTransaction.CreatedAt,
 	); err != nil {
-		return nil, errors.WithErrorMessage(err, errors.NotKnown, "scanning transaction returned from insert")
+		return returningTransaction, errors.WithErrorMessage(err, errors.NotKnown, "scanning transaction returned from insert")
 	}
 
 	// insert the entries
@@ -149,23 +149,23 @@ func (r *Repository) CreateTransaction(ctx context.Context, create *transaction.
 			var pgErr *pgconn.PgError
 			if errors.As(err, &pgErr) {
 				if pgErr.Code == pgerrcode.ForeignKeyViolation {
-					return nil, errors.WithErrorMessage(err, errors.NoRelationshipFound, "inserting entry with foreign key constraint on transaction id")
+					return returningTransaction, errors.WithErrorMessage(err, errors.NoRelationshipFound, "inserting entry with foreign key constraint on transaction id")
 				}
 			}
-			return nil, errors.WithErrorMessage(err, errors.NotKnown, "scanning entry result row")
+			return returningTransaction, errors.WithErrorMessage(err, errors.NotKnown, "scanning entry result row")
 		}
 		returningTransaction.Entries = append(returningTransaction.Entries, returningEntry)
 	}
 
 	if err := validate.Validate(returningTransaction); err != nil {
 		if err := tx.Rollback(ctx); err != nil {
-			return nil, errors.WithErrorMessage(err, errors.NotKnown, "rolling back create transaction on validating transaction returned from create")
+			return returningTransaction, errors.WithErrorMessage(err, errors.NotKnown, "rolling back create transaction on validating transaction returned from create")
 		}
-		return nil, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating transaction returned from creation")
+		return returningTransaction, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating transaction returned from creation")
 	}
 
 	if err := tx.Commit(ctx); err != nil {
-		return nil, errors.WithErrorMessage(err, errors.NotKnown, "committing create transaction transaction")
+		return returningTransaction, errors.WithErrorMessage(err, errors.NotKnown, "committing create transaction transaction")
 	}
 	return returningTransaction, nil
 }

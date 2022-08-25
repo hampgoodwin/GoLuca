@@ -5,19 +5,20 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/hampgoodwin/GoLuca/internal/http/api"
 	"github.com/hampgoodwin/GoLuca/pkg/amount"
+	httpamount "github.com/hampgoodwin/GoLuca/pkg/http/v0/amount"
+	httptransaction "github.com/hampgoodwin/GoLuca/pkg/http/v0/transaction"
 	"github.com/hampgoodwin/GoLuca/pkg/transaction"
 	"github.com/hampgoodwin/errors"
 	"github.com/matryer/is"
 )
 
-func TestNewTransactionFromHTTPTransaction(t *testing.T) {
+func TestNewTransactionFromHTTPCreateTransaction(t *testing.T) {
 	debitAccount := uuid.NewString()
 	creditAccount := uuid.NewString()
 	testCases := []struct {
 		description     string
-		httpTransaction api.Transaction
+		httpTransaction httptransaction.CreateTransaction
 		expected        transaction.Transaction
 		err             error
 	}{
@@ -26,14 +27,14 @@ func TestNewTransactionFromHTTPTransaction(t *testing.T) {
 		},
 		{
 			description: "success",
-			httpTransaction: api.Transaction{
+			httpTransaction: httptransaction.CreateTransaction{
 				Description: "transaction",
-				Entries: []api.Entry{
+				Entries: []httptransaction.CreateEntry{
 					{
 						Description:   "1",
 						DebitAccount:  debitAccount,
 						CreditAccount: creditAccount,
-						Amount: api.Amount{
+						Amount: httpamount.Amount{
 							Value:    "100",
 							Currency: "USD",
 						},
@@ -62,7 +63,7 @@ func TestNewTransactionFromHTTPTransaction(t *testing.T) {
 		tc := tc
 		t.Run(fmt.Sprintf("%d:%s", i, tc.description), func(t *testing.T) {
 			t.Parallel()
-			actual, err := NewTransactionFromHTTPTransaction(tc.httpTransaction)
+			actual, err := NewTransactionFromHTTPCreateTransaction(tc.httpTransaction)
 			if tc.err != nil {
 				a.True(err != nil)
 				a.True(errors.Is(err, tc.err))

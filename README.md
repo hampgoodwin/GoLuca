@@ -2,7 +2,7 @@
 
 A Simple Accounting Ledger
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/hampgoodwin/GoLuca)](https://goreportcard.com/report/github.com/hampgoodwin/GoLuca) [![Coverage Status](https://coveralls.io/repos/github/hampgoodwin/GoLuca/badge.svg?branch=main)](https://coveralls.io/github/hampgoodwin/GoLuca?branch=main) [![golangci-lint](https://github.com/hampgoodwin/GoLuca/actions/workflows/golint-ci.yml/badge.svg)](https://github.com/hampgoodwin/GoLuca/actions/workflows/golint-ci.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/hampgoodwin/GoLuca)](https://goreportcard.com/report/github.com/hampgoodwin/GoLuca) [![Coverage Status](https://coveralls.io/repos/github/hampgoodwin/GoLuca/badge.svg)](https://coveralls.io/github/hampgoodwin/GoLuca) [![golangci-lint](https://github.com/hampgoodwin/GoLuca/actions/workflows/golint-ci.yml/badge.svg)](https://github.com/hampgoodwin/GoLuca/actions/workflows/golint-ci.yml)
 
 - Simple application which writes and reads accounting ledger entries
 
@@ -15,6 +15,11 @@ A Simple Accounting Ledger
 ---
 
 TODO
+- [ ] [implement safer enums](https://threedots.tech/post/safer-enums-in-go/)
+- [ ] version the api's
+- [ ] add gRPC methods, matching http spec
+- [ ] migrate to guid from uuid
+    - [ ] probably requires db migration
 - [ ] use httpapi models for request/response of all resources
 - [ ] Testing
     - [x] Add more unit tests, solitary and sociable
@@ -35,9 +40,11 @@ TODO
 - [ ] make a frontend with some dashboard functionality, (vue3 plz) OOOOH!!!
 - [ ] Events
     - [ ] Add eventing
-- [ ] 011y
+    - [ ] explore NATS
+- [ ] o11y
     - [ ] Add tracing
     - [ ] Add metrics
+        - [ ] OpenTelemetry metrics ready?
 - [x] decouple application runtime, environment, controller, and test!
 - [x] implement golang-migrate or similar db migration strategy
     - [x] include the sql files as bin data in binary so migrator can run them ez pz
