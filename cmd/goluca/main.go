@@ -10,8 +10,8 @@ import (
 	"github.com/hampgoodwin/GoLuca/internal/database"
 	"github.com/hampgoodwin/GoLuca/internal/environment"
 	"github.com/hampgoodwin/GoLuca/internal/http/controller"
+	"github.com/hampgoodwin/GoLuca/internal/http/router"
 	"github.com/hampgoodwin/GoLuca/internal/repository"
-	"github.com/hampgoodwin/GoLuca/internal/router"
 	"github.com/hampgoodwin/GoLuca/internal/service"
 	"go.uber.org/zap"
 )
