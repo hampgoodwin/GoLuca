@@ -12,4 +12,4 @@ then
     exit 1
 fi
 
-openapi preview-docs api/openapi.yml
+openapi preview-docs http/spec/openapi.yml

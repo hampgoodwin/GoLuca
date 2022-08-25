@@ -15,6 +15,10 @@ A Simple Accounting Ledger
 ---
 
 TODO
+- [ ] version the api's
+- [ ] add gRPC methods, matching http spec
+- [ ] migrate to guid from uuid
+    - [ ] probably requires db migration
 - [ ] use httpapi models for request/response of all resources
 - [ ] Testing
     - [x] Add more unit tests, solitary and sociable
