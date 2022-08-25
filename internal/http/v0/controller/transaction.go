@@ -9,7 +9,6 @@ import (
 	"github.com/hampgoodwin/GoLuca/internal/transformer"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
 	httptransaction "github.com/hampgoodwin/GoLuca/pkg/http/v0/transaction"
-	"github.com/hampgoodwin/GoLuca/pkg/transaction"
 	"github.com/hampgoodwin/errors"
 )
 
@@ -26,12 +25,12 @@ type transactionRequest struct {
 }
 
 type transactionResponse struct {
-	transaction.Transaction `json:"transaction" validate:"required"`
+	httptransaction.Transaction `json:"transaction" validate:"required"`
 }
 
 type transactionsResponse struct {
-	Transactions []transaction.Transaction `json:"transactions" validate:"required"`
-	NextCursor   string                    `json:"nextCursor,omitempty" validate:"base64"`
+	Transactions []httptransaction.Transaction `json:"transactions" validate:"required"`
+	NextCursor   string                        `json:"nextCursor,omitempty" validate:"base64"`
 }
 
 func (c *Controller) getTransactions(w http.ResponseWriter, r *http.Request) {
@@ -45,7 +44,21 @@ func (c *Controller) getTransactions(w http.ResponseWriter, r *http.Request) {
 		c.respondError(w, c.log, errors.Wrap(err, "getting transactions from service"))
 		return
 	}
-	res := &transactionsResponse{Transactions: transactions, NextCursor: *nextCursor}
+	if err := validate.Validate(transactions); err != nil {
+		c.respondError(w, c.log, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating transactions"))
+		return
+	}
+
+	responseTransactions := []httptransaction.Transaction{}
+	for _, transaction := range transactions {
+		responseTransactions = append(responseTransactions, transformer.NewHTTPTransactionFromTransaction(transaction))
+	}
+	if err := validate.Validate(responseTransactions); err != nil {
+		c.respondError(w, c.log, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating http response transactions"))
+		return
+	}
+
+	res := &transactionsResponse{Transactions: responseTransactions, NextCursor: *nextCursor}
 	c.respond(w, res, http.StatusOK)
 }
 
@@ -57,7 +70,17 @@ func (c *Controller) getTransaction(w http.ResponseWriter, r *http.Request) {
 		c.respondError(w, c.log, errors.Wrap(err, "getting transaction from service"))
 		return
 	}
-	res := &transactionResponse{Transaction: transaction}
+	if err := validate.Validate(transaction); err != nil {
+		c.respondError(w, c.log, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating transaction"))
+		return
+	}
+
+	responseTransaction := transformer.NewHTTPTransactionFromTransaction(transaction)
+	if err := validate.Validate(responseTransaction); err != nil {
+		c.respondError(w, c.log, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating http response transaction"))
+		return
+	}
+	res := &transactionResponse{Transaction: responseTransaction}
 	c.respond(w, res, http.StatusOK)
 }
 
@@ -69,7 +92,6 @@ func (c *Controller) createTransaction(w http.ResponseWriter, r *http.Request) {
 		c.respondError(w, c.log, errors.WrapWithErrorMessage(err, errors.NotDeserializable, err.Error(), "deserializing request body"))
 		return
 	}
-
 	if err := validate.Validate(req); err != nil {
 		c.respondError(w, c.log, errors.WithErrorMessage(err, errors.NotValidRequestData, "validating http api transaction request"))
 		return
@@ -80,13 +102,22 @@ func (c *Controller) createTransaction(w http.ResponseWriter, r *http.Request) {
 		c.respondError(w, c.log, errors.Wrap(errors.WithError(err, errors.NotValidRequest), "transforming http api transaction to transaction"))
 		return
 	}
-
-	rtrn, err := c.service.CreateTransactionAndEntries(ctx, create)
+	transaction, err := c.service.CreateTransactionAndEntries(ctx, create)
 	if err != nil {
 		c.respondError(w, c.log, errors.Wrap(err, "creating transaction in service"))
 		return
 	}
+	if err := validate.Validate(transaction); err != nil {
+		c.respondError(w, c.log, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating transaction"))
+		return
+	}
 
-	res := &transactionResponse{Transaction: rtrn}
+	responseTransaction := transformer.NewHTTPTransactionFromTransaction(transaction)
+	if err := validate.Validate(responseTransaction); err != nil {
+		c.respondError(w, c.log, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating http response transaction"))
+		return
+	}
+
+	res := &transactionResponse{Transaction: responseTransaction}
 	c.respond(w, res, http.StatusCreated)
 }

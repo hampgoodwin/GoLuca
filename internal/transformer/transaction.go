@@ -37,3 +37,7 @@ func NewEntryFromHTTPCreateEntry(in httptransaction.CreateEntry) (transaction.En
 	out.Amount = inAmount
 	return out, nil
 }
+
+func NewHTTPTransactionFromTransaction(in transaction.Transaction) httptransaction.Transaction {
+	return httptransaction.Transaction(in)
+}
