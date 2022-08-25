@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/go-playground/validator"
-	"github.com/hampgoodwin/GoLuca/internal/http/api"
+	"github.com/hampgoodwin/GoLuca/internal/http/v0/api"
 	"github.com/hampgoodwin/GoLuca/pkg/amount"
 	"github.com/hampgoodwin/errors"
 	"github.com/matryer/is"

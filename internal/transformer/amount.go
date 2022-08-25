@@ -3,7 +3,7 @@ package transformer
 import (
 	"strconv"
 
-	"github.com/hampgoodwin/GoLuca/internal/http/api"
+	"github.com/hampgoodwin/GoLuca/internal/http/v0/api"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
 	"github.com/hampgoodwin/GoLuca/pkg/amount"
 	"github.com/hampgoodwin/errors"

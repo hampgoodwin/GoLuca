@@ -3,7 +3,7 @@ package controller
 import (
 	"net/http"
 
-	"github.com/hampgoodwin/GoLuca/internal/http/router"
+	"github.com/hampgoodwin/GoLuca/internal/http/v0/router"
 	"github.com/hampgoodwin/GoLuca/internal/repository"
 	"github.com/hampgoodwin/GoLuca/internal/service"
 	"github.com/jackc/pgx/v4/pgxpool"
