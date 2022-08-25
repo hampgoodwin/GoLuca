@@ -35,9 +35,11 @@ TODO
 - [ ] make a frontend with some dashboard functionality, (vue3 plz) OOOOH!!!
 - [ ] Events
     - [ ] Add eventing
-- [ ] 011y
+    - [ ] explore NATS
+- [ ] o11y
     - [ ] Add tracing
     - [ ] Add metrics
+        - [ ] OpenTelemetry metrics ready?
 - [x] decouple application runtime, environment, controller, and test!
 - [x] implement golang-migrate or similar db migration strategy
     - [x] include the sql files as bin data in binary so migrator can run them ez pz
