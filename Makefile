@@ -1,5 +1,5 @@
 
-GOLANGCI_LINT_VERSION = v1.49
+GOLANGCI_LINT_VERSION = latest
 
 .PHONY: test
 test:

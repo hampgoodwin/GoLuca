@@ -6,6 +6,14 @@ A Simple Accounting Ledger
 
 - Simple application which writes and reads accounting ledger entries
 
+## Tooling
+
+- [gofumpt](https://github.com/mvdan/gofumpt) for formatting.
+- [golangci-lint](https://github.com/golangci/golangci-lint) for linting.
+- [colima](https://github.com/abiosoft/colima) for container runtimes.
+
+---
+
 TODO
 - [ ] use httpapi models for request/response of all resources
 - [ ] Testing

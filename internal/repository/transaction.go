@@ -47,10 +47,14 @@ func (r *Repository) GetTransaction(ctx context.Context, transactionID string) (
 		return nil, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating transaction fetched from database")
 	}
 
+	if err := tx.Commit(ctx); err != nil {
+		return nil, errors.WithErrorMessage(err, errors.NotKnown, "committing get transaction query")
+	}
+
 	return returningTransaction, nil
 }
 
-// GetTransactions get's transactions paginaged by cursor and limit
+// GetTransactions get's transactions paginated by cursor and limit
 func (r *Repository) GetTransactions(ctx context.Context, transactionID string, createdAt time.Time, limit uint64) ([]transaction.Transaction, error) {
 	tx, err := r.database.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
@@ -102,6 +106,9 @@ func (r *Repository) GetTransactions(ctx context.Context, transactionID string, 
 
 	if err := validate.Validate(returningTransactions); err != nil {
 		return nil, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating transactions fetched from database")
+	}
+	if err := tx.Commit(ctx); err != nil {
+		return nil, errors.WithErrorMessage(err, errors.NotKnown, "committing get transactions transaction")
 	}
 
 	return returningTransactions, nil
@@ -158,7 +165,7 @@ func (r *Repository) CreateTransaction(ctx context.Context, create *transaction.
 	}
 
 	if err := tx.Commit(ctx); err != nil {
-		return nil, errors.WithErrorMessage(err, errors.NotKnown, "committing transaction creation transaction")
+		return nil, errors.WithErrorMessage(err, errors.NotKnown, "committing create transaction transaction")
 	}
 	return returningTransaction, nil
 }
