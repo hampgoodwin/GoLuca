@@ -102,11 +102,7 @@ func (c *Controller) createAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	create, err := transformer.NewAccountFromHTTPAccount(req.Account)
-	if err != nil {
-		c.respondError(w, c.log, errors.Wrap(errors.WithError(err, errors.NotValidRequest), "transforming http api transaction to transaction"))
-		return
-	}
+	create := transformer.NewAccountFromHTTPCreateAccount(req.Account)
 
 	created, err := c.service.CreateAccount(ctx, create)
 	if err != nil {

@@ -13,7 +13,7 @@ import (
 	"github.com/matryer/is"
 )
 
-func TestNewTransactionFromHTTPTransaction(t *testing.T) {
+func TestNewTransactionFromHTTPCreateTransaction(t *testing.T) {
 	debitAccount := uuid.NewString()
 	creditAccount := uuid.NewString()
 	testCases := []struct {

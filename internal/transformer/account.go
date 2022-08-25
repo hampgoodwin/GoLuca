@@ -5,11 +5,11 @@ import (
 	httpaccount "github.com/hampgoodwin/GoLuca/pkg/http/account"
 )
 
-func NewAccountFromHTTPAccount(in httpaccount.CreateAccount) (account.Account, error) {
+func NewAccountFromHTTPCreateAccount(in httpaccount.CreateAccount) account.Account {
 	out := account.Account{}
 
 	if in == (httpaccount.CreateAccount{}) {
-		return out, nil
+		return out
 	}
 
 	out.ParentID = in.ParentID
@@ -17,7 +17,7 @@ func NewAccountFromHTTPAccount(in httpaccount.CreateAccount) (account.Account, e
 	out.Type = in.Type
 	out.Basis = in.Basis
 
-	return out, nil
+	return out
 }
 
 func NewHTTPAccountFromAccount(in account.Account) httpaccount.Account {
