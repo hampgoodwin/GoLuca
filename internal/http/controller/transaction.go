@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
-	"github.com/hampgoodwin/GoLuca/internal/httpapi"
+	"github.com/hampgoodwin/GoLuca/internal/http/api"
 	"github.com/hampgoodwin/GoLuca/internal/transformer"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
 	"github.com/hampgoodwin/GoLuca/pkg/transaction"
@@ -22,7 +22,7 @@ func (c *Controller) RegisterTransactionRoutes(r *chi.Mux) {
 }
 
 type transactionRequest struct {
-	httpapi.Transaction `json:"transaction" validate:"required"`
+	api.Transaction `json:"transaction" validate:"required"`
 }
 
 type transactionResponse struct {
@@ -77,7 +77,7 @@ func (c *Controller) createTransaction(w http.ResponseWriter, r *http.Request) {
 
 	create, err := transformer.NewTransactionFromHTTPTransaction(req.Transaction)
 	if err != nil {
-		c.respondError(w, c.log, errors.Wrap(err, "transforming http api transaction to transaction"))
+		c.respondError(w, c.log, errors.Wrap(errors.WithError(err, errors.NotValidRequest), "transforming http api transaction to transaction"))
 		return
 	}
 
