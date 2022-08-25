@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	api "github.com/hampgoodwin/GoLuca/internal/http/httpapi"
+	"github.com/hampgoodwin/GoLuca/internal/http/api"
 	"github.com/hampgoodwin/GoLuca/pkg/amount"
 	"github.com/hampgoodwin/GoLuca/pkg/transaction"
 	"github.com/hampgoodwin/errors"

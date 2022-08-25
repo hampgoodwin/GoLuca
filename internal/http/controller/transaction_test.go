@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	api "github.com/hampgoodwin/GoLuca/internal/http/httpapi"
+	"github.com/hampgoodwin/GoLuca/internal/http/api"
 	"github.com/hampgoodwin/GoLuca/internal/test"
 	"github.com/hampgoodwin/GoLuca/pkg/account"
 	"github.com/hampgoodwin/GoLuca/pkg/amount"
