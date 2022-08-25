@@ -1,6 +1,6 @@
 module github.com/hampgoodwin/GoLuca
 
-go 1.17
+go 1.19
 
 require (
 	github.com/brianvoe/gofakeit v3.18.0+incompatible
