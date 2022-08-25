@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/hampgoodwin/GoLuca/pkg/account"
-	httpaccount "github.com/hampgoodwin/GoLuca/pkg/http/account"
+	httpaccount "github.com/hampgoodwin/GoLuca/pkg/http/v0/account"
 	"github.com/matryer/is"
 )
 

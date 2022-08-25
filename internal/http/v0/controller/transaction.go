@@ -8,7 +8,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/hampgoodwin/GoLuca/internal/transformer"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
-	httptransaction "github.com/hampgoodwin/GoLuca/pkg/http/transaction"
+	httptransaction "github.com/hampgoodwin/GoLuca/pkg/http/v0/transaction"
 	"github.com/hampgoodwin/GoLuca/pkg/transaction"
 	"github.com/hampgoodwin/errors"
 )

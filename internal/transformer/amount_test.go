@@ -7,7 +7,7 @@ import (
 
 	"github.com/go-playground/validator"
 	"github.com/hampgoodwin/GoLuca/pkg/amount"
-	httpamount "github.com/hampgoodwin/GoLuca/pkg/http/amount"
+	httpamount "github.com/hampgoodwin/GoLuca/pkg/http/v0/amount"
 	"github.com/hampgoodwin/errors"
 	"github.com/matryer/is"
 )

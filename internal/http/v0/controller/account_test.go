@@ -12,7 +12,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/hampgoodwin/GoLuca/internal/test"
 	"github.com/hampgoodwin/GoLuca/pkg/account"
-	httpaccount "github.com/hampgoodwin/GoLuca/pkg/http/account"
+	httpaccount "github.com/hampgoodwin/GoLuca/pkg/http/v0/account"
 )
 
 func TestCreateAccount(t *testing.T) {

@@ -10,9 +10,9 @@ import (
 	"github.com/hampgoodwin/GoLuca/internal/test"
 	"github.com/hampgoodwin/GoLuca/pkg/account"
 	"github.com/hampgoodwin/GoLuca/pkg/amount"
-	httpaccount "github.com/hampgoodwin/GoLuca/pkg/http/account"
-	httpamount "github.com/hampgoodwin/GoLuca/pkg/http/amount"
-	httptransaction "github.com/hampgoodwin/GoLuca/pkg/http/transaction"
+	httpaccount "github.com/hampgoodwin/GoLuca/pkg/http/v0/account"
+	httpamount "github.com/hampgoodwin/GoLuca/pkg/http/v0/amount"
+	httptransaction "github.com/hampgoodwin/GoLuca/pkg/http/v0/transaction"
 )
 
 func TestCreateTransaction(t *testing.T) {

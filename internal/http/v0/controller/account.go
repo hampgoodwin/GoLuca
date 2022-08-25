@@ -8,7 +8,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/hampgoodwin/GoLuca/internal/transformer"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
-	httpaccount "github.com/hampgoodwin/GoLuca/pkg/http/account"
+	httpaccount "github.com/hampgoodwin/GoLuca/pkg/http/v0/account"
 
 	"github.com/hampgoodwin/errors"
 	"go.uber.org/zap"

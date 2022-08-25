@@ -3,7 +3,7 @@ package transaction
 import (
 	"time"
 
-	httpamount "github.com/hampgoodwin/GoLuca/pkg/http/amount"
+	httpamount "github.com/hampgoodwin/GoLuca/pkg/http/v0/amount"
 )
 
 type CreateTransaction struct {

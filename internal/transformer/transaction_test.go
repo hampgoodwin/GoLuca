@@ -6,8 +6,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/hampgoodwin/GoLuca/pkg/amount"
-	httpamount "github.com/hampgoodwin/GoLuca/pkg/http/amount"
-	httptransaction "github.com/hampgoodwin/GoLuca/pkg/http/transaction"
+	httpamount "github.com/hampgoodwin/GoLuca/pkg/http/v0/amount"
+	httptransaction "github.com/hampgoodwin/GoLuca/pkg/http/v0/transaction"
 	"github.com/hampgoodwin/GoLuca/pkg/transaction"
 	"github.com/hampgoodwin/errors"
 	"github.com/matryer/is"

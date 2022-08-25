@@ -5,7 +5,7 @@ import (
 
 	"github.com/hampgoodwin/GoLuca/internal/validate"
 	"github.com/hampgoodwin/GoLuca/pkg/amount"
-	httpamount "github.com/hampgoodwin/GoLuca/pkg/http/amount"
+	httpamount "github.com/hampgoodwin/GoLuca/pkg/http/v0/amount"
 	"github.com/hampgoodwin/errors"
 )
 

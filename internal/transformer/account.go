@@ -2,7 +2,7 @@ package transformer
 
 import (
 	"github.com/hampgoodwin/GoLuca/pkg/account"
-	httpaccount "github.com/hampgoodwin/GoLuca/pkg/http/account"
+	httpaccount "github.com/hampgoodwin/GoLuca/pkg/http/v0/account"
 )
 
 func NewAccountFromHTTPCreateAccount(in httpaccount.CreateAccount) account.Account {
