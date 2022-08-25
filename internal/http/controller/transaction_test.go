@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hampgoodwin/GoLuca/internal/httpapi"
+	api "github.com/hampgoodwin/GoLuca/internal/http/httpapi"
 	"github.com/hampgoodwin/GoLuca/internal/test"
 	"github.com/hampgoodwin/GoLuca/pkg/account"
 	"github.com/hampgoodwin/GoLuca/pkg/amount"
@@ -45,14 +45,14 @@ func TestCreateTransaction(t *testing.T) {
 	revenueAccount := aRes.Account
 
 	tReq := transactionRequest{
-		Transaction: httpapi.Transaction{
+		Transaction: api.Transaction{
 			Description: "test",
-			Entries: []httpapi.Entry{
+			Entries: []api.Entry{
 				{
 					Description:   "",
 					DebitAccount:  cashAccount.ID,
 					CreditAccount: revenueAccount.ID,
-					Amount: httpapi.Amount{
+					Amount: api.Amount{
 						Value:    "100",
 						Currency: "USD",
 					},
@@ -118,14 +118,14 @@ func TestGetTransaction(t *testing.T) {
 	revenueAccount := aRes.Account
 
 	tReq := transactionRequest{
-		Transaction: httpapi.Transaction{
+		Transaction: api.Transaction{
 			Description: "test",
-			Entries: []httpapi.Entry{
+			Entries: []api.Entry{
 				{
 					Description:   "",
 					DebitAccount:  cashAccount.ID,
 					CreditAccount: revenueAccount.ID,
-					Amount: httpapi.Amount{
+					Amount: api.Amount{
 						Value:    "100",
 						Currency: "USD",
 					},
@@ -193,14 +193,14 @@ func TestCreateTransaction_int64_overflow(t *testing.T) {
 	revenueAccount := aRes.Account
 
 	tReq := transactionRequest{
-		Transaction: httpapi.Transaction{
+		Transaction: api.Transaction{
 			Description: "test",
-			Entries: []httpapi.Entry{
+			Entries: []api.Entry{
 				{
 					Description:   "",
 					DebitAccount:  cashAccount.ID,
 					CreditAccount: revenueAccount.ID,
-					Amount: httpapi.Amount{
+					Amount: api.Amount{
 						Value:    "9223372036854775808",
 						Currency: "USD",
 					},

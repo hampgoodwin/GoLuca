@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/hampgoodwin/GoLuca/internal/httpapi"
+	api "github.com/hampgoodwin/GoLuca/internal/http/httpapi"
 	"github.com/hampgoodwin/GoLuca/pkg/amount"
 	"github.com/hampgoodwin/GoLuca/pkg/transaction"
 	"github.com/hampgoodwin/errors"
@@ -17,7 +17,7 @@ func TestNewTransactionFromHTTPTransaction(t *testing.T) {
 	creditAccount := uuid.NewString()
 	testCases := []struct {
 		description     string
-		httpTransaction httpapi.Transaction
+		httpTransaction api.Transaction
 		expected        transaction.Transaction
 		err             error
 	}{
@@ -26,14 +26,14 @@ func TestNewTransactionFromHTTPTransaction(t *testing.T) {
 		},
 		{
 			description: "success",
-			httpTransaction: httpapi.Transaction{
+			httpTransaction: api.Transaction{
 				Description: "transaction",
-				Entries: []httpapi.Entry{
+				Entries: []api.Entry{
 					{
 						Description:   "1",
 						DebitAccount:  debitAccount,
 						CreditAccount: creditAccount,
-						Amount: httpapi.Amount{
+						Amount: api.Amount{
 							Value:    "100",
 							Currency: "USD",
 						},

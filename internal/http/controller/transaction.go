@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
-	"github.com/hampgoodwin/GoLuca/internal/httpapi"
+	api "github.com/hampgoodwin/GoLuca/internal/http/httpapi"
 	"github.com/hampgoodwin/GoLuca/internal/transformer"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
 	"github.com/hampgoodwin/GoLuca/pkg/transaction"
@@ -22,7 +22,7 @@ func (c *Controller) RegisterTransactionRoutes(r *chi.Mux) {
 }
 
 type transactionRequest struct {
-	httpapi.Transaction `json:"transaction" validate:"required"`
+	api.Transaction `json:"transaction" validate:"required"`
 }
 
 type transactionResponse struct {

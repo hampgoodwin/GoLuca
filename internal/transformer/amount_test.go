@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/go-playground/validator"
-	"github.com/hampgoodwin/GoLuca/internal/httpapi"
+	api "github.com/hampgoodwin/GoLuca/internal/http/httpapi"
 	"github.com/hampgoodwin/GoLuca/pkg/amount"
 	"github.com/hampgoodwin/errors"
 	"github.com/matryer/is"
@@ -15,29 +15,29 @@ import (
 func TestNewAmountFromHTTPAmount(t *testing.T) {
 	testCases := []struct {
 		description string
-		httpamount  httpapi.Amount
+		httpamount  api.Amount
 		expected    amount.Amount
 		err         error
 	}{
 		{description: "empty"},
 		{
 			description: "value-overflows-int64",
-			httpamount:  httpapi.Amount{Value: "9223372036854775808"},
+			httpamount:  api.Amount{Value: "9223372036854775808"},
 			err:         &strconv.NumError{},
 		},
 		{
 			description: "invalid-value",
-			httpamount:  httpapi.Amount{Value: "-10"},
+			httpamount:  api.Amount{Value: "-10"},
 			err:         validator.ValidationErrors{},
 		},
 		{
 			description: "invalid-currency",
-			httpamount:  httpapi.Amount{Currency: "KRKZ"},
+			httpamount:  api.Amount{Currency: "KRKZ"},
 			err:         validator.ValidationErrors{},
 		},
 		{
 			description: "success",
-			httpamount:  httpapi.Amount{Value: "100", Currency: "USD"},
+			httpamount:  api.Amount{Value: "100", Currency: "USD"},
 			expected:    amount.Amount{Value: 100, Currency: "USD"},
 		},
 	}

@@ -1,12 +1,12 @@
 package transformer
 
 import (
-	"github.com/hampgoodwin/GoLuca/internal/httpapi"
+	api "github.com/hampgoodwin/GoLuca/internal/http/httpapi"
 	"github.com/hampgoodwin/GoLuca/pkg/transaction"
 	"github.com/hampgoodwin/errors"
 )
 
-func NewTransactionFromHTTPTransaction(t httpapi.Transaction) (transaction.Transaction, error) {
+func NewTransactionFromHTTPTransaction(t api.Transaction) (transaction.Transaction, error) {
 	out := transaction.Transaction{}
 	if t.IsZero() {
 		return out, nil
@@ -22,9 +22,9 @@ func NewTransactionFromHTTPTransaction(t httpapi.Transaction) (transaction.Trans
 	return out, nil
 }
 
-func NewEntryFromHTTPEntry(e httpapi.Entry) (transaction.Entry, error) {
+func NewEntryFromHTTPEntry(e api.Entry) (transaction.Entry, error) {
 	out := transaction.Entry{}
-	if e == (httpapi.Entry{}) {
+	if e == (api.Entry{}) {
 		return out, nil
 	}
 	out.Description = e.Description

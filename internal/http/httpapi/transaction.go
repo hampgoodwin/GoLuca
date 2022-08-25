@@ -1,4 +1,4 @@
-package httpapi
+package api
 
 type Transaction struct {
 	Description string  `json:"description" validate:"required"`

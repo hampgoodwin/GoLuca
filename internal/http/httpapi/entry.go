@@ -1,4 +1,4 @@
-package httpapi
+package api
 
 type Entry struct {
 	Description   string `json:"description"`
