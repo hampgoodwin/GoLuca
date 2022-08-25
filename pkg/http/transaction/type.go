@@ -7,11 +7,11 @@ import (
 )
 
 type CreateTransaction struct {
-	Description string  `json:"description" validate:"required"`
-	Entries     []Entry `json:"entries,omitempty" validate:"dive,gte=1"`
+	Description string        `json:"description" validate:"required"`
+	Entries     []CreateEntry `json:"entries,omitempty" validate:"dive,gte=1"`
 }
 
-func (t Transaction) IsZero() bool {
+func (t CreateTransaction) IsZero() bool {
 	if t.Description != "" {
 		return false
 	}

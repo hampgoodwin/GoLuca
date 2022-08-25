@@ -3,15 +3,15 @@ package transformer
 import (
 	"strconv"
 
-	"github.com/hampgoodwin/GoLuca/internal/http/v0/api"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
 	"github.com/hampgoodwin/GoLuca/pkg/amount"
+	httpamount "github.com/hampgoodwin/GoLuca/pkg/http/amount"
 	"github.com/hampgoodwin/errors"
 )
 
-func NewAmountFromHTTPAmount(a api.Amount) (amount.Amount, error) {
+func NewAmountFromHTTPAmount(a httpamount.Amount) (amount.Amount, error) {
 	out := amount.Amount{}
-	if a == (api.Amount{}) {
+	if a == (httpamount.Amount{}) {
 		return out, nil
 	}
 	value, err := strconv.ParseInt(a.Value, 10, 64)

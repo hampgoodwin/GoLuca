@@ -41,30 +41,30 @@ func (s *Service) GetTransactions(ctx context.Context, cursor, limit string) ([]
 	return transactions, &encodedCursor, nil
 }
 
-func (s *Service) GetTransaction(ctx context.Context, transactionID string) (*transaction.Transaction, error) {
-	transaction, err := s.repository.GetTransaction(ctx, transactionID)
+func (s *Service) GetTransaction(ctx context.Context, transactionID string) (transaction.Transaction, error) {
+	txn, err := s.repository.GetTransaction(ctx, transactionID)
 	if err != nil {
-		return nil, errors.Wrap(err, fmt.Sprintf("getting transaction %q", transactionID))
+		return transaction.Transaction{}, errors.Wrap(err, fmt.Sprintf("getting transaction %q", transactionID))
 	}
-	return transaction, nil
+	return txn, nil
 }
 
-func (s *Service) CreateTransactionAndEntries(ctx context.Context, transaction *transaction.Transaction) (*transaction.Transaction, error) {
-	transaction.ID = uuid.New().String()
-	transaction.CreatedAt = time.Now()
-	for i := 0; i < len(transaction.Entries); i++ {
-		transaction.Entries[i].ID = uuid.New().String()
-		transaction.Entries[i].TransactionID = transaction.ID
-		transaction.Entries[i].CreatedAt = transaction.CreatedAt
+func (s *Service) CreateTransactionAndEntries(ctx context.Context, txn transaction.Transaction) (transaction.Transaction, error) {
+	txn.ID = uuid.New().String()
+	txn.CreatedAt = time.Now()
+	for i := 0; i < len(txn.Entries); i++ {
+		txn.Entries[i].ID = uuid.New().String()
+		txn.Entries[i].TransactionID = txn.ID
+		txn.Entries[i].CreatedAt = txn.CreatedAt
 	}
 
-	if err := validate.Validate(transaction); err != nil {
-		return nil, errors.WithErrorMessage(err, errors.NotValidRequestData, "validating transaction before persisting to database")
+	if err := validate.Validate(txn); err != nil {
+		return transaction.Transaction{}, errors.WithErrorMessage(err, errors.NotValidRequestData, "validating transaction before persisting to database")
 	}
 
-	transaction, err := s.repository.CreateTransaction(ctx, transaction)
+	txn, err := s.repository.CreateTransaction(ctx, txn)
 	if err != nil {
-		return nil, errors.Wrap(err, "storing transaction")
+		return transaction.Transaction{}, errors.Wrap(err, "storing transaction")
 	}
-	return transaction, nil
+	return txn, nil
 }
