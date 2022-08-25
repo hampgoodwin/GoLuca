@@ -10,13 +10,12 @@ import (
 	"github.com/matryer/is"
 )
 
-func TestNewAccountFromHTTPAccount(t *testing.T) {
+func TestNewAccountFromHTTPCreateAccount(t *testing.T) {
 	parentID := uuid.NewString()
 	testCases := []struct {
 		description       string
 		httpCreateAccount httpaccount.CreateAccount
 		expected          account.Account
-		err               error
 	}{
 		{description: "empty"},
 		{
@@ -43,6 +42,45 @@ func TestNewAccountFromHTTPAccount(t *testing.T) {
 		t.Run(fmt.Sprintf("%d:%s", i, tc.description), func(t *testing.T) {
 			t.Parallel()
 			actual := NewAccountFromHTTPCreateAccount(tc.httpCreateAccount)
+
+			a.Equal(tc.expected, actual)
+		})
+	}
+}
+
+func TestNewHTTPAccountFromAccount(t *testing.T) {
+	testCases := []struct {
+		description string
+		account     account.Account
+		expected    httpaccount.Account
+	}{
+		{description: "empty"},
+		{
+			description: "success",
+			account: account.Account{
+				ID:       "ID",
+				ParentID: "parentID",
+				Name:     "equity",
+				Type:     account.Equity,
+				Basis:    "credit",
+			},
+			expected: httpaccount.Account{
+				ID:       "ID",
+				ParentID: "parentID",
+				Name:     "equity",
+				Type:     account.Equity,
+				Basis:    "credit",
+			},
+		},
+	}
+
+	a := is.New(t)
+
+	for i, tc := range testCases {
+		tc := tc
+		t.Run(fmt.Sprintf("%d:%s", i, tc.description), func(t *testing.T) {
+			t.Parallel()
+			actual := NewHTTPAccountFromAccount(tc.account)
 
 			a.Equal(tc.expected, actual)
 		})
