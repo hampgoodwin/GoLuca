@@ -12,6 +12,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/hampgoodwin/GoLuca/internal/test"
 	"github.com/hampgoodwin/GoLuca/pkg/account"
+	httpaccount "github.com/hampgoodwin/GoLuca/pkg/http/account"
 )
 
 func TestCreateAccount(t *testing.T) {
@@ -19,7 +20,7 @@ func TestCreateAccount(t *testing.T) {
 	s.SetHTTP(t, newTestHTTPHandler(s.Env.Log, s.DB))
 
 	aReq := accountRequest{
-		Account: &account.Account{
+		Account: httpaccount.CreateAccount{
 			Name:  "cash",
 			Type:  account.Asset,
 			Basis: "debit",
@@ -47,7 +48,7 @@ func TestCreateAccount_InvalidRequestBody(t *testing.T) {
 	s.SetHTTP(t, newTestHTTPHandler(s.Env.Log, s.DB))
 
 	aReq := accountRequest{
-		Account: &account.Account{
+		Account: httpaccount.CreateAccount{
 			Name:  "",
 			Type:  account.Type("type"),
 			Basis: "sandwhich",
@@ -61,8 +62,8 @@ func TestCreateAccount_InvalidRequestBody(t *testing.T) {
 	err := json.NewDecoder(res.Body).Decode(&errRes)
 	s.Is.NoErr(err)
 
-	s.Is.Equal("validating deserialized account body", errRes.Description)
-	s.Is.Equal("Key: 'Account.Name' Error:Field validation for 'Name' failed on the 'required' tag\nKey: 'Account.Type' Error:Field validation for 'Type' failed on the 'oneof' tag\nKey: 'Account.Basis' Error:Field validation for 'Basis' failed on the 'oneof' tag", errRes.ValidationErrors)
+	s.Is.Equal("validating http api create account request", errRes.Description)
+	s.Is.Equal("Key: 'accountRequest.Account.Name' Error:Field validation for 'Name' failed on the 'required' tag\nKey: 'accountRequest.Account.Type' Error:Field validation for 'Type' failed on the 'oneof' tag\nKey: 'accountRequest.Account.Basis' Error:Field validation for 'Basis' failed on the 'oneof' tag", errRes.ValidationErrors)
 }
 
 func TestCreateAccount_CannotDeserialize(t *testing.T) {
@@ -88,7 +89,7 @@ func TestGetAccount(t *testing.T) {
 
 	// Create an account and assert
 	aReq := accountRequest{
-		Account: &account.Account{
+		Account: httpaccount.CreateAccount{
 			Name:  "cash",
 			Type:  account.Asset,
 			Basis: "debit",
@@ -154,7 +155,7 @@ func TestGetAccounts(t *testing.T) {
 
 	// Create an account and assert
 	aReq := accountRequest{
-		Account: &account.Account{
+		Account: httpaccount.CreateAccount{
 			Name:  "cash",
 			Type:  account.Asset,
 			Basis: "debit",
@@ -167,7 +168,7 @@ func TestGetAccounts(t *testing.T) {
 	err := json.NewDecoder(res.Body).Decode(&a1)
 	s.Is.NoErr(err)
 
-	aReq.Name = "accounts receivable"
+	aReq.Account.Name = "accounts receivable"
 	res2 := createAccount(t, &s, aReq)
 	defer res2.Body.Close()
 
@@ -180,7 +181,7 @@ func TestGetAccounts(t *testing.T) {
 
 	i := 0
 	for _, a := range aRes.Accounts {
-		if a == *a1.Account || a == *a2.Account {
+		if a == a1.Account || a == a2.Account {
 			i++
 		}
 	}

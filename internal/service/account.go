@@ -13,12 +13,12 @@ import (
 	"github.com/hampgoodwin/errors"
 )
 
-func (s *Service) GetAccount(ctx context.Context, accountID string) (*account.Account, error) {
-	account, err := s.repository.GetAccount(ctx, accountID)
+func (s *Service) GetAccount(ctx context.Context, accountID string) (account.Account, error) {
+	acct, err := s.repository.GetAccount(ctx, accountID)
 	if err != nil {
-		return nil, errors.Wrap(err, "fetching account from database")
+		return account.Account{}, errors.Wrap(err, "fetching account from database")
 	}
-	return account, nil
+	return acct, nil
 }
 
 func (s *Service) GetAccounts(ctx context.Context, cursor, limit string) ([]account.Account, *string, error) {
@@ -49,17 +49,17 @@ func (s *Service) GetAccounts(ctx context.Context, cursor, limit string) ([]acco
 	return accounts, &nextCursor, nil
 }
 
-func (s *Service) CreateAccount(ctx context.Context, account *account.Account) (*account.Account, error) {
-	account.ID = uuid.New().String()
-	account.CreatedAt = time.Now()
+func (s *Service) CreateAccount(ctx context.Context, create account.Account) (account.Account, error) {
+	create.ID = uuid.New().String()
+	create.CreatedAt = time.Now()
 
-	if err := validate.Validate(account); err != nil {
-		return nil, errors.WithErrorMessage(err, errors.NotValidRequestData, "validating deserialized account body")
+	if err := validate.Validate(create); err != nil {
+		return account.Account{}, errors.WithErrorMessage(err, errors.NotValidRequestData, "validating internal account")
 	}
 
-	created, err := s.repository.CreateAccount(ctx, account)
+	created, err := s.repository.CreateAccount(ctx, create)
 	if err != nil {
-		return nil, errors.Wrap(err, "creating account in database")
+		return account.Account{}, errors.Wrap(err, "creating account in database")
 	}
 	return created, nil
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/hampgoodwin/GoLuca/internal/test"
 	"github.com/hampgoodwin/GoLuca/pkg/account"
 	"github.com/hampgoodwin/GoLuca/pkg/amount"
+	httpaccount "github.com/hampgoodwin/GoLuca/pkg/http/account"
 )
 
 func TestCreateTransaction(t *testing.T) {
@@ -18,7 +19,7 @@ func TestCreateTransaction(t *testing.T) {
 	s.SetHTTP(t, newTestHTTPHandler(s.Env.Log, s.DB))
 
 	aReq := accountRequest{
-		Account: &account.Account{
+		Account: httpaccount.CreateAccount{
 			Name:  "cash",
 			Type:  account.Asset,
 			Basis: "debit",
@@ -32,7 +33,7 @@ func TestCreateTransaction(t *testing.T) {
 	cashAccount := aRes.Account
 
 	aReq = accountRequest{
-		Account: &account.Account{
+		Account: httpaccount.CreateAccount{
 			Name:  "revenue",
 			Type:  account.Asset,
 			Basis: "credit",
@@ -90,7 +91,7 @@ func TestGetTransaction(t *testing.T) {
 	s.SetHTTP(t, newTestHTTPHandler(s.Env.Log, s.DB))
 
 	aReq := accountRequest{
-		Account: &account.Account{
+		Account: httpaccount.CreateAccount{
 			Name:  "cash",
 			Type:  account.Asset,
 			Basis: "debit",
@@ -104,7 +105,7 @@ func TestGetTransaction(t *testing.T) {
 	cashAccount := aRes.Account
 
 	aReq = accountRequest{
-		Account: &account.Account{
+		Account: httpaccount.CreateAccount{
 			Name:  "revenue",
 			Type:  account.Asset,
 			Basis: "credit",
@@ -165,7 +166,7 @@ func TestCreateTransaction_int64_overflow(t *testing.T) {
 	s.SetHTTP(t, newTestHTTPHandler(s.Env.Log, s.DB))
 
 	aReq := accountRequest{
-		Account: &account.Account{
+		Account: httpaccount.CreateAccount{
 			Name:  "cash",
 			Type:  account.Asset,
 			Basis: "debit",
@@ -179,7 +180,7 @@ func TestCreateTransaction_int64_overflow(t *testing.T) {
 	cashAccount := aRes.Account
 
 	aReq = accountRequest{
-		Account: &account.Account{
+		Account: httpaccount.CreateAccount{
 			Name:  "revenue",
 			Type:  account.Asset,
 			Basis: "credit",
