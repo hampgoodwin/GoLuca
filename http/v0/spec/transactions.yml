@@ -57,7 +57,7 @@ components:
       type: object
       properties:
         id:
-          $ref: 'shared.yml#/components/schemas/uuid'
+          $ref: 'shared.yml#/components/schemas/ksuid'
         description:
           type: string
         entries:
@@ -72,9 +72,9 @@ components:
         description:
           type: string
         debitAccount:
-          $ref: 'shared.yml#/components/schemas/uuid'
+          $ref: 'shared.yml#/components/schemas/ksuid'
         creditAccount:
-          $ref: 'shared.yml#/components/schemas/uuid'
+          $ref: 'shared.yml#/components/schemas/ksuid'
         amount:
           $ref: 'entries.yml#/components/schemas/amount'
       required:
@@ -135,5 +135,5 @@ components:
       required: true
       description: 'required uuid url parameter to get a specific transaction resource.'
       schema:
-        $ref: 'shared.yml#/components/schemas/uuid'
+        $ref: 'shared.yml#/components/schemas/ksuid'
 

@@ -14,19 +14,21 @@ import (
 // GetAccount gets an account from the database
 func (r *Repository) GetAccount(ctx context.Context, accountID string) (account.Account, error) {
 	acct := account.Account{}
+	var t string
 	if err := r.database.QueryRow(ctx,
 		`SELECT id, parent_id, name, type, basis, created_at
 		FROM account
 		WHERE id=$1
 		;`,
 		accountID).Scan(
-		&acct.ID, &acct.ParentID, &acct.Name, &acct.Type, &acct.Basis, &acct.CreatedAt,
+		&acct.ID, &acct.ParentID, &acct.Name, &t, &acct.Basis, &acct.CreatedAt,
 	); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return account.Account{}, errors.WithErrorMessage(err, errors.NotFound, fmt.Sprintf("account %q not found", accountID))
 		}
 		return account.Account{}, errors.WithErrorMessage(err, errors.NotKnown, "scanning account result row")
 	}
+	acct.Type = account.ParseType(t)
 	if err := validate.Validate(acct); err != nil {
 		return account.Account{}, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating account fetched from database")
 	}
@@ -58,11 +60,13 @@ func (r *Repository) GetAccounts(ctx context.Context, accountID string, createdA
 	defer rows.Close()
 	accounts := []account.Account{}
 	for rows.Next() {
-		account := account.Account{}
-		if err := rows.Scan(&account.ID, &account.ParentID, &account.Name, &account.Type, &account.Basis, &account.CreatedAt); err != nil {
+		acct := account.Account{}
+		var t string
+		if err := rows.Scan(&acct.ID, &acct.ParentID, &acct.Name, &t, &acct.Basis, &acct.CreatedAt); err != nil {
 			return nil, errors.WithErrorMessage(err, errors.NotKnown, "scanning account result row")
 		}
-		accounts = append(accounts, account)
+		acct.Type = account.ParseType(t)
+		accounts = append(accounts, acct)
 	}
 	if err := validate.Validate(accounts); err != nil {
 		return nil, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating accounts fetched from data store")
@@ -78,6 +82,7 @@ func (r *Repository) CreateAccount(ctx context.Context, create account.Account) 
 		return account.Account{}, errors.WithErrorMessage(err, errors.NotKnown, "beginning create account db transaction")
 	}
 
+	var t string
 	returning := account.Account{}
 	if err := tx.QueryRow(ctx, `
 		INSERT INTO account(id, parent_id, name, type, basis, created_at)
@@ -88,12 +93,13 @@ func (r *Repository) CreateAccount(ctx context.Context, create account.Account) 
 		&returning.ID,
 		&returning.ParentID,
 		&returning.Name,
-		&returning.Type,
+		&t,
 		&returning.Basis,
 		&returning.CreatedAt,
 	); err != nil {
 		return account.Account{}, errors.WithErrorMessage(err, errors.NotKnown, "scanning account returned from insert")
 	}
+	returning.Type = account.ParseType(t)
 	if err := validate.Validate(returning); err != nil {
 		if err := tx.Rollback(ctx); err != nil {
 			return account.Account{}, errors.WithErrorMessage(err, errors.NotValidInternalData, "rolling back transaction on failed validating account returned from insert")
