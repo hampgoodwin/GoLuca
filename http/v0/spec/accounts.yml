@@ -87,14 +87,23 @@ components:
       requestAccount:
         type: object
         properties:
-          parentId:
-            $ref: 'shared.yml#/components/schemas/uuid'
-          name:
-            type: string
-          type:
-            $ref: '#/components/schemas/type'
-          basis:
-            $ref: '#/components/schemas/basis'
+          account:
+            type: object
+            properties:
+              parentId:
+                $ref: 'shared.yml#/components/schemas/uuid'
+              name:
+                type: string
+              type:
+                $ref: '#/components/schemas/type'
+              basis:
+                $ref: '#/components/schemas/basis'
+            required:
+              - "name"
+              - "type"
+              - "basis"
+        required:
+          - "account"
 
   responses:
     getAccount:
