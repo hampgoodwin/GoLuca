@@ -80,15 +80,18 @@ components:
     requestTransaction:
       type: object
       properties:
-        description:
-          type: string
-        entries:
-          type: array
-          minLength: 1
-          items:
-            $ref: '#/components/schemas/requestEntry'
-        createdAt:
-          $ref: 'shared.yml#/components/schemas/time'
+        account:
+          type: object
+          properties:
+            description:
+              type: string
+            entries:
+              type: array
+              minLength: 1
+              items:
+                $ref: '#/components/schemas/requestEntry'
+            createdAt:
+              $ref: 'shared.yml#/components/schemas/time'
 
   responses:
     getTransaction:

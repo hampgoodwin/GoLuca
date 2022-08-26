@@ -10,7 +10,12 @@ servers:
   - url: https://localhost:3333
 tags:
   - name: Accounts
+    description: 'Operations for interacting with account object. 
+      An account is a pre-requisite for creating transactions, and maintains a derived running balance of an account.'
   - name: Transactions
+    description: Operations for interacting with transaction object.
+       A transaction holds the information of how money effects accounts.
+       A transaction is made up of accounting/ledger entries. A single entry must be double-entry, and non composite.
 paths:
 # accounts
   /accounts:
