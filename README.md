@@ -15,7 +15,7 @@ A Simple Accounting Ledger
 ---
 
 TODO
-- [ ] [implement safer enums](https://threedots.tech/post/safer-enums-in-go/)
+- [x] [implement safer enums](https://threedots.tech/post/safer-enums-in-go/)
 - [ ] migrate to guid from uuid
     - [ ] probably requires db migration/update
 - [ ] add gRPC methods, matching http spec

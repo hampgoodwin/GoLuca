@@ -14,7 +14,7 @@ func NewAccountFromHTTPCreateAccount(in httpaccount.CreateAccount) account.Accou
 
 	out.ParentID = in.ParentID
 	out.Name = in.Name
-	out.Type = in.Type
+	out.Type = account.ParseType(in.Type)
 	out.Basis = in.Basis
 
 	return out
@@ -30,7 +30,7 @@ func NewHTTPAccountFromAccount(in account.Account) httpaccount.Account {
 	out.ID = in.ID
 	out.ParentID = in.ParentID
 	out.Name = in.Name
-	out.Type = in.Type
+	out.Type = in.Type.String()
 	out.Basis = in.Basis
 	out.CreatedAt = in.CreatedAt
 

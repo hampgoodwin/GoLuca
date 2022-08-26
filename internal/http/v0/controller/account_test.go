@@ -11,7 +11,6 @@ import (
 	"github.com/brianvoe/gofakeit"
 	"github.com/google/uuid"
 	"github.com/hampgoodwin/GoLuca/internal/test"
-	"github.com/hampgoodwin/GoLuca/pkg/account"
 	httpaccount "github.com/hampgoodwin/GoLuca/pkg/http/v0/account"
 )
 
@@ -22,7 +21,7 @@ func TestCreateAccount(t *testing.T) {
 	aReq := accountRequest{
 		Account: httpaccount.CreateAccount{
 			Name:  "cash",
-			Type:  account.Asset,
+			Type:  "asset",
 			Basis: "debit",
 		},
 	}
@@ -50,7 +49,7 @@ func TestCreateAccount_InvalidRequestBody(t *testing.T) {
 	aReq := accountRequest{
 		Account: httpaccount.CreateAccount{
 			Name:  "",
-			Type:  account.Type("type"),
+			Type:  "",
 			Basis: "sandwhich",
 		},
 	}
@@ -63,7 +62,7 @@ func TestCreateAccount_InvalidRequestBody(t *testing.T) {
 	s.Is.NoErr(err)
 
 	s.Is.Equal("validating http api create account request", errRes.Description)
-	s.Is.Equal("Key: 'accountRequest.Account.Name' Error:Field validation for 'Name' failed on the 'required' tag\nKey: 'accountRequest.Account.Type' Error:Field validation for 'Type' failed on the 'oneof' tag\nKey: 'accountRequest.Account.Basis' Error:Field validation for 'Basis' failed on the 'oneof' tag", errRes.ValidationErrors)
+	s.Is.Equal("Key: 'accountRequest.Account.Name' Error:Field validation for 'Name' failed on the 'required' tag\nKey: 'accountRequest.Account.Type' Error:Field validation for 'Type' failed on the 'required' tag\nKey: 'accountRequest.Account.Basis' Error:Field validation for 'Basis' failed on the 'oneof' tag", errRes.ValidationErrors)
 }
 
 func TestCreateAccount_CannotDeserialize(t *testing.T) {
@@ -91,7 +90,7 @@ func TestGetAccount(t *testing.T) {
 	aReq := accountRequest{
 		Account: httpaccount.CreateAccount{
 			Name:  "cash",
-			Type:  account.Asset,
+			Type:  "asset",
 			Basis: "debit",
 		},
 	}
@@ -157,7 +156,7 @@ func TestGetAccounts(t *testing.T) {
 	aReq := accountRequest{
 		Account: httpaccount.CreateAccount{
 			Name:  "cash",
-			Type:  account.Asset,
+			Type:  "asset",
 			Basis: "debit",
 		},
 	}

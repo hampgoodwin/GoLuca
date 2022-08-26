@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/hampgoodwin/GoLuca/internal/test"
-	"github.com/hampgoodwin/GoLuca/pkg/account"
 	"github.com/hampgoodwin/GoLuca/pkg/amount"
 	httpaccount "github.com/hampgoodwin/GoLuca/pkg/http/v0/account"
 	httpamount "github.com/hampgoodwin/GoLuca/pkg/http/v0/amount"
@@ -22,7 +21,7 @@ func TestCreateTransaction(t *testing.T) {
 	aReq := accountRequest{
 		Account: httpaccount.CreateAccount{
 			Name:  "cash",
-			Type:  account.Asset,
+			Type:  "asset",
 			Basis: "debit",
 		},
 	}
@@ -36,7 +35,7 @@ func TestCreateTransaction(t *testing.T) {
 	aReq = accountRequest{
 		Account: httpaccount.CreateAccount{
 			Name:  "revenue",
-			Type:  account.Asset,
+			Type:  "asset",
 			Basis: "credit",
 		},
 	}
@@ -94,7 +93,7 @@ func TestCreateTransaction_int64_overflow(t *testing.T) {
 	aReq := accountRequest{
 		Account: httpaccount.CreateAccount{
 			Name:  "cash",
-			Type:  account.Asset,
+			Type:  "asset",
 			Basis: "debit",
 		},
 	}
@@ -108,7 +107,7 @@ func TestCreateTransaction_int64_overflow(t *testing.T) {
 	aReq = accountRequest{
 		Account: httpaccount.CreateAccount{
 			Name:  "revenue",
-			Type:  account.Asset,
+			Type:  "asset",
 			Basis: "credit",
 		},
 	}
@@ -153,7 +152,7 @@ func TestGetTransaction(t *testing.T) {
 	aReq := accountRequest{
 		Account: httpaccount.CreateAccount{
 			Name:  "cash",
-			Type:  account.Asset,
+			Type:  "asset",
 			Basis: "debit",
 		},
 	}
@@ -167,7 +166,7 @@ func TestGetTransaction(t *testing.T) {
 	aReq = accountRequest{
 		Account: httpaccount.CreateAccount{
 			Name:  "revenue",
-			Type:  account.Asset,
+			Type:  "asset",
 			Basis: "credit",
 		},
 	}
@@ -232,7 +231,7 @@ func TestGetTransactions(t *testing.T) {
 	aReq := accountRequest{
 		Account: httpaccount.CreateAccount{
 			Name:  "cash",
-			Type:  account.Asset,
+			Type:  "asset",
 			Basis: "debit",
 		},
 	}
@@ -246,7 +245,7 @@ func TestGetTransactions(t *testing.T) {
 	aReq = accountRequest{
 		Account: httpaccount.CreateAccount{
 			Name:  "revenue",
-			Type:  account.Asset,
+			Type:  "asset",
 			Basis: "credit",
 		},
 	}
