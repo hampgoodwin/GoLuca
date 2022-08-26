@@ -36,6 +36,9 @@ components:
           type: string
           maxLength: 3
           minLength: 3
+      required:
+        - "value"
+        - "currency"
     entry:
       type: object
       properties:

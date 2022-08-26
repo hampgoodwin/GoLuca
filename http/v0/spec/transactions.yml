@@ -77,10 +77,14 @@ components:
           $ref: 'shared.yml#/components/schemas/uuid'
         amount:
           $ref: 'entries.yml#/components/schemas/amount'
+      required:
+        - "debitAccount"
+        - "creditAccount"
+        - "amount"
     requestTransaction:
       type: object
       properties:
-        account:
+        transaction:
           type: object
           properties:
             description:
@@ -90,8 +94,9 @@ components:
               minLength: 1
               items:
                 $ref: '#/components/schemas/requestEntry'
-            createdAt:
-              $ref: 'shared.yml#/components/schemas/time'
+          required:
+            - "description"
+            - "entries"
 
   responses:
     getTransaction:
@@ -110,7 +115,7 @@ components:
           schema:
             type: object
             properties:
-              transaction:
+              transactions:
                 type: array
                 items:
                   $ref: '#/components/schemas/responseTransaction'

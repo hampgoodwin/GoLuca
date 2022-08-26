@@ -98,6 +98,12 @@ components:
                 $ref: '#/components/schemas/type'
               basis:
                 $ref: '#/components/schemas/basis'
+            required:
+              - "name"
+              - "type"
+              - "basis"
+        required:
+          - "account"
 
   responses:
     getAccount:
