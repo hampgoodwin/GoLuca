@@ -31,7 +31,7 @@ type Type struct {
 	slug string `validate:"required,oneof=asset liability equity revenue expense gain loss"`
 }
 
-// iota const's for account Type
+// safer enums for Type enum
 var (
 	TypeUnknown   = Type{""}
 	TypeAsset     = Type{"asset"}
