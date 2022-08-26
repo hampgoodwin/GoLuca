@@ -6,11 +6,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
 	"github.com/hampgoodwin/GoLuca/pkg/pagination"
 	"github.com/hampgoodwin/GoLuca/pkg/transaction"
 	"github.com/hampgoodwin/errors"
+	"github.com/segmentio/ksuid"
 )
 
 func (s *Service) GetTransactions(ctx context.Context, cursor, limit string) ([]transaction.Transaction, *string, error) {
@@ -50,10 +50,10 @@ func (s *Service) GetTransaction(ctx context.Context, transactionID string) (tra
 }
 
 func (s *Service) CreateTransactionAndEntries(ctx context.Context, txn transaction.Transaction) (transaction.Transaction, error) {
-	txn.ID = uuid.New().String()
+	txn.ID = ksuid.New().String()
 	txn.CreatedAt = time.Now()
 	for i := 0; i < len(txn.Entries); i++ {
-		txn.Entries[i].ID = uuid.New().String()
+		txn.Entries[i].ID = ksuid.New().String()
 		txn.Entries[i].TransactionID = txn.ID
 		txn.Entries[i].CreatedAt = txn.CreatedAt
 	}

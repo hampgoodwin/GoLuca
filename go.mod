@@ -37,6 +37,8 @@ require (
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 )
 
+require github.com/segmentio/ksuid v1.0.4
+
 require (
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect

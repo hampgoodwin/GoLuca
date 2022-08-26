@@ -4,18 +4,18 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/google/uuid"
 	"github.com/hampgoodwin/GoLuca/pkg/amount"
 	httpamount "github.com/hampgoodwin/GoLuca/pkg/http/v0/amount"
 	httptransaction "github.com/hampgoodwin/GoLuca/pkg/http/v0/transaction"
 	"github.com/hampgoodwin/GoLuca/pkg/transaction"
 	"github.com/hampgoodwin/errors"
 	"github.com/matryer/is"
+	"github.com/segmentio/ksuid"
 )
 
 func TestNewTransactionFromHTTPCreateTransaction(t *testing.T) {
-	debitAccount := uuid.NewString()
-	creditAccount := uuid.NewString()
+	debitAccount := ksuid.New().String()
+	creditAccount := ksuid.New().String()
 	testCases := []struct {
 		description     string
 		httpTransaction httptransaction.CreateTransaction
