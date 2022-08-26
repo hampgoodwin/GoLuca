@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hampgoodwin/GoLuca/internal/transaction"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
-	"github.com/hampgoodwin/GoLuca/pkg/transaction"
 	"github.com/hampgoodwin/errors"
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgerrcode"

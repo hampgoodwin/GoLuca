@@ -3,7 +3,7 @@ package transaction
 import (
 	"time"
 
-	"github.com/hampgoodwin/GoLuca/pkg/amount"
+	"github.com/hampgoodwin/GoLuca/internal/amount"
 )
 
 // Transaction ...

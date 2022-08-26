@@ -1,8 +1,8 @@
 package transformer
 
 import (
+	"github.com/hampgoodwin/GoLuca/internal/transaction"
 	httptransaction "github.com/hampgoodwin/GoLuca/pkg/http/v0/transaction"
-	"github.com/hampgoodwin/GoLuca/pkg/transaction"
 	"github.com/hampgoodwin/errors"
 )
 

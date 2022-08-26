@@ -3,8 +3,8 @@ package transformer
 import (
 	"strconv"
 
+	"github.com/hampgoodwin/GoLuca/internal/amount"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
-	"github.com/hampgoodwin/GoLuca/pkg/amount"
 	httpamount "github.com/hampgoodwin/GoLuca/pkg/http/v0/amount"
 	"github.com/hampgoodwin/errors"
 )

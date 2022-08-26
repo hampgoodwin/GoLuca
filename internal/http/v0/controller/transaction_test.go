@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hampgoodwin/GoLuca/internal/amount"
 	"github.com/hampgoodwin/GoLuca/internal/test"
-	"github.com/hampgoodwin/GoLuca/pkg/amount"
 	httpaccount "github.com/hampgoodwin/GoLuca/pkg/http/v0/account"
 	httpamount "github.com/hampgoodwin/GoLuca/pkg/http/v0/amount"
 	httptransaction "github.com/hampgoodwin/GoLuca/pkg/http/v0/transaction"

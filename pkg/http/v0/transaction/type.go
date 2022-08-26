@@ -3,9 +3,9 @@ package transaction
 import (
 	"time"
 
+	"github.com/hampgoodwin/GoLuca/internal/transaction"
 	"github.com/hampgoodwin/GoLuca/pkg/http/v0/amount"
 	httpamount "github.com/hampgoodwin/GoLuca/pkg/http/v0/amount"
-	"github.com/hampgoodwin/GoLuca/pkg/transaction"
 )
 
 type CreateTransaction struct {

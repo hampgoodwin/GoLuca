@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hampgoodwin/GoLuca/pkg/account"
+	"github.com/hampgoodwin/GoLuca/internal/account"
 	httpaccount "github.com/hampgoodwin/GoLuca/pkg/http/v0/account"
 	"github.com/matryer/is"
 	"github.com/segmentio/ksuid"

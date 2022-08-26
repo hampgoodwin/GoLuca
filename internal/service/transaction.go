@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/hampgoodwin/GoLuca/internal/transaction"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
 	"github.com/hampgoodwin/GoLuca/pkg/pagination"
-	"github.com/hampgoodwin/GoLuca/pkg/transaction"
 	"github.com/hampgoodwin/errors"
 	"github.com/segmentio/ksuid"
 )

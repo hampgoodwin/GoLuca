@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hampgoodwin/GoLuca/internal/transaction"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
-	"github.com/hampgoodwin/GoLuca/pkg/transaction"
 	"github.com/hampgoodwin/errors"
 	"github.com/jackc/pgx/v4"
 )
