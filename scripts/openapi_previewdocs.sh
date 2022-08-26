@@ -8,7 +8,7 @@ if ! command -v openapi &> /dev/null
 then
     echo "attemping global install for openapi cli"
     npm i -g @redocly/openapi-cli@latest
-    echo "<the_command> could not be found"
+    echo "npm could not be found"
     exit 1
 fi
 
