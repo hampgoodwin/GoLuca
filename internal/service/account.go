@@ -6,11 +6,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
 	"github.com/hampgoodwin/GoLuca/pkg/account"
 	"github.com/hampgoodwin/GoLuca/pkg/pagination"
 	"github.com/hampgoodwin/errors"
+	"github.com/segmentio/ksuid"
 )
 
 func (s *Service) GetAccount(ctx context.Context, accountID string) (account.Account, error) {
@@ -50,7 +50,7 @@ func (s *Service) GetAccounts(ctx context.Context, cursor, limit string) ([]acco
 }
 
 func (s *Service) CreateAccount(ctx context.Context, create account.Account) (account.Account, error) {
-	create.ID = uuid.New().String()
+	create.ID = ksuid.New().String()
 	create.CreatedAt = time.Now()
 
 	if err := validate.Validate(create); err != nil {
