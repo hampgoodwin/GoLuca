@@ -1,6 +1,9 @@
 package transaction
 
 import (
+	"time"
+
+	"github.com/hampgoodwin/GoLuca/pkg/http/v0/amount"
 	httpamount "github.com/hampgoodwin/GoLuca/pkg/http/v0/amount"
 	"github.com/hampgoodwin/GoLuca/pkg/transaction"
 )
@@ -29,4 +32,12 @@ type CreateEntry struct {
 
 type Transaction transaction.Transaction
 
-type Entry transaction.Entry
+type Entry struct {
+	ID            string        `json:"id"`
+	TransactionID string        `json:"transactionID"`
+	Description   string        `json:"description"`
+	DebitAccount  string        `json:"debitAccount"`
+	CreditAccount string        `json:"creditAccount"`
+	Amount        amount.Amount `json:"amount"`
+	CreatedAt     time.Time     `json:"createdAt"`
+}

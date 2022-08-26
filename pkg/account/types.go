@@ -10,12 +10,12 @@ var ErrParseType = errors.New("error parsing string as type")
 
 // Account represents a collection of entries into a logical grouping
 type Account struct {
-	ID        string    `json:"id" validate:"required,KSUID"`
-	ParentID  string    `json:"parentId,omitempty" validate:"omitempty,KSUID"`
-	Name      string    `json:"name" validate:"required"`
-	Type      Type      `json:"type" validate:"required"`
-	Basis     string    `json:"basis" validate:"required,oneof=debit credit"`
-	CreatedAt time.Time `json:"createdAt" validate:"required"`
+	ID        string    `validate:"required,KSUID"`
+	ParentID  string    `validate:"omitempty,KSUID"`
+	Name      string    `validate:"required"`
+	Type      Type      `validate:"required"`
+	Basis     string    `validate:"required,oneof=debit credit"`
+	CreatedAt time.Time `validate:"required"`
 }
 
 func (a Account) String() string {
