@@ -15,9 +15,7 @@ A Simple Accounting Ledger
 ---
 
 TODO
-- [x] [implement safer enums](https://threedots.tech/post/safer-enums-in-go/)
-- [ ] migrate to guid from uuid
-    - [ ] probably requires db migration/update
+- [ ] implement db types and transformers
 - [ ] add gRPC methods, matching http spec
 - [ ] Testing
     - [x] Add more unit tests, solitary and sociable
@@ -44,6 +42,10 @@ TODO
     - [ ] Add metrics
         - [ ] OpenTelemetry metrics ready?
     - [ ] Log Collector?
+- [x] [implement safer enums](https://threedots.tech/post/safer-enums-in-go/)
+- [x] migrate to guid from uuid
+    - [x] probably requires db migration/update
+- [x] migrate to ksuid from uuid
 - [x] version the api's
 - [x] use httpapi models for request/response of all resources
 - [x] decouple application runtime, environment, controller, and test!

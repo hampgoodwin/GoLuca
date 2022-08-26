@@ -15,7 +15,7 @@ import (
 func (c *Controller) RegisterTransactionRoutes(r *chi.Mux) {
 	r.Route("/transactions", func(r chi.Router) {
 		r.Get("/", c.getTransactions)
-		r.Get(fmt.Sprintf("/{transactionId:%s}", uuidRegexp), c.getTransaction)
+		r.Get(fmt.Sprintf("/{transactionId:%s}", ksuidRegexp), c.getTransaction)
 		r.Post("/", c.createTransaction)
 	})
 }
