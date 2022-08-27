@@ -50,9 +50,8 @@ func (c *Controller) getTransactions(w http.ResponseWriter, r *http.Request) {
 	for _, transaction := range transactions {
 		responseTransactions = append(responseTransactions, transformer.NewHTTPTransactionFromTransaction(transaction))
 	}
-
 	if err := validate.Validate(responseTransactions); err != nil {
-		c.respondError(w, c.log, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating http response transactions"))
+		c.respondError(w, c.log, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating http transactions from transaction"))
 		return
 	}
 
@@ -72,7 +71,7 @@ func (c *Controller) getTransaction(w http.ResponseWriter, r *http.Request) {
 
 	responseTransaction := transformer.NewHTTPTransactionFromTransaction(transaction)
 	if err := validate.Validate(responseTransaction); err != nil {
-		c.respondError(w, c.log, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating http response transaction"))
+		c.respondError(w, c.log, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating http transaction from transaction"))
 		return
 	}
 
@@ -95,7 +94,7 @@ func (c *Controller) createTransaction(w http.ResponseWriter, r *http.Request) {
 
 	create, err := transformer.NewTransactionFromHTTPCreateTransaction(req.Transaction)
 	if err != nil {
-		c.respondError(w, c.log, errors.Wrap(errors.WithError(err, errors.NotValidRequest), "transforming http api transaction to transaction"))
+		c.respondError(w, c.log, errors.Wrap(errors.WithError(err, errors.NotValidRequest), "transforming transaction from http transaction"))
 		return
 	}
 
@@ -107,7 +106,7 @@ func (c *Controller) createTransaction(w http.ResponseWriter, r *http.Request) {
 
 	returning := transformer.NewHTTPTransactionFromTransaction(created)
 	if err := validate.Validate(returning); err != nil {
-		c.respondError(w, c.log, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating http response transaction"))
+		c.respondError(w, c.log, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating http transaction from transaction"))
 		return
 	}
 

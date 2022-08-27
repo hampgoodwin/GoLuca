@@ -21,6 +21,9 @@ func (s *Service) GetTransaction(ctx context.Context, transactionID string) (tra
 	}
 
 	transaction := transformer.NewTransactionFromRepoTransaction(repoTransaction)
+	if err := validate.Validate(transaction); err != nil {
+		return transaction, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating transfer from repository transfer")
+	}
 	return transaction, nil
 }
 
@@ -53,6 +56,9 @@ func (s *Service) GetTransactions(ctx context.Context, cursor, limit string) ([]
 	for _, repoTransaction := range repoTransactions {
 		transactions = append(transactions, transformer.NewTransactionFromRepoTransaction(repoTransaction))
 	}
+	if err := validate.Validate(transactions); err != nil {
+		return transactions, nil, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating transfers from repository transfers")
+	}
 
 	return transactions, &encodedCursor, nil
 }
@@ -65,7 +71,6 @@ func (s *Service) CreateTransaction(ctx context.Context, create transaction.Tran
 		create.Entries[i].TransactionID = create.ID
 		create.Entries[i].CreatedAt = create.CreatedAt
 	}
-
 	if err := validate.Validate(create); err != nil {
 		return transaction.Transaction{}, errors.WithErrorMessage(err, errors.NotValidRequestData, "validating transaction before persisting to database")
 	}
@@ -78,6 +83,9 @@ func (s *Service) CreateTransaction(ctx context.Context, create transaction.Tran
 	}
 
 	transaction := transformer.NewTransactionFromRepoTransaction(created)
+	if err := validate.Validate(transaction); err != nil {
+		return transaction, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating transfer from repository transfer")
+	}
 
 	return transaction, nil
 }
