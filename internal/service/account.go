@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/hampgoodwin/GoLuca/internal/account"
+	"github.com/hampgoodwin/GoLuca/internal/transformer"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
 	"github.com/hampgoodwin/GoLuca/pkg/pagination"
 	"github.com/hampgoodwin/errors"
@@ -14,11 +15,12 @@ import (
 )
 
 func (s *Service) GetAccount(ctx context.Context, accountID string) (account.Account, error) {
-	acct, err := s.repository.GetAccount(ctx, accountID)
+	repoAccount, err := s.repository.GetAccount(ctx, accountID)
 	if err != nil {
 		return account.Account{}, errors.Wrap(err, "fetching account from database")
 	}
-	return acct, nil
+	account := transformer.NewAccountFromRepoAccount(repoAccount)
+	return account, nil
 }
 
 func (s *Service) GetAccounts(ctx context.Context, cursor, limit string) ([]account.Account, *string, error) {
@@ -36,16 +38,22 @@ func (s *Service) GetAccounts(ctx context.Context, cursor, limit string) ([]acco
 			// return nil, nil, errors.WrapWithErrorMessage(err, errors.NotValidRequest, err.Error(), "decoding cursor")
 		}
 	}
-	accounts, err := s.repository.GetAccounts(ctx, id, createdAt, limitInt)
+	repoAccounts, err := s.repository.GetAccounts(ctx, id, createdAt, limitInt)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, fmt.Sprintf("fetching accounts from database with cursor %q", cursor))
 	}
 
 	nextCursor := ""
-	if len(accounts) == int(limitInt) {
-		nextCursor = pagination.EncodeCursor(accounts[len(accounts)-1].CreatedAt, accounts[len(accounts)-1].ID)
-		accounts = accounts[:len(accounts)-1]
+	if len(repoAccounts) == int(limitInt) {
+		nextCursor = pagination.EncodeCursor(repoAccounts[len(repoAccounts)-1].CreatedAt, repoAccounts[len(repoAccounts)-1].ID)
+		repoAccounts = repoAccounts[:len(repoAccounts)-1]
 	}
+
+	accounts := []account.Account{}
+	for _, repoAccount := range repoAccounts {
+		accounts = append(accounts, transformer.NewAccountFromRepoAccount(repoAccount))
+	}
+
 	return accounts, &nextCursor, nil
 }
 
@@ -57,9 +65,14 @@ func (s *Service) CreateAccount(ctx context.Context, create account.Account) (ac
 		return account.Account{}, errors.WithErrorMessage(err, errors.NotValidRequestData, "validating internal account")
 	}
 
-	created, err := s.repository.CreateAccount(ctx, create)
+	repoAccount := transformer.NewRepoAccountFromAccount(create)
+
+	created, err := s.repository.CreateAccount(ctx, repoAccount)
 	if err != nil {
 		return account.Account{}, errors.Wrap(err, "creating account in database")
 	}
-	return created, nil
+
+	account := transformer.NewAccountFromRepoAccount(created)
+
+	return account, nil
 }

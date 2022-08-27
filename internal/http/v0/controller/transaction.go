@@ -102,22 +102,19 @@ func (c *Controller) createTransaction(w http.ResponseWriter, r *http.Request) {
 		c.respondError(w, c.log, errors.Wrap(errors.WithError(err, errors.NotValidRequest), "transforming http api transaction to transaction"))
 		return
 	}
-	transaction, err := c.service.CreateTransactionAndEntries(ctx, create)
+
+	created, err := c.service.CreateTransaction(ctx, create)
 	if err != nil {
 		c.respondError(w, c.log, errors.Wrap(err, "creating transaction in service"))
 		return
 	}
-	if err := validate.Validate(transaction); err != nil {
-		c.respondError(w, c.log, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating transaction"))
-		return
-	}
 
-	responseTransaction := transformer.NewHTTPTransactionFromTransaction(transaction)
-	if err := validate.Validate(responseTransaction); err != nil {
+	returning := transformer.NewHTTPTransactionFromTransaction(created)
+	if err := validate.Validate(returning); err != nil {
 		c.respondError(w, c.log, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating http response transaction"))
 		return
 	}
 
-	res := &transactionResponse{Transaction: responseTransaction}
+	res := &transactionResponse{Transaction: returning}
 	c.respond(w, res, http.StatusCreated)
 }

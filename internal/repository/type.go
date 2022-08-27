@@ -20,6 +20,16 @@ type Transaction struct {
 	CreatedAt   time.Time
 }
 
+func (t Transaction) IsZero() bool {
+	if t.Description != "" {
+		return false
+	}
+	if t.Entries != nil {
+		return false
+	}
+	return true
+}
+
 type Entry struct {
 	ID            string
 	TransactionID string

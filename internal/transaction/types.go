@@ -14,6 +14,22 @@ type Transaction struct {
 	CreatedAt   time.Time `validate:"required"`
 }
 
+func (t Transaction) IsZero() bool {
+	if t.Description != "" {
+		return false
+	}
+	if t.Entries != nil {
+		return false
+	}
+	if t.ID != "" {
+		return false
+	}
+	if t.CreatedAt != (time.Time{}) {
+		return false
+	}
+	return true
+}
+
 // Entry ...
 type Entry struct {
 	ID            string `validate:"required,KSUID"`
