@@ -61,8 +61,8 @@ func TestCreateAccount_InvalidRequestBody(t *testing.T) {
 	err := json.NewDecoder(res.Body).Decode(&errRes)
 	s.Is.NoErr(err)
 
-	s.Is.Equal("validating http api create account request", errRes.Description)
-	s.Is.Equal("Key: 'accountRequest.Account.Name' Error:Field validation for 'Name' failed on the 'required' tag\nKey: 'accountRequest.Account.Type' Error:Field validation for 'Type' failed on the 'required' tag\nKey: 'accountRequest.Account.Basis' Error:Field validation for 'Basis' failed on the 'oneof' tag", errRes.ValidationErrors)
+	s.Is.Equal("validating internal account", errRes.Description)
+	s.Is.Equal("Key: 'Account.Name' Error:Field validation for 'Name' failed on the 'required' tag\nKey: 'Account.Basis' Error:Field validation for 'Basis' failed on the 'oneof' tag", errRes.ValidationErrors)
 }
 
 func TestCreateAccount_CannotDeserialize(t *testing.T) {

@@ -6,12 +6,23 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/hampgoodwin/GoLuca/internal/transaction"
+	"github.com/hampgoodwin/GoLuca/internal/transformer"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
 	"github.com/hampgoodwin/GoLuca/pkg/pagination"
-	"github.com/hampgoodwin/GoLuca/pkg/transaction"
 	"github.com/hampgoodwin/errors"
 	"github.com/segmentio/ksuid"
 )
+
+func (s *Service) GetTransaction(ctx context.Context, transactionID string) (transaction.Transaction, error) {
+	repoTransaction, err := s.repository.GetTransaction(ctx, transactionID)
+	if err != nil {
+		return transaction.Transaction{}, errors.Wrap(err, fmt.Sprintf("getting transaction %q", transactionID))
+	}
+
+	transaction := transformer.NewTransactionFromRepoTransaction(repoTransaction)
+	return transaction, nil
+}
 
 func (s *Service) GetTransactions(ctx context.Context, cursor, limit string) ([]transaction.Transaction, *string, error) {
 	limitInt, err := strconv.ParseUint(limit, 10, 64)
@@ -27,44 +38,46 @@ func (s *Service) GetTransactions(ctx context.Context, cursor, limit string) ([]
 			return nil, nil, errors.WrapWithErrorMessage(err, errors.NotKnown, err.Error(), "decoding cursor")
 		}
 	}
-	transactions, err := s.repository.GetTransactions(ctx, id, createdAt, limitInt)
+	repoTransactions, err := s.repository.GetTransactions(ctx, id, createdAt, limitInt)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, fmt.Sprintf("fetching transactions from database with cursor %q", cursor))
 	}
 
 	encodedCursor := ""
-	if len(transactions) == int(limitInt) {
-		encodedCursor = pagination.EncodeCursor(transactions[len(transactions)-1].CreatedAt, transactions[len(transactions)-1].ID)
-		transactions = transactions[:len(transactions)-1]
+	if len(repoTransactions) == int(limitInt) {
+		encodedCursor = pagination.EncodeCursor(repoTransactions[len(repoTransactions)-1].CreatedAt, repoTransactions[len(repoTransactions)-1].ID)
+		repoTransactions = repoTransactions[:len(repoTransactions)-1]
+	}
+
+	transactions := []transaction.Transaction{}
+	for _, repoTransaction := range repoTransactions {
+		transactions = append(transactions, transformer.NewTransactionFromRepoTransaction(repoTransaction))
 	}
 
 	return transactions, &encodedCursor, nil
 }
 
-func (s *Service) GetTransaction(ctx context.Context, transactionID string) (transaction.Transaction, error) {
-	txn, err := s.repository.GetTransaction(ctx, transactionID)
-	if err != nil {
-		return transaction.Transaction{}, errors.Wrap(err, fmt.Sprintf("getting transaction %q", transactionID))
-	}
-	return txn, nil
-}
-
-func (s *Service) CreateTransactionAndEntries(ctx context.Context, txn transaction.Transaction) (transaction.Transaction, error) {
-	txn.ID = ksuid.New().String()
-	txn.CreatedAt = time.Now()
-	for i := 0; i < len(txn.Entries); i++ {
-		txn.Entries[i].ID = ksuid.New().String()
-		txn.Entries[i].TransactionID = txn.ID
-		txn.Entries[i].CreatedAt = txn.CreatedAt
+func (s *Service) CreateTransaction(ctx context.Context, create transaction.Transaction) (transaction.Transaction, error) {
+	create.ID = ksuid.New().String()
+	create.CreatedAt = time.Now()
+	for i := 0; i < len(create.Entries); i++ {
+		create.Entries[i].ID = ksuid.New().String()
+		create.Entries[i].TransactionID = create.ID
+		create.Entries[i].CreatedAt = create.CreatedAt
 	}
 
-	if err := validate.Validate(txn); err != nil {
+	if err := validate.Validate(create); err != nil {
 		return transaction.Transaction{}, errors.WithErrorMessage(err, errors.NotValidRequestData, "validating transaction before persisting to database")
 	}
 
-	txn, err := s.repository.CreateTransaction(ctx, txn)
+	repoTransaction := transformer.NewRepoTransactionFromTransaction(create)
+
+	created, err := s.repository.CreateTransaction(ctx, repoTransaction)
 	if err != nil {
 		return transaction.Transaction{}, errors.Wrap(err, "storing transaction")
 	}
-	return txn, nil
+
+	transaction := transformer.NewTransactionFromRepoTransaction(created)
+
+	return transaction, nil
 }

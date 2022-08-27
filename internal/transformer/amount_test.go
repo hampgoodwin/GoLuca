@@ -6,7 +6,8 @@ import (
 	"testing"
 
 	"github.com/go-playground/validator"
-	"github.com/hampgoodwin/GoLuca/pkg/amount"
+	"github.com/hampgoodwin/GoLuca/internal/amount"
+	"github.com/hampgoodwin/GoLuca/internal/repository"
 	httpamount "github.com/hampgoodwin/GoLuca/pkg/http/v0/amount"
 	"github.com/hampgoodwin/errors"
 	"github.com/matryer/is"
@@ -54,6 +55,87 @@ func TestNewAmountFromHTTPAmount(t *testing.T) {
 				return
 			}
 			a.NoErr(err)
+			a.Equal(tc.expected, actual)
+		})
+	}
+}
+
+func TestNewHTTPAmountFromAmount(t *testing.T) {
+	testCases := []struct {
+		description string
+		amount      amount.Amount
+		expected    httpamount.Amount
+		err         error
+	}{
+		{description: "empty"},
+		{
+			description: "success",
+			amount:      amount.Amount{Value: 100, Currency: "USD"},
+			expected:    httpamount.Amount{Value: "100", Currency: "USD"},
+		},
+	}
+
+	a := is.New(t)
+
+	for i, tc := range testCases {
+		tc := tc
+		t.Run(fmt.Sprintf("%d:%s", i, tc.description), func(t *testing.T) {
+			t.Parallel()
+			actual := NewHTTPAmountFromAmount(tc.amount)
+			a.Equal(tc.expected, actual)
+		})
+	}
+}
+
+func TestNewAmountFromRepoAmount(t *testing.T) {
+	testCases := []struct {
+		description string
+		amount      repository.Amount
+		expected    amount.Amount
+		err         error
+	}{
+		{description: "empty"},
+		{
+			description: "success",
+			amount:      repository.Amount{Value: 100, Currency: "USD"},
+			expected:    amount.Amount{Value: 100, Currency: "USD"},
+		},
+	}
+
+	a := is.New(t)
+
+	for i, tc := range testCases {
+		tc := tc
+		t.Run(fmt.Sprintf("%d:%s", i, tc.description), func(t *testing.T) {
+			t.Parallel()
+			actual := NewAmountFromRepoAmount(tc.amount)
+			a.Equal(tc.expected, actual)
+		})
+	}
+}
+
+func TestNewRepoAmountFromAmount(t *testing.T) {
+	testCases := []struct {
+		description string
+		amount      amount.Amount
+		expected    repository.Amount
+		err         error
+	}{
+		{description: "empty"},
+		{
+			description: "success",
+			amount:      amount.Amount{Value: 100, Currency: "USD"},
+			expected:    repository.Amount{Value: 100, Currency: "USD"},
+		},
+	}
+
+	a := is.New(t)
+
+	for i, tc := range testCases {
+		tc := tc
+		t.Run(fmt.Sprintf("%d:%s", i, tc.description), func(t *testing.T) {
+			t.Parallel()
+			actual := NewRepoAmountFromAmount(tc.amount)
 			a.Equal(tc.expected, actual)
 		})
 	}

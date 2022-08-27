@@ -1,6 +1,6 @@
 package amount
 
 type Amount struct {
-	Value    string `json:"value" validate:"int64,gte=0"`
-	Currency string `json:"currency" validate:"len=3,alpha"`
+	Value    string `json:"value" validate:"required,stringAsInt64"`
+	Currency string `json:"currency" validate:"required,len=3"`
 }

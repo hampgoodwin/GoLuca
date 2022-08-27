@@ -1,8 +1,10 @@
 package transaction
 
 import (
+	"time"
+
+	"github.com/hampgoodwin/GoLuca/pkg/http/v0/amount"
 	httpamount "github.com/hampgoodwin/GoLuca/pkg/http/v0/amount"
-	"github.com/hampgoodwin/GoLuca/pkg/transaction"
 )
 
 type CreateTransaction struct {
@@ -27,6 +29,35 @@ type CreateEntry struct {
 	Amount        httpamount.Amount `json:"amount" validate:"required"`
 }
 
-type Transaction transaction.Transaction
+type Transaction struct {
+	ID          string    `json:"id"`
+	Description string    `json:"description"`
+	Entries     []Entry   `json:"entries"`
+	CreatedAt   time.Time `json:"createdAt"`
+}
 
-type Entry transaction.Entry
+func (t Transaction) IsZero() bool {
+	if t.Description != "" {
+		return false
+	}
+	if t.Entries != nil {
+		return false
+	}
+	if t.ID != "" {
+		return false
+	}
+	if t.CreatedAt != (time.Time{}) {
+		return false
+	}
+	return true
+}
+
+type Entry struct {
+	ID            string        `json:"id"`
+	TransactionID string        `json:"transactionID"`
+	Description   string        `json:"description"`
+	DebitAccount  string        `json:"debitAccount"`
+	CreditAccount string        `json:"creditAccount"`
+	Amount        amount.Amount `json:"amount"`
+	CreatedAt     time.Time     `json:"createdAt"`
+}

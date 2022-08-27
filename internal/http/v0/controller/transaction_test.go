@@ -3,12 +3,12 @@ package controller
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 	"testing"
 
 	"github.com/hampgoodwin/GoLuca/internal/test"
-	"github.com/hampgoodwin/GoLuca/pkg/amount"
 	httpaccount "github.com/hampgoodwin/GoLuca/pkg/http/v0/account"
 	httpamount "github.com/hampgoodwin/GoLuca/pkg/http/v0/amount"
 	httptransaction "github.com/hampgoodwin/GoLuca/pkg/http/v0/transaction"
@@ -73,7 +73,7 @@ func TestCreateTransaction(t *testing.T) {
 
 	s.Is.True(tRes.Entries[0].CreditAccount == revenueAccount.ID)
 	s.Is.True(tRes.Entries[0].DebitAccount == cashAccount.ID)
-	s.Is.True(tRes.Entries[0].Amount == amount.Amount{Value: 100, Currency: "USD"})
+	s.Is.True(tRes.Entries[0].Amount == httpamount.Amount{Value: "100", Currency: "USD"})
 
 	tReq.Transaction.Entries[0].Amount.Value = "9223372036854775807"
 
@@ -83,7 +83,7 @@ func TestCreateTransaction(t *testing.T) {
 	err = json.NewDecoder(res4.Body).Decode(&tRes)
 	s.Is.NoErr(err)
 
-	s.Is.True(tRes.Entries[0].Amount == amount.Amount{Value: 9223372036854775807, Currency: "USD"})
+	s.Is.True(tRes.Entries[0].Amount == httpamount.Amount{Value: "9223372036854775807", Currency: "USD"})
 }
 
 func TestCreateTransaction_int64_overflow(t *testing.T) {
@@ -142,7 +142,8 @@ func TestCreateTransaction_int64_overflow(t *testing.T) {
 	s.Is.NoErr(err)
 
 	s.Is.True(errRes != (ErrorResponse{}))
-	s.Is.True(strings.Contains(errRes.ValidationErrors, "int64"))
+	fmt.Println(errRes)
+	s.Is.True(strings.Contains(errRes.ValidationErrors, "stringAsInt64"))
 }
 
 func TestGetTransaction(t *testing.T) {
@@ -204,7 +205,7 @@ func TestGetTransaction(t *testing.T) {
 
 	s.Is.True(tRes.Entries[0].CreditAccount == revenueAccount.ID)
 	s.Is.True(tRes.Entries[0].DebitAccount == cashAccount.ID)
-	s.Is.True(tRes.Entries[0].Amount == amount.Amount{Value: 100, Currency: "USD"})
+	s.Is.True(tRes.Entries[0].Amount == httpamount.Amount{Value: "100", Currency: "USD"})
 
 	tReq.Transaction.Entries[0].Amount.Value = "9223372036854775807"
 	tReq.Transaction.Entries[0].Amount.Currency = "usd"
@@ -284,7 +285,7 @@ func TestGetTransactions(t *testing.T) {
 
 	s.Is.True(tRes.Entries[0].CreditAccount == revenueAccount.ID)
 	s.Is.True(tRes.Entries[0].DebitAccount == cashAccount.ID)
-	s.Is.True(tRes.Entries[0].Amount == amount.Amount{Value: 100, Currency: "USD"})
+	s.Is.True(tRes.Entries[0].Amount == httpamount.Amount{Value: "100", Currency: "USD"})
 
 	tReq.Transaction.Entries[0].Amount.Value = "9223372036854775807"
 	tReq.Transaction.Entries[0].Amount.Currency = "usd"
