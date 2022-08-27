@@ -16,8 +16,6 @@ A Simple Accounting Ledger
 
 TODO
 - [ ] re-evaluate type validation logic in the service
-- [x] implement db types and transformers
-    - [ ] add tests
 - [ ] add gRPC methods, matching http spec
 - [ ] Testing
     - [x] Add more unit tests, solitary and sociable
@@ -44,6 +42,8 @@ TODO
     - [ ] Add metrics
         - [ ] OpenTelemetry metrics ready?
     - [ ] Log Collector?
+- [x] implement db types and transformers
+    - [x] add tests
 - [x] [implement safer enums](https://threedots.tech/post/safer-enums-in-go/)
 - [x] migrate to guid from uuid
     - [x] probably requires db migration/update
