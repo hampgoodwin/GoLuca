@@ -3,6 +3,7 @@ package controller
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 	"testing"
@@ -142,7 +143,8 @@ func TestCreateTransaction_int64_overflow(t *testing.T) {
 	s.Is.NoErr(err)
 
 	s.Is.True(errRes != (ErrorResponse{}))
-	s.Is.True(strings.Contains(errRes.ValidationErrors, "int64"))
+	fmt.Println(errRes)
+	s.Is.True(strings.Contains(errRes.ValidationErrors, "stringAsInt64"))
 }
 
 func TestGetTransaction(t *testing.T) {
