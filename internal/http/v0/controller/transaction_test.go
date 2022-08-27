@@ -8,7 +8,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hampgoodwin/GoLuca/internal/amount"
 	"github.com/hampgoodwin/GoLuca/internal/test"
 	httpaccount "github.com/hampgoodwin/GoLuca/pkg/http/v0/account"
 	httpamount "github.com/hampgoodwin/GoLuca/pkg/http/v0/amount"
@@ -74,7 +73,7 @@ func TestCreateTransaction(t *testing.T) {
 
 	s.Is.True(tRes.Entries[0].CreditAccount == revenueAccount.ID)
 	s.Is.True(tRes.Entries[0].DebitAccount == cashAccount.ID)
-	s.Is.True(tRes.Entries[0].Amount == amount.Amount{Value: 100, Currency: "USD"})
+	s.Is.True(tRes.Entries[0].Amount == httpamount.Amount{Value: "100", Currency: "USD"})
 
 	tReq.Transaction.Entries[0].Amount.Value = "9223372036854775807"
 
@@ -84,7 +83,7 @@ func TestCreateTransaction(t *testing.T) {
 	err = json.NewDecoder(res4.Body).Decode(&tRes)
 	s.Is.NoErr(err)
 
-	s.Is.True(tRes.Entries[0].Amount == amount.Amount{Value: 9223372036854775807, Currency: "USD"})
+	s.Is.True(tRes.Entries[0].Amount == httpamount.Amount{Value: "9223372036854775807", Currency: "USD"})
 }
 
 func TestCreateTransaction_int64_overflow(t *testing.T) {
@@ -206,7 +205,7 @@ func TestGetTransaction(t *testing.T) {
 
 	s.Is.True(tRes.Entries[0].CreditAccount == revenueAccount.ID)
 	s.Is.True(tRes.Entries[0].DebitAccount == cashAccount.ID)
-	s.Is.True(tRes.Entries[0].Amount == amount.Amount{Value: 100, Currency: "USD"})
+	s.Is.True(tRes.Entries[0].Amount == httpamount.Amount{Value: "100", Currency: "USD"})
 
 	tReq.Transaction.Entries[0].Amount.Value = "9223372036854775807"
 	tReq.Transaction.Entries[0].Amount.Currency = "usd"
@@ -286,7 +285,7 @@ func TestGetTransactions(t *testing.T) {
 
 	s.Is.True(tRes.Entries[0].CreditAccount == revenueAccount.ID)
 	s.Is.True(tRes.Entries[0].DebitAccount == cashAccount.ID)
-	s.Is.True(tRes.Entries[0].Amount == amount.Amount{Value: 100, Currency: "USD"})
+	s.Is.True(tRes.Entries[0].Amount == httpamount.Amount{Value: "100", Currency: "USD"})
 
 	tReq.Transaction.Entries[0].Amount.Value = "9223372036854775807"
 	tReq.Transaction.Entries[0].Amount.Currency = "usd"

@@ -15,7 +15,9 @@ A Simple Accounting Ledger
 ---
 
 TODO
-- [ ] implement db types and transformers
+- [ ] re-evaluate type validation logic in the service
+- [x] implement db types and transformers
+    - [ ] add tests
 - [ ] add gRPC methods, matching http spec
 - [ ] Testing
     - [x] Add more unit tests, solitary and sociable

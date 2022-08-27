@@ -48,7 +48,44 @@ func NewEntryFromHTTPCreateEntry(in httptransaction.CreateEntry) (transaction.En
 }
 
 func NewHTTPTransactionFromTransaction(in transaction.Transaction) httptransaction.Transaction {
-	return httptransaction.Transaction(in)
+	out := httptransaction.Transaction{}
+
+	if in.IsZero() {
+		return out
+	}
+
+	out.ID = in.ID
+	out.Description = in.Description
+
+	for _, entry := range in.Entries {
+		inEntry := NewHTTPEntryFromEntry(entry)
+		out.Entries = append(out.Entries, inEntry)
+	}
+
+	out.CreatedAt = in.CreatedAt
+
+	return out
+}
+
+func NewHTTPEntryFromEntry(in transaction.Entry) httptransaction.Entry {
+	out := httptransaction.Entry{}
+
+	if in == (transaction.Entry{}) {
+		return out
+	}
+
+	out.ID = in.ID
+	out.TransactionID = in.TransactionID
+	out.Description = in.Description
+	out.DebitAccount = in.DebitAccount
+	out.CreditAccount = in.CreditAccount
+
+	inAmount := NewHTTPAmountFromAmount(in.Amount)
+	out.Amount = inAmount
+
+	out.CreatedAt = in.CreatedAt
+
+	return out
 }
 
 func NewTransactionFromRepoTransaction(in repository.Transaction) transaction.Transaction {

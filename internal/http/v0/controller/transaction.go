@@ -39,13 +39,10 @@ func (c *Controller) getTransactions(w http.ResponseWriter, r *http.Request) {
 	if limit == "" {
 		limit = "10"
 	}
+
 	transactions, nextCursor, err := c.service.GetTransactions(ctx, cursor, limit)
 	if err != nil {
 		c.respondError(w, c.log, errors.Wrap(err, "getting transactions from service"))
-		return
-	}
-	if err := validate.Validate(transactions); err != nil {
-		c.respondError(w, c.log, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating transactions"))
 		return
 	}
 
@@ -53,6 +50,7 @@ func (c *Controller) getTransactions(w http.ResponseWriter, r *http.Request) {
 	for _, transaction := range transactions {
 		responseTransactions = append(responseTransactions, transformer.NewHTTPTransactionFromTransaction(transaction))
 	}
+
 	if err := validate.Validate(responseTransactions); err != nil {
 		c.respondError(w, c.log, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating http response transactions"))
 		return
@@ -65,13 +63,10 @@ func (c *Controller) getTransactions(w http.ResponseWriter, r *http.Request) {
 func (c *Controller) getTransaction(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	transactionID := chi.URLParam(r, "transactionId")
+
 	transaction, err := c.service.GetTransaction(ctx, transactionID)
 	if err != nil {
 		c.respondError(w, c.log, errors.Wrap(err, "getting transaction from service"))
-		return
-	}
-	if err := validate.Validate(transaction); err != nil {
-		c.respondError(w, c.log, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating transaction"))
 		return
 	}
 
@@ -80,6 +75,7 @@ func (c *Controller) getTransaction(w http.ResponseWriter, r *http.Request) {
 		c.respondError(w, c.log, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating http response transaction"))
 		return
 	}
+
 	res := &transactionResponse{Transaction: responseTransaction}
 	c.respond(w, res, http.StatusOK)
 }
