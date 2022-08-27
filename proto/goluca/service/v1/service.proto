@@ -5,13 +5,13 @@ package goluca.service.v1;
 import "goluca/model/v1/transaction.proto";
 
 message GetTransactionRequest {
-    string transaction_id = 1;
+  string transaction_id = 1;
 }
 
 message GetTransactionResponse {
-    goluca.model.v1.Transaction transaction = 1;
+  goluca.model.v1.Transaction transaction = 1;
 }
 
 service GoLucaService {
-    rpc GetTransaction(GetTransactionRequest) returns (GetTransactionResponse) {}
+  rpc GetTransaction(GetTransactionRequest) returns (GetTransactionResponse) {}
 }

@@ -2,22 +2,22 @@ syntax = "proto3";
 
 package goluca.model.v1;
 
-import "google/protobuf/timestamp.proto";
 import "goluca/model/v1/amount.proto";
+import "google/protobuf/timestamp.proto";
 
 message Transaction {
-    string id = 1;
-    string description = 2;
-    repeated Entry entries = 3;
-    google.protobuf.Timestamp created_at = 4; 
+  string id = 1;
+  string description = 2;
+  repeated Entry entries = 3;
+  google.protobuf.Timestamp created_at = 4;
 }
 
 message Entry {
-    string id = 1;
-    string transaction_id = 2;
-    string description = 3;
-    string debit_account = 4;
-    string credit_account = 5;
-    goluca.model.v1.Amount amount = 6;
-    google.protobuf.Timestamp created_at = 7; 
+  string id = 1;
+  string transaction_id = 2;
+  string description = 3;
+  string debit_account = 4;
+  string credit_account = 5;
+  goluca.model.v1.Amount amount = 6;
+  google.protobuf.Timestamp created_at = 7;
 }

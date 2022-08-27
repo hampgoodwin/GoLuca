@@ -3,6 +3,6 @@ syntax = "proto3";
 package goluca.model.v1;
 
 message Amount {
-    int64 value = 1;
-    string currency = 2;
+  int64 value = 1;
+  string currency = 2;
 }
