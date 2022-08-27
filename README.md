@@ -15,8 +15,18 @@ A Simple Accounting Ledger
 ---
 
 TODO
-- [ ] re-evaluate type validation logic in the service
 - [ ] add gRPC methods, matching http spec
+    - [ ] add gRPC server start to main?
+    - [ ] add gRPC method tests..? idk
+- [ ] Events
+    - [ ] Add eventing
+    - [ ] explore NATS
+- [ ] o11y
+    - [ ] Add tracing
+    - [ ] Add metrics
+        - [ ] OpenTelemetry metrics ready?
+    - [ ] Log Collector?
+- [ ] make a frontend with some dashboard functionality, (vue3 plz) OOOOH!!!
 - [ ] Testing
     - [x] Add more unit tests, solitary and sociable
     - [x] Add Integration testing
@@ -33,15 +43,7 @@ TODO
     - [ ] add default limit size as a configurable somewhere
 - [ ] improve pagination by displaying page number of result.
     - [ ] set up configuration loader or a new secrets loader to load values from appvault
-- [ ] make a frontend with some dashboard functionality, (vue3 plz) OOOOH!!!
-- [ ] Events
-    - [ ] Add eventing
-    - [ ] explore NATS
-- [ ] o11y
-    - [ ] Add tracing
-    - [ ] Add metrics
-        - [ ] OpenTelemetry metrics ready?
-    - [ ] Log Collector?
+- [x] re-evaluate type validation logic in the service
 - [x] implement db types and transformers
     - [x] add tests
 - [x] [implement safer enums](https://threedots.tech/post/safer-enums-in-go/)
