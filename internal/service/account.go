@@ -19,7 +19,12 @@ func (s *Service) GetAccount(ctx context.Context, accountID string) (account.Acc
 	if err != nil {
 		return account.Account{}, errors.Wrap(err, "fetching account from database")
 	}
+
 	account := transformer.NewAccountFromRepoAccount(repoAccount)
+	if err := validate.Validate(account); err != nil {
+		return account, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating account from repository account")
+	}
+
 	return account, nil
 }
 
@@ -53,6 +58,9 @@ func (s *Service) GetAccounts(ctx context.Context, cursor, limit string) ([]acco
 	for _, repoAccount := range repoAccounts {
 		accounts = append(accounts, transformer.NewAccountFromRepoAccount(repoAccount))
 	}
+	if err := validate.Validate(accounts); err != nil {
+		return accounts, nil, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating accounts from repository accounts")
+	}
 
 	return accounts, &nextCursor, nil
 }
@@ -62,7 +70,7 @@ func (s *Service) CreateAccount(ctx context.Context, create account.Account) (ac
 	create.CreatedAt = time.Now()
 
 	if err := validate.Validate(create); err != nil {
-		return account.Account{}, errors.WithErrorMessage(err, errors.NotValidRequestData, "validating internal account")
+		return account.Account{}, errors.WithErrorMessage(err, errors.NotValidRequestData, "validating account")
 	}
 
 	repoAccount := transformer.NewRepoAccountFromAccount(create)
@@ -73,6 +81,9 @@ func (s *Service) CreateAccount(ctx context.Context, create account.Account) (ac
 	}
 
 	account := transformer.NewAccountFromRepoAccount(created)
+	if err := validate.Validate(account); err != nil {
+		return account, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating account from repository account")
+	}
 
 	return account, nil
 }

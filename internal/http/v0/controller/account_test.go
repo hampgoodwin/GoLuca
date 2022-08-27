@@ -61,7 +61,7 @@ func TestCreateAccount_InvalidRequestBody(t *testing.T) {
 	err := json.NewDecoder(res.Body).Decode(&errRes)
 	s.Is.NoErr(err)
 
-	s.Is.Equal("validating internal account", errRes.Description)
+	s.Is.Equal("validating account", errRes.Description)
 	s.Is.Equal("Key: 'Account.Name' Error:Field validation for 'Name' failed on the 'required' tag\nKey: 'Account.Basis' Error:Field validation for 'Basis' failed on the 'oneof' tag", errRes.ValidationErrors)
 }
 
