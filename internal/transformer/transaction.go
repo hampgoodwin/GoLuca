@@ -1,10 +1,13 @@
 package transformer
 
 import (
+	modelv1 "github.com/hampgoodwin/GoLuca/gen/proto/go/goluca/model/v1"
+	"github.com/hampgoodwin/GoLuca/internal/amount"
 	"github.com/hampgoodwin/GoLuca/internal/repository"
 	"github.com/hampgoodwin/GoLuca/internal/transaction"
 	httptransaction "github.com/hampgoodwin/GoLuca/pkg/http/v0/transaction"
 	"github.com/hampgoodwin/errors"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func NewTransactionFromHTTPCreateTransaction(in httptransaction.CreateTransaction) (transaction.Transaction, error) {
@@ -168,6 +171,61 @@ func NewRepoEntryFromEntry(in transaction.Entry) repository.Entry {
 	out.Amount = inAmount
 
 	out.CreatedAt = in.CreatedAt
+
+	return out
+}
+
+func NewPBTransactionFromTransaction(in transaction.Transaction) *modelv1.Transaction {
+	if in.IsZero() {
+		return nil
+	}
+
+	out := &modelv1.Transaction{
+		Id:          in.ID,
+		Description: in.Description,
+		Entries:     nil, // filled in after
+		CreatedAt:   timestamppb.New(in.CreatedAt),
+	}
+
+	var entries []*modelv1.Entry
+	for _, entry := range in.Entries {
+		entry := NewPBEntryFromEntry(entry)
+		entries = append(entries, entry)
+	}
+	if len(entries) > 0 {
+		out.Entries = entries
+	}
+
+	return out
+}
+
+func NewPBEntryFromEntry(in transaction.Entry) *modelv1.Entry {
+	if in == (transaction.Entry{}) {
+		return nil
+	}
+
+	out := &modelv1.Entry{
+		Id:            in.ID,
+		TransactionId: in.TransactionID,
+		Description:   in.Description,
+		DebitAccount:  in.DebitAccount,
+		CreditAccount: in.CreditAccount,
+		Amount:        NewPBAmountFromAmount(in.Amount),
+		CreatedAt:     timestamppb.New(in.CreatedAt),
+	}
+
+	return out
+}
+
+func NewPBAmountFromAmount(in amount.Amount) *modelv1.Amount {
+	if in == (amount.Amount{}) {
+		return nil
+	}
+
+	out := &modelv1.Amount{
+		Value:    in.Value,
+		Currency: in.Currency,
+	}
 
 	return out
 }

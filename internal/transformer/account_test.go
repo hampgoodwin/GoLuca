@@ -63,7 +63,7 @@ func TestNewHTTPAccountFromAccount(t *testing.T) {
 				ParentID: "parentID",
 				Name:     "equity",
 				Type:     account.TypeEquity,
-				Basis:    account.BasisDebit,
+				Basis:    account.BasisCredit,
 			},
 			expected: httpaccount.Account{
 				ID:       "ID",

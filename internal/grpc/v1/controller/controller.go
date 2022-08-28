@@ -7,11 +7,11 @@ import (
 
 type Controller struct {
 	log     *zap.Logger
-	service service.Service
+	service *service.Service
 }
 
-func NewController(l *zap.Logger, s service.Service) Controller {
-	return Controller{
+func NewController(l *zap.Logger, s *service.Service) *Controller {
+	return &Controller{
 		log:     l,
 		service: s,
 	}

@@ -2,6 +2,7 @@ package transformer
 
 import (
 	modelv1 "github.com/hampgoodwin/GoLuca/gen/proto/go/goluca/model/v1"
+	servicev1 "github.com/hampgoodwin/GoLuca/gen/proto/go/goluca/service/v1"
 	"github.com/hampgoodwin/GoLuca/internal/account"
 	"github.com/hampgoodwin/GoLuca/internal/repository"
 	httpaccount "github.com/hampgoodwin/GoLuca/pkg/http/v0/account"
@@ -91,6 +92,21 @@ func NewPBAccountFromAccount(in account.Account) *modelv1.Account {
 	if in.ParentID != "" {
 		out.ParentId = &in.ParentID
 	}
+
+	return out
+}
+
+func NewAccountFromPBCreateAccount(in *servicev1.CreateAccountRequest) account.Account {
+	out := account.Account{}
+
+	if in == nil {
+		return out
+	}
+
+	out.ParentID = in.GetParentId()
+	out.Name = in.Name
+	out.Type = pbAccountTypeToAccountType(in.Type)
+	out.Basis = pbAccountBasisToAccountBasis(in.Basis)
 
 	return out
 }

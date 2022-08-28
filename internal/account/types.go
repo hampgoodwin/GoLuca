@@ -28,7 +28,8 @@ func (a Account) String() string {
 
 // Type represents the type of account
 type Type struct {
-	slug string `validate:"required,oneof=asset liability equity revenue expense gain loss"`
+	// Slug should not be accessed by dependent code. It is exported for validation reasons
+	Slug string `validate:"oneof=asset liability equity revenue expense gain loss"`
 }
 
 // safer enums for Type enum
@@ -63,11 +64,12 @@ func ParseType(t string) Type {
 }
 
 func (t Type) String() string {
-	return t.slug
+	return t.Slug
 }
 
 type Basis struct {
-	slug string `validate:"required,oneof=debit credit"`
+	// Slug should not be accessed by dependent code. It is exported for validation reasons
+	Slug string `validate:"oneof=debit credit"`
 }
 
 var (
@@ -91,5 +93,5 @@ func ParseBasis(b string) Basis {
 }
 
 func (b Basis) String() string {
-	return b.slug
+	return b.Slug
 }

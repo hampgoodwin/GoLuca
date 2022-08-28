@@ -60,7 +60,9 @@ message CreateAccountRequest {
   goluca.model.v1.Basis basis = 4;
 }
 
-message CreateAccountResponse {}
+message CreateAccountResponse {
+  goluca.model.v1.Account account = 1;
+}
 
 service GoLucaService {
   // Account Endpoints
