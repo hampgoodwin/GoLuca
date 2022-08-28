@@ -33,23 +33,21 @@ func (s *Service) ListTransactions(ctx context.Context, cursor, limit string) ([
 		return nil, nil, errors.Wrap(err, "parsing limit query parameter")
 	}
 	limitInt++ // we always want one more than the size of the page, the extra at the end of the resultset serves as starting record for the next page
+
 	var id string
 	var createdAt time.Time
 	if cursor != "" {
-		id, createdAt, err = pagination.DecodeCursor(cursor)
+		cursor, err := pagination.ParseCursor(cursor)
 		if err != nil {
-			return nil, nil, errors.WrapWithErrorMessage(err, errors.NotKnown, err.Error(), "decoding cursor")
+			return nil, nil, errors.WithErrorMessage(err, errors.NotValidRequest, "parsing cursor object")
 		}
+		id = cursor.ID
+		createdAt = cursor.Time
 	}
+
 	repoTransactions, err := s.repository.ListTransactions(ctx, id, createdAt, limitInt)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, fmt.Sprintf("fetching transactions from database with cursor %q", cursor))
-	}
-
-	encodedCursor := ""
-	if len(repoTransactions) == int(limitInt) {
-		encodedCursor = pagination.EncodeCursor(repoTransactions[len(repoTransactions)-1].CreatedAt, repoTransactions[len(repoTransactions)-1].ID)
-		repoTransactions = repoTransactions[:len(repoTransactions)-1]
 	}
 
 	transactions := []transaction.Transaction{}
@@ -60,7 +58,22 @@ func (s *Service) ListTransactions(ctx context.Context, cursor, limit string) ([
 		return transactions, nil, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating transfers from repository transfers")
 	}
 
-	return transactions, &encodedCursor, nil
+	nextCursor := ""
+	if len(transactions) == int(limitInt) {
+		var err error
+		lastTransaction := transactions[len(transactions)-1]
+		nextCursor, err = pagination.Cursor{
+			ID:         lastTransaction.ID,
+			Time:       lastTransaction.CreatedAt,
+			Parameters: nil, // once I add query paramters/filters, include this
+		}.EncodeCursor()
+		if err != nil {
+			return nil, nil, errors.WithErrorMessage(err, errors.NotValidInternalData, "encoding cursor for next cursor")
+		}
+		transactions = transactions[:len(transactions)-1]
+	}
+
+	return transactions, &nextCursor, nil
 }
 
 func (s *Service) CreateTransaction(ctx context.Context, create transaction.Transaction) (transaction.Transaction, error) {
