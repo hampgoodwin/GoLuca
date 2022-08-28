@@ -221,7 +221,7 @@ func TestGetTransaction(t *testing.T) {
 	s.Is.Equal(getTRes, tRes)
 }
 
-func TestGetTransactions(t *testing.T) {
+func TestListTransactions(t *testing.T) {
 	s := test.GetScope(t)
 	s.SetHTTP(t, newTestHTTPHandler(s.Env.Log, s.DB))
 
@@ -290,7 +290,7 @@ func TestGetTransactions(t *testing.T) {
 	tReq.Transaction.Entries[0].Amount.Value = "9223372036854775807"
 	tReq.Transaction.Entries[0].Amount.Currency = "usd"
 
-	res4 := getTransactions(t, &s)
+	res4 := listTransactions(t, &s)
 	defer res4.Body.Close()
 	s.Is.True(res4.StatusCode == http.StatusOK)
 
@@ -345,7 +345,7 @@ func getTransaction(
 	return res
 }
 
-func getTransactions(
+func listTransactions(
 	t *testing.T,
 	s *test.Scope,
 ) *http.Response {

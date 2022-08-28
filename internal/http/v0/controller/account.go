@@ -29,7 +29,7 @@ type accountsResponse struct {
 
 func (c *Controller) RegisterAccountRoutes(r *chi.Mux) {
 	r.Route("/accounts", func(r chi.Router) {
-		r.Get("/", c.getAccounts)
+		r.Get("/", c.listAccounts)
 		r.Get(fmt.Sprintf("/{accountId:%s}", ksuidRegexp), c.getAccount)
 		r.Post("/", c.createAccount)
 	})
@@ -56,13 +56,13 @@ func (c *Controller) getAccount(w http.ResponseWriter, r *http.Request) {
 	c.respond(w, res, http.StatusOK)
 }
 
-func (c *Controller) getAccounts(w http.ResponseWriter, r *http.Request) {
+func (c *Controller) listAccounts(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	limit, cursor := r.URL.Query().Get("limit"), r.URL.Query().Get("cursor")
 	if limit == "" {
 		limit = "10"
 	}
-	accounts, nextCursor, err := c.service.GetAccounts(ctx, cursor, limit)
+	accounts, nextCursor, err := c.service.ListAccounts(ctx, cursor, limit)
 	if err != nil {
 		c.respondError(w, c.log, errors.Wrap(err, "getting accounts from service"))
 		return

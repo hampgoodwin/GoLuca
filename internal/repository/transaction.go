@@ -53,8 +53,8 @@ func (r *Repository) GetTransaction(ctx context.Context, transactionID string) (
 	return returning, nil
 }
 
-// GetTransactions get's transactions paginated by cursor and limit
-func (r *Repository) GetTransactions(ctx context.Context, transactionID string, createdAt time.Time, limit uint64) ([]Transaction, error) {
+// ListTransactions get's transactions paginated by cursor and limit
+func (r *Repository) ListTransactions(ctx context.Context, transactionID string, createdAt time.Time, limit uint64) ([]Transaction, error) {
 	tx, err := r.database.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		return nil, errors.WithErrorMessage(err, errors.NotKnown, "beginning get transactions db transactoion")

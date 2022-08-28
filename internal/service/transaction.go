@@ -27,7 +27,7 @@ func (s *Service) GetTransaction(ctx context.Context, transactionID string) (tra
 	return transaction, nil
 }
 
-func (s *Service) GetTransactions(ctx context.Context, cursor, limit string) ([]transaction.Transaction, *string, error) {
+func (s *Service) ListTransactions(ctx context.Context, cursor, limit string) ([]transaction.Transaction, *string, error) {
 	limitInt, err := strconv.ParseUint(limit, 10, 64)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "parsing limit query parameter")
@@ -41,7 +41,7 @@ func (s *Service) GetTransactions(ctx context.Context, cursor, limit string) ([]
 			return nil, nil, errors.WrapWithErrorMessage(err, errors.NotKnown, err.Error(), "decoding cursor")
 		}
 	}
-	repoTransactions, err := s.repository.GetTransactions(ctx, id, createdAt, limitInt)
+	repoTransactions, err := s.repository.ListTransactions(ctx, id, createdAt, limitInt)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, fmt.Sprintf("fetching transactions from database with cursor %q", cursor))
 	}

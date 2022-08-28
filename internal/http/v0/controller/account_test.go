@@ -148,7 +148,7 @@ func TestGetAccount_InvalidPersistedAccount(t *testing.T) {
 	s.Is.Equal(http.StatusNotFound, res.StatusCode)
 }
 
-func TestGetAccounts(t *testing.T) {
+func TestListAccounts(t *testing.T) {
 	s := test.GetScope(t)
 	s.SetHTTP(t, newTestHTTPHandler(s.Env.Log, s.DB))
 
@@ -175,7 +175,7 @@ func TestGetAccounts(t *testing.T) {
 	err = json.NewDecoder(res2.Body).Decode(&a2)
 	s.Is.NoErr(err)
 
-	aRes := getAccounts(t, &s)
+	aRes := listAccounts(t, &s)
 	s.Is.True(len(aRes.Accounts) == 2)
 
 	i := 0
@@ -230,7 +230,7 @@ func getAccount(
 	return res
 }
 
-func getAccounts(
+func listAccounts(
 	t *testing.T,
 	s *test.Scope,
 ) accountsResponse {

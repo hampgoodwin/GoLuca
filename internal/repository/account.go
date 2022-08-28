@@ -32,8 +32,8 @@ func (r *Repository) GetAccount(ctx context.Context, accountID string) (Account,
 	return acct, nil
 }
 
-// GetAccounts get accounts paginated based on a cursor and limit
-func (r *Repository) GetAccounts(ctx context.Context, accountID string, createdAt time.Time, limit uint64) ([]Account, error) {
+// ListAccounts get accounts paginated based on a cursor and limit
+func (r *Repository) ListAccounts(ctx context.Context, accountID string, createdAt time.Time, limit uint64) ([]Account, error) {
 	query := `SELECT id, parent_id, name, type, basis, created_at
 		FROM account
 		WHERE 1=1`
