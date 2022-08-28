@@ -27,9 +27,13 @@ message CreateTransactionRequest {}
 
 message CreateTransactionResponse {}
 
-message GetAccountRequest {}
+message GetAccountRequest {
+  string account_id = 1;
+}
 
-message GetAccountResponse {}
+message GetAccountResponse {
+  goluca.model.v1.Account account = 1;
+}
 
 message ListAccountsRequest{
   int32 page_size = 2047;
