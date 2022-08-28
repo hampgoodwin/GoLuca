@@ -46,14 +46,14 @@ var (
 
 // typeAsStringMap is used in parsing a string to a type
 var typeAsStringMap = map[string]Type{
-	"":         TypeUnspecified,
-	"asset":    TypeAsset,
-	"liablity": TypeLiability,
-	"equity":   TypeEquity,
-	"revenue":  TypeRevenue,
-	"expense":  TypeExpense,
-	"gain":     TypeGain,
-	"loss":     TypeLoss,
+	"":          TypeUnspecified,
+	"asset":     TypeAsset,
+	"liability": TypeLiability,
+	"equity":    TypeEquity,
+	"revenue":   TypeRevenue,
+	"expense":   TypeExpense,
+	"gain":      TypeGain,
+	"loss":      TypeLoss,
 }
 
 func ParseType(t string) Type {

@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
+	"net"
 	"net/http"
 
 	"github.com/golang-migrate/migrate/v4"
@@ -55,8 +57,17 @@ func main() {
 
 	grpcController := grpccontroller.NewController(env.Log, service)
 
+	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", 5000))
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+
 	grpcServer := grpc.NewServer()
 	grpcrouter.Register(grpcServer, grpcController)
+
+	if err := grpcServer.Serve(lis); err != nil {
+		env.Log.Panic("grpc server failed", zap.Error(err))
+	}
 
 	if err := httpServer.ListenAndServe(); err != nil {
 		env.Log.Panic("http server failed", zap.Error(err))
