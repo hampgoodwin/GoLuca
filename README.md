@@ -8,6 +8,12 @@ A Simple Accounting Ledger
 
 ## Tooling
 
+- [buf](https://buf.build/)
+    - ```
+      brew install bufbuild/buf/buf 
+      go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+      go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+      ```
 - [gofumpt](https://github.com/mvdan/gofumpt) for formatting.
 - [golangci-lint](https://github.com/golangci/golangci-lint) for linting.
 - [colima](https://github.com/abiosoft/colima) for container runtimes.
