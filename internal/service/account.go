@@ -34,24 +34,21 @@ func (s *Service) ListAccounts(ctx context.Context, cursor, limit string) ([]acc
 		return nil, nil, errors.Wrap(err, "parsing limit query parameter")
 	}
 	limitInt++ // we always want one more than the size of the page, the extra at the end of the resultset serves as starting record for the next page
+
 	var id string
 	var createdAt time.Time
 	if cursor != "" {
-		id, createdAt, err = pagination.DecodeCursor(cursor)
+		cursor, err := pagination.ParseCursor(cursor)
 		if err != nil {
-			return nil, nil, errors.Wrap(errors.WithMessage(err, err.Error()), "decoding cursor")
-			// return nil, nil, errors.WrapWithErrorMessage(err, errors.NotValidRequest, err.Error(), "decoding cursor")
+			return nil, nil, errors.WithErrorMessage(err, errors.NotValidRequest, "parsing cursor object")
 		}
+		id = cursor.ID
+		createdAt = cursor.Time
 	}
+
 	repoAccounts, err := s.repository.ListAccounts(ctx, id, createdAt, limitInt)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, fmt.Sprintf("fetching accounts from database with cursor %q", cursor))
-	}
-
-	nextCursor := ""
-	if len(repoAccounts) == int(limitInt) {
-		nextCursor = pagination.EncodeCursor(repoAccounts[len(repoAccounts)-1].CreatedAt, repoAccounts[len(repoAccounts)-1].ID)
-		repoAccounts = repoAccounts[:len(repoAccounts)-1]
 	}
 
 	accounts := []account.Account{}
@@ -60,6 +57,21 @@ func (s *Service) ListAccounts(ctx context.Context, cursor, limit string) ([]acc
 	}
 	if err := validate.Validate(accounts); err != nil {
 		return accounts, nil, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating accounts from repository accounts")
+	}
+
+	nextCursor := ""
+	if len(accounts) == int(limitInt) {
+		var err error
+		lastAccount := accounts[len(accounts)-1]
+		nextCursor, err = pagination.Cursor{
+			ID:         lastAccount.ID,
+			Time:       lastAccount.CreatedAt,
+			Parameters: nil, // once I add query paramters/filters, include this
+		}.EncodeCursor()
+		if err != nil {
+			return nil, nil, errors.WithErrorMessage(err, errors.NotValidInternalData, "encoding cursor for next cursor")
+		}
+		accounts = accounts[:len(accounts)-1]
 	}
 
 	return accounts, &nextCursor, nil

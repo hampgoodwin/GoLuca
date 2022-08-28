@@ -41,7 +41,7 @@ paths:
 
   /accounts/{accountId}:
     get:
-      summary: Get an account resource by its ID
+      summary: Get account by ID
       description: Get an account resource by its ID
       tags:
         - Accounts

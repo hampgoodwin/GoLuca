@@ -3,6 +3,8 @@ syntax = "proto3";
 package goluca.service.v1;
 
 import "goluca/model/v1/transaction.proto";
+import "goluca/model/v1/account.proto";
+import "goluca/model/v1/amount.proto";
 
 message GetTransactionRequest {
   string transaction_id = 1;
@@ -13,26 +15,54 @@ message GetTransactionResponse {
 }
 
 message ListTransactionsRequest {
-  repeated string transaction_ids = 1;
+  int32 page_size = 2047;
+  string page_token = 2046;
 }
 
-message ListTransactionsResponse {}
+message ListTransactionsResponse {
+  repeated goluca.model.v1.Transaction transaction = 1;
+  string next_page_token = 2047;
+}
 
-message CreateTransactionRequest {}
+message CreateTransactionRequest {
+  string description = 1;
+  string debit_account = 2;
+  string credit_account = 3;
+  goluca.model.v1.Amount amount = 4;
+}
 
-message CreateTransactionResponse {}
+message CreateTransactionResponse {
+  goluca.model.v1.Transaction transaction = 1;
+}
 
-message GetAccountRequest {}
+message GetAccountRequest {
+  string account_id = 1;
+}
 
-message GetAccountResponse {}
+message GetAccountResponse {
+  goluca.model.v1.Account account = 1;
+}
 
-message ListAccountsRequest{}
+message ListAccountsRequest{
+  int32 page_size = 2047;
+  string page_token = 2046;
+}
 
-message ListAccountsResponse {}
+message ListAccountsResponse {
+  repeated goluca.model.v1.Account account = 1;
+  string next_page_token = 2047;
+}
 
-message CreateAccountRequest {}
+message CreateAccountRequest {
+  optional string parent_id = 1;
+  string name = 2;
+  goluca.model.v1.AccountType type = 3;
+  goluca.model.v1.Basis basis = 4;
+}
 
-message CreateAccountResponse {}
+message CreateAccountResponse {
+  goluca.model.v1.Account account = 1;
+}
 
 service GoLucaService {
   // Account Endpoints

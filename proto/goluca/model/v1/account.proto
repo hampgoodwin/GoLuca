@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package goluca.model.v1;
+
+import "google/protobuf/timestamp.proto";
+
+message Account {
+  string id = 1;
+  optional string parent_id = 2;
+  string name = 3;
+  AccountType type = 4;
+  Basis basis = 5;
+  google.protobuf.Timestamp created_at = 7;
+}
+
+enum AccountType {
+    ACCOUNT_TYPE_UNSPECIFIED = 0;
+    ACCOUNT_TYPE_ASSET = 1;
+    ACCOUNT_TYPE_LIABILITY = 2;
+    ACCOUNT_TYPE_EQUITY = 3;
+    ACCOUNT_TYPE_REVENUE = 4;
+    ACCOUNT_TYPE_EXPENSE = 5;
+    ACCOUNT_TYPE_GAIN = 6;
+    ACCOUNT_TYPE_LOSS = 7;
+}
+
+enum Basis {
+    BASIS_UNSPECIFIED = 0;
+    BASIS_DEBIT = 1;
+    BASIS_CREDIT = 2;
+}

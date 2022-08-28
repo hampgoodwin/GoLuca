@@ -3,17 +3,22 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
+	"net"
 	"net/http"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/hampgoodwin/GoLuca/internal/database"
 	"github.com/hampgoodwin/GoLuca/internal/environment"
-	"github.com/hampgoodwin/GoLuca/internal/http/v0/controller"
-	"github.com/hampgoodwin/GoLuca/internal/http/v0/router"
+	grpccontroller "github.com/hampgoodwin/GoLuca/internal/grpc/v1/controller"
+	grpcrouter "github.com/hampgoodwin/GoLuca/internal/grpc/v1/router"
+	httpcontroller "github.com/hampgoodwin/GoLuca/internal/http/v0/controller"
+	httprouter "github.com/hampgoodwin/GoLuca/internal/http/v0/router"
 	"github.com/hampgoodwin/GoLuca/internal/repository"
 	"github.com/hampgoodwin/GoLuca/internal/service"
 	"go.uber.org/zap"
+	"google.golang.org/grpc"
 )
 
 func main() {
@@ -38,22 +43,37 @@ func main() {
 
 	repository := repository.NewRepository(db)
 	service := service.NewService(env.Log, repository)
-	controller := controller.NewController(env.Log, service)
-	s := &http.Server{
+
+	httpController := httpcontroller.NewController(env.Log, service)
+	httpServer := &http.Server{
 		Addr:     env.Config.HTTPAPI.AddressString(),
 		ErrorLog: zap.NewStdLog(env.Log),
-		Handler: router.Register(
+		Handler: httprouter.Register(
 			env.Log,
-			controller.RegisterAccountRoutes,
-			controller.RegisterTransactionRoutes,
+			httpController.RegisterAccountRoutes,
+			httpController.RegisterTransactionRoutes,
 		),
 	}
 
-	if err := s.ListenAndServe(); err != nil {
+	grpcController := grpccontroller.NewController(env.Log, service)
+
+	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", 5000))
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+
+	grpcServer := grpc.NewServer()
+	grpcrouter.Register(grpcServer, grpcController)
+
+	if err := grpcServer.Serve(lis); err != nil {
+		env.Log.Panic("grpc server failed", zap.Error(err))
+	}
+
+	if err := httpServer.ListenAndServe(); err != nil {
 		env.Log.Panic("http server failed", zap.Error(err))
 	}
 
-	if err := s.Shutdown(ctx); err != nil {
+	if err := httpServer.Shutdown(ctx); err != nil {
 		env.Log.Fatal("shutting server down", zap.Error(err))
 	}
 }

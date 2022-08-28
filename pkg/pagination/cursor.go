@@ -7,36 +7,49 @@ import (
 	"time"
 
 	"github.com/hampgoodwin/errors"
-
-	"github.com/google/uuid"
+	"github.com/segmentio/ksuid"
 )
 
-func DecodeCursor(encodedCursor string) (id string, res time.Time, err error) {
+func ParseCursor(encodedCursor string) (Cursor, error) {
+	c := Cursor{}
+
 	byt, err := base64.StdEncoding.DecodeString(encodedCursor)
 	if err != nil {
 		err = errors.WithErrorMessage(err, errors.NotValidRequest, "cursor is not valid base64")
-		return
+		return c, err
 	}
 
-	arrStr := strings.Split(string(byt), ",")
-	if len(arrStr) != 2 {
+	arrStr := strings.SplitN(string(byt), ",", ctEncodedCursorItems)
+	if len(arrStr) != ctEncodedCursorItems {
 		err = errors.New("cursor is invalid")
-		return
+		return c, err
 	}
 
-	res, err = time.Parse(time.RFC3339Nano, arrStr[0])
+	t, err := time.Parse(time.RFC3339Nano, arrStr[0])
 	if err != nil {
-		return
+		return c, err
 	}
-	id = arrStr[1]
-	_, err = uuid.Parse(id)
+	c.Time = t
+
+	id := arrStr[1]
+	_, err = ksuid.Parse(id)
 	if err != nil {
-		return
+		return c, err
 	}
-	return
+	c.ID = id
+
+	if err = c.decodeParameters(arrStr[2]); err != nil {
+		return c, err
+	}
+
+	return c, nil
 }
 
-func EncodeCursor(t time.Time, id string) string {
-	key := fmt.Sprintf("%s,%s", t.Format(time.RFC3339Nano), id)
-	return base64.StdEncoding.EncodeToString([]byte(key))
+func (c Cursor) EncodeCursor() (string, error) {
+	parameters, err := c.encodeParameters()
+	if err != nil {
+		return "", err
+	}
+	key := fmt.Sprintf("%s,%s,%s", c.Time.Format(time.RFC3339Nano), c.ID, parameters)
+	return base64.StdEncoding.EncodeToString([]byte(key)), nil
 }

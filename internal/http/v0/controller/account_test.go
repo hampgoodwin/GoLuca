@@ -62,7 +62,7 @@ func TestCreateAccount_InvalidRequestBody(t *testing.T) {
 	s.Is.NoErr(err)
 
 	s.Is.Equal("validating account", errRes.Description)
-	s.Is.Equal("Key: 'Account.Name' Error:Field validation for 'Name' failed on the 'required' tag\nKey: 'Account.Basis' Error:Field validation for 'Basis' failed on the 'oneof' tag", errRes.ValidationErrors)
+	s.Is.Equal("Key: 'Account.Name' Error:Field validation for 'Name' failed on the 'required' tag\nKey: 'Account.Type.Slug' Error:Field validation for 'Slug' failed on the 'oneof' tag\nKey: 'Account.Basis.Slug' Error:Field validation for 'Slug' failed on the 'oneof' tag", errRes.ValidationErrors)
 }
 
 func TestCreateAccount_CannotDeserialize(t *testing.T) {

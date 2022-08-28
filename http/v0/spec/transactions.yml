@@ -40,7 +40,7 @@ paths:
 
   /transactions/{transactionId}:
     get:
-      summary: Get a transaction resource by its ID
+      summary: Get transaction by ID
       description: Get a transaction resource by its ID
       tags:
         - Transactions

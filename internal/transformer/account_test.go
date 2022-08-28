@@ -31,7 +31,7 @@ func TestNewAccountFromHTTPCreateAccount(t *testing.T) {
 				ParentID: parentID,
 				Name:     "asset",
 				Type:     account.TypeAsset,
-				Basis:    "debit",
+				Basis:    account.BasisDebit,
 			},
 		},
 	}
@@ -63,7 +63,7 @@ func TestNewHTTPAccountFromAccount(t *testing.T) {
 				ParentID: "parentID",
 				Name:     "equity",
 				Type:     account.TypeEquity,
-				Basis:    "credit",
+				Basis:    account.BasisCredit,
 			},
 			expected: httpaccount.Account{
 				ID:       "ID",
@@ -109,7 +109,7 @@ func TestNewAccountFromRepoAccount(t *testing.T) {
 				ParentID: "parentID",
 				Name:     "equity",
 				Type:     account.TypeEquity,
-				Basis:    "credit",
+				Basis:    account.BasisCredit,
 			},
 		},
 	}
@@ -141,7 +141,7 @@ func TestNewRepoAccountFromAccount(t *testing.T) {
 				ParentID: "parentID",
 				Name:     "equity",
 				Type:     account.TypeEquity,
-				Basis:    "credit",
+				Basis:    account.BasisCredit,
 			},
 			expected: repository.Account{
 				ID:       "ID",

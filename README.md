@@ -21,6 +21,10 @@ A Simple Accounting Ledger
 ---
 
 TODO
+- [ ] better startup logging
+    - [ ] info and such about what's starting.
+- [ ] health endpoint..?
+- [ ] retry startup dependecies
 - [ ] add gRPC methods, matching http spec
     - [ ] add gRPC server start to main?
     - [ ] add gRPC method tests..? idk
@@ -49,6 +53,7 @@ TODO
     - [ ] add default limit size as a configurable somewhere
 - [ ] improve pagination by displaying page number of result.
     - [ ] set up configuration loader or a new secrets loader to load values from appvault
+- [x] make basis an enum
 - [x] re-evaluate type validation logic in the service
 - [x] implement db types and transformers
     - [x] add tests
