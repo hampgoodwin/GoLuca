@@ -28,7 +28,7 @@ func (s *Service) GetAccount(ctx context.Context, accountID string) (account.Acc
 	return account, nil
 }
 
-func (s *Service) GetAccounts(ctx context.Context, cursor, limit string) ([]account.Account, *string, error) {
+func (s *Service) ListAccounts(ctx context.Context, cursor, limit string) ([]account.Account, *string, error) {
 	limitInt, err := strconv.ParseUint(limit, 10, 64)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "parsing limit query parameter")
@@ -43,7 +43,7 @@ func (s *Service) GetAccounts(ctx context.Context, cursor, limit string) ([]acco
 			// return nil, nil, errors.WrapWithErrorMessage(err, errors.NotValidRequest, err.Error(), "decoding cursor")
 		}
 	}
-	repoAccounts, err := s.repository.GetAccounts(ctx, id, createdAt, limitInt)
+	repoAccounts, err := s.repository.ListAccounts(ctx, id, createdAt, limitInt)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, fmt.Sprintf("fetching accounts from database with cursor %q", cursor))
 	}
