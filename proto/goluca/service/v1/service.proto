@@ -12,6 +12,35 @@ message GetTransactionResponse {
   goluca.model.v1.Transaction transaction = 1;
 }
 
+message ListTransactionsRequest {
+  repeated string transaction_ids = 1;
+}
+
+message ListTransactionsResponse {}
+
+message CreateTransactionRequest {}
+
+message CreateTransactionResponse {}
+
+message GetAccountRequest {}
+
+message GetAccountResponse {}
+
+message ListAccountsRequest{}
+
+message ListAccountsResponse {}
+
+message CreateAccountRequest {}
+
+message CreateAccountResponse {}
+
 service GoLucaService {
+  // Account Endpoints
+  rpc GetAccount(GetAccountRequest) returns (GetAccountResponse) {}
+  rpc ListAccounts(ListAccountsRequest) returns (ListAccountsResponse) {}
+  rpc CreateAccount(CreateAccountRequest) returns (CreateAccountResponse) {}
+  // Transaction endpoints
   rpc GetTransaction(GetTransactionRequest) returns (GetTransactionResponse) {}
+  rpc ListTransactions(ListTransactionsRequest) returns (ListTransactionsResponse) {}
+  rpc CreateTransaction(CreateTransactionRequest) returns (CreateTransactionResponse) {}
 }

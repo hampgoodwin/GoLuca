@@ -12,13 +12,6 @@ jobs:
         uses: bufbuild/buf-setup-action@v1.6.0
         with:
           github_token: ${{ github.token }}
-      # - name: buf-registry-login
-      #   run: echo ${{ secrets.BUF_GITHUB_CI_TOKEN }} |  buf registry login --username ntwrkbot --token-stdin
-      # - name: buf-breaking
-      #   uses: bufbuild/buf-breaking-action@v1.1.0
-      #   with:
-      #     input: 'proto'
-      #     against: 'https://github.com/ntwrk1/checkout-service.git#branch=main,ref=HEAD,subdir=proto'
       - name: buf-lint-action
         uses: bufbuild/buf-lint-action@v1.0.1
         with:
