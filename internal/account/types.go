@@ -14,7 +14,7 @@ type Account struct {
 	ParentID  string    `validate:"omitempty,KSUID"`
 	Name      string    `validate:"required"`
 	Type      Type      `validate:"required"`
-	Basis     string    `validate:"required,oneof=debit credit"`
+	Basis     Basis     `validate:"required"`
 	CreatedAt time.Time `validate:"required"`
 }
 
@@ -33,19 +33,19 @@ type Type struct {
 
 // safer enums for Type enum
 var (
-	TypeUnknown   = Type{""}
-	TypeAsset     = Type{"asset"}
-	TypeLiability = Type{"liability"}
-	TypeEquity    = Type{"equity"}
-	TypeRevenue   = Type{"revenue"}
-	TypeExpense   = Type{"expense"}
-	TypeGain      = Type{"gain"}
-	TypeLoss      = Type{"loss"}
+	TypeUnspecified = Type{""}
+	TypeAsset       = Type{"asset"}
+	TypeLiability   = Type{"liability"}
+	TypeEquity      = Type{"equity"}
+	TypeRevenue     = Type{"revenue"}
+	TypeExpense     = Type{"expense"}
+	TypeGain        = Type{"gain"}
+	TypeLoss        = Type{"loss"}
 )
 
 // typeAsStringMap is used in parsing a string to a type
 var typeAsStringMap = map[string]Type{
-	"":         TypeUnknown,
+	"":         TypeUnspecified,
 	"asset":    TypeAsset,
 	"liablity": TypeLiability,
 	"equity":   TypeEquity,
@@ -59,9 +59,37 @@ func ParseType(t string) Type {
 	if v, ok := typeAsStringMap[t]; ok {
 		return v
 	}
-	return TypeUnknown
+	return TypeUnspecified
 }
 
 func (t Type) String() string {
 	return t.slug
+}
+
+type Basis struct {
+	slug string `validate:"required,oneof=debit credit"`
+}
+
+var (
+	BasisUnspecified = Basis{""}
+	BasisDebit       = Basis{"debit"}
+	BasisCredit      = Basis{"credit"}
+)
+
+// typeAsStringMap is used in parsing a string to a type
+var basisAsStringMap = map[string]Basis{
+	"":       BasisUnspecified,
+	"debit":  BasisDebit,
+	"credit": BasisCredit,
+}
+
+func ParseBasis(b string) Basis {
+	if v, ok := basisAsStringMap[b]; ok {
+		return v
+	}
+	return BasisUnspecified
+}
+
+func (b Basis) String() string {
+	return b.slug
 }

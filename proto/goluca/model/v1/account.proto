@@ -6,7 +6,7 @@ import "google/protobuf/timestamp.proto";
 
 message Account {
   string id = 1;
-  string parent_id = 2;
+  optional string parent_id = 2;
   string name = 3;
   AccountType type = 4;
   Basis basis = 5;
