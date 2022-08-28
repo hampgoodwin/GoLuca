@@ -3,6 +3,7 @@ syntax = "proto3";
 package goluca.service.v1;
 
 import "goluca/model/v1/transaction.proto";
+import "goluca/model/v1/account.proto";
 
 message GetTransactionRequest {
   string transaction_id = 1;
@@ -13,10 +14,14 @@ message GetTransactionResponse {
 }
 
 message ListTransactionsRequest {
-  repeated string transaction_ids = 1;
+  int32 page_size = 2047;
+  string page_token = 2046;
 }
 
-message ListTransactionsResponse {}
+message ListTransactionsResponse {
+  repeated goluca.model.v1.Transaction transaction = 1;
+  string next_page_token = 2047;
+}
 
 message CreateTransactionRequest {}
 
@@ -26,9 +31,15 @@ message GetAccountRequest {}
 
 message GetAccountResponse {}
 
-message ListAccountsRequest{}
+message ListAccountsRequest{
+  int32 page_size = 2047;
+  string page_token = 2046;
+}
 
-message ListAccountsResponse {}
+message ListAccountsResponse {
+  repeated goluca.model.v1.Account account = 1;
+  string next_page_token = 2047;
+}
 
 message CreateAccountRequest {}
 

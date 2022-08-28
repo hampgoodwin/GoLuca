@@ -21,6 +21,7 @@ A Simple Accounting Ledger
 ---
 
 TODO
+- [ ] make basis an enum
 - [ ] add gRPC methods, matching http spec
     - [ ] add gRPC server start to main?
     - [ ] add gRPC method tests..? idk
