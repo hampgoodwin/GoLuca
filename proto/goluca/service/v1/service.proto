@@ -4,6 +4,7 @@ package goluca.service.v1;
 
 import "goluca/model/v1/transaction.proto";
 import "goluca/model/v1/account.proto";
+import "goluca/model/v1/amount.proto";
 
 message GetTransactionRequest {
   string transaction_id = 1;
@@ -23,9 +24,16 @@ message ListTransactionsResponse {
   string next_page_token = 2047;
 }
 
-message CreateTransactionRequest {}
+message CreateTransactionRequest {
+  string description = 1;
+  string debit_account = 2;
+  string credit_account = 3;
+  goluca.model.v1.Amount amount = 4;
+}
 
-message CreateTransactionResponse {}
+message CreateTransactionResponse {
+  goluca.model.v1.Transaction transaction = 1;
+}
 
 message GetAccountRequest {
   string account_id = 1;
@@ -45,7 +53,12 @@ message ListAccountsResponse {
   string next_page_token = 2047;
 }
 
-message CreateAccountRequest {}
+message CreateAccountRequest {
+  optional string parent_id = 1;
+  string name = 2;
+  goluca.model.v1.AccountType type = 3;
+  goluca.model.v1.Basis basis = 4;
+}
 
 message CreateAccountResponse {}
 

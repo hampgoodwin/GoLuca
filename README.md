@@ -21,6 +21,10 @@ A Simple Accounting Ledger
 ---
 
 TODO
+- [ ] better startup logging
+    - [ ] info and such about what's starting.
+- [ ] health endpoint..?
+- [ ] retry startup dependecies
 - [ ] make basis an enum
 - [ ] add gRPC methods, matching http spec
     - [ ] add gRPC server start to main?

@@ -148,7 +148,7 @@ func (r *Repository) CreateTransaction(ctx context.Context, create Transaction) 
 			var pgErr *pgconn.PgError
 			if errors.As(err, &pgErr) {
 				if pgErr.Code == pgerrcode.ForeignKeyViolation {
-					return returning, errors.WithErrorMessage(err, errors.NoRelationshipFound, "inserting entry with foreign key constraint on transaction id")
+					return returning, errors.WithErrorMessage(err, errors.NoRelationshipFound, "inserting entry with key constraint on one of transaction id, debit account, or credit account")
 				}
 			}
 			return returning, errors.WithErrorMessage(err, errors.NotKnown, "scanning entry result row")
