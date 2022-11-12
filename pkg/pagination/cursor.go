@@ -15,7 +15,8 @@ func ParseCursor(encodedCursor string) (Cursor, error) {
 
 	byt, err := base64.StdEncoding.DecodeString(encodedCursor)
 	if err != nil {
-		err = errors.WithErrorMessage(err, errors.NotValidRequest, "cursor is not valid base64")
+		err = errors.WithErrorMessage(err, errors.NotValidRequestData, "cursor is not valid base64")
+		c.Parameters = map[string][]string{"current_cursor": {encodedCursor}}
 		return c, err
 	}
 

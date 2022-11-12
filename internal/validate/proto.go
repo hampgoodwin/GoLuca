@@ -1,9 +1,6 @@
 package validate
 
 var (
-	listAccountsResponseValidation = map[string]string{
-		"Accounts": "required",
-	}
 	accountValidation = map[string]string{
 		"Id":        "required,KSUID",
 		"parentId":  "omitempty,KSUID",

@@ -23,13 +23,27 @@ func Validate(i interface{}) error {
 	return nil
 }
 
+func Var(i interface{}, tag string) error {
+	v := validator.New()
+	registerCustomValidations(v)
+	if err := v.Var(i, tag); err != nil {
+		if _, ok := err.(*validator.InvalidValidationError); ok {
+			return nil
+		}
+		validationErrors := err.(validator.ValidationErrors)
+		if len(validationErrors) > 0 {
+			return err
+		}
+	}
+	return nil
+}
+
 func registerCustomValidations(v *validator.Validate) {
 	// custom validations
 	_ = v.RegisterValidation("stringAsInt64", stringAsInt64)
 	_ = v.RegisterValidation("KSUID", KSUID)
 
 	// custom structs
-	v.RegisterStructValidationMapRules(listAccountsResponseValidation, &servicev1.ListAccountsResponse{})
 	v.RegisterStructValidationMapRules(accountValidation, &modelv1.Account{})
 	v.RegisterStructValidationMapRules(getAccountRequest, &servicev1.GetAccountRequest{})
 	v.RegisterStructValidationMapRules(createAccountRequest, &servicev1.CreateAccountRequest{})

@@ -9,9 +9,10 @@ import (
 	"testing"
 
 	"github.com/brianvoe/gofakeit"
+	"github.com/segmentio/ksuid"
+
 	"github.com/hampgoodwin/GoLuca/internal/test"
 	httpaccount "github.com/hampgoodwin/GoLuca/pkg/http/v0/account"
-	"github.com/segmentio/ksuid"
 )
 
 func TestCreateAccount(t *testing.T) {
@@ -175,7 +176,12 @@ func TestListAccounts(t *testing.T) {
 	err = json.NewDecoder(res2.Body).Decode(&a2)
 	s.Is.NoErr(err)
 
-	aRes := listAccounts(t, &s)
+	httpResponse := listAccounts(t, &s, "", "")
+
+	var aRes accountsResponse
+	err = json.NewDecoder(httpResponse.Body).Decode(&aRes)
+	s.Is.NoErr(err)
+
 	s.Is.True(len(aRes.Accounts) == 2)
 
 	i := 0
@@ -185,6 +191,20 @@ func TestListAccounts(t *testing.T) {
 		}
 	}
 	s.Is.True(i == len(aRes.Accounts))
+}
+
+func TestListAccounts_InvalidRequestBody(t *testing.T) {
+	s := test.GetScope(t)
+	s.SetHTTP(t, newTestHTTPHandler(s.Env.Log, s.DB))
+
+	httpResponse := listAccounts(t, &s, "invalid_cursor", "")
+
+	var errorResponse ErrorResponse
+	err := json.NewDecoder(httpResponse.Body).Decode(&errorResponse)
+	s.Is.NoErr(err)
+
+	s.Is.True(errorResponse.Description == "invalid cursor or token")
+	s.Is.True(httpResponse.StatusCode == http.StatusBadRequest)
 }
 
 func createAccount(
@@ -233,11 +253,13 @@ func getAccount(
 func listAccounts(
 	t *testing.T,
 	s *test.Scope,
-) accountsResponse {
+	cursor string,
+	limit string,
+) *http.Response {
 	// Get the created account and assert it's equal to the created account
 	req, err := http.NewRequest(
 		http.MethodGet,
-		s.HTTPTestServer.URL+"/accounts",
+		s.HTTPTestServer.URL+"/accounts"+fmt.Sprintf("?cursor=%s&limit=%s", cursor, limit),
 		nil,
 	)
 	s.Is.NoErr(err)
@@ -245,9 +267,5 @@ func listAccounts(
 	res, err := s.HTTPClient.Do(req)
 	s.Is.NoErr(err)
 
-	var aRes accountsResponse
-	err = json.NewDecoder(res.Body).Decode(&aRes)
-	s.Is.NoErr(err)
-
-	return aRes
+	return res
 }

@@ -24,8 +24,8 @@ type accountResponse struct {
 }
 
 type accountsResponse struct {
-	Accounts   []httpaccount.Account `json:"accounts" validated:"required"`
-	NextCursor string                `json:"nextCursor,omitempty" validated:"base64"`
+	Accounts   []httpaccount.Account `json:"accounts" validate:"required"`
+	NextCursor string                `json:"nextCursor,omitempty" validate:"cursor"`
 }
 
 func (c *Controller) RegisterAccountRoutes(r *chi.Mux) {
@@ -67,6 +67,14 @@ func (c *Controller) listAccounts(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		c.respondError(w, c.log, errors.Wrap(err, "converting page size"))
 	}
+	if cursor == "\"\"" {
+		cursor = ""
+	}
+	if err := validate.Var(cursor, "omitempty,base64"); err != nil {
+		c.respondError(w, c.log, errors.WithErrorMessage(err, errors.NotValidRequest, "invalid cursor or token"))
+		return
+	}
+
 	accounts, nextCursor, err := c.service.ListAccounts(ctx, cursor, limitUInt64)
 	if err != nil {
 		c.respondError(w, c.log, errors.Wrap(err, "getting accounts from service"))

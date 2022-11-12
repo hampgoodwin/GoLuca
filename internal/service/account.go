@@ -35,6 +35,9 @@ func (s *Service) ListAccounts(ctx context.Context, cursor string, limit uint64)
 	if cursor != "" {
 		cursor, err := pagination.ParseCursor(cursor)
 		if err != nil {
+			if err := validate.Validate(cursor); err != nil {
+				return nil, "", errors.WithErrorMessage(err, errors.NotValidRequestData, "invalid cursor/token")
+			}
 			return nil, "", errors.WithErrorMessage(err, errors.NotValidRequest, "parsing cursor object")
 		}
 		id = cursor.ID
@@ -61,7 +64,7 @@ func (s *Service) ListAccounts(ctx context.Context, cursor string, limit uint64)
 		nextCursor, err = pagination.Cursor{
 			ID:         lastAccount.ID,
 			Time:       lastAccount.CreatedAt,
-			Parameters: nil, // once I add query paramters/filters, include this
+			Parameters: map[string][]string{"previous_cursor": {cursor}}, // once I add query paramters/filters, include this
 		}.EncodeCursor()
 		if err != nil {
 			return nil, "", errors.WithErrorMessage(err, errors.NotValidInternalData, "encoding cursor for next cursor")
