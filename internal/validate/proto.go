@@ -1,7 +1,7 @@
 package validate
 
 var (
-	accountValidation = map[string]string{
+	account = map[string]string{
 		"Id":        "required,KSUID",
 		"parentId":  "omitempty,KSUID",
 		"Name":      "required",
@@ -17,5 +17,14 @@ var (
 		"Name":     "required",
 		"Type":     "required",
 		"Basis":    "required",
+	}
+	getTransactionRequest = map[string]string{
+		"TransactionId": "required,KSUID",
+	}
+	transaction = map[string]string{
+		"Id":          "required,KSUID",
+		"Description": "required",
+		"Entries":     "dive,gte=1",
+		"CreatedAt":   "required",
 	}
 )

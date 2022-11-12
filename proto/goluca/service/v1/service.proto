@@ -2,9 +2,9 @@ syntax = "proto3";
 
 package goluca.service.v1;
 
-import "goluca/model/v1/transaction.proto";
 import "goluca/model/v1/account.proto";
 import "goluca/model/v1/amount.proto";
+import "goluca/model/v1/transaction.proto";
 
 message GetTransactionRequest {
   string transaction_id = 1;
@@ -15,20 +15,25 @@ message GetTransactionResponse {
 }
 
 message ListTransactionsRequest {
-  int32 page_size = 2047;
+  uint64 page_size = 2047;
   string page_token = 2046;
 }
 
 message ListTransactionsResponse {
-  repeated goluca.model.v1.Transaction transaction = 1;
+  repeated goluca.model.v1.Transaction transactions = 1;
   string next_page_token = 2047;
 }
 
-message CreateTransactionRequest {
+message CreateEntry {
   string description = 1;
   string debit_account = 2;
   string credit_account = 3;
   goluca.model.v1.Amount amount = 4;
+}
+
+message CreateTransactionRequest {
+  string description = 1;
+  repeated CreateEntry entries = 2;
 }
 
 message CreateTransactionResponse {
@@ -43,7 +48,7 @@ message GetAccountResponse {
   goluca.model.v1.Account account = 1;
 }
 
-message ListAccountsRequest{
+message ListAccountsRequest {
   uint64 page_size = 2047;
   string page_token = 2046;
 }

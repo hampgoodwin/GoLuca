@@ -44,7 +44,11 @@ func registerCustomValidations(v *validator.Validate) {
 	_ = v.RegisterValidation("KSUID", KSUID)
 
 	// custom structs
-	v.RegisterStructValidationMapRules(accountValidation, &modelv1.Account{})
+	v.RegisterStructValidationMapRules(account, &modelv1.Account{})
 	v.RegisterStructValidationMapRules(getAccountRequest, &servicev1.GetAccountRequest{})
 	v.RegisterStructValidationMapRules(createAccountRequest, &servicev1.CreateAccountRequest{})
+
+	v.RegisterStructValidationMapRules(transaction, &modelv1.Transaction{})
+	v.RegisterStructValidationMapRules(getTransactionRequest, &servicev1.GetTransactionRequest{})
+
 }

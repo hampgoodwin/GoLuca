@@ -134,11 +134,12 @@ func (r *Repository) CreateTransaction(ctx context.Context, create Transaction) 
 	for _, entry := range create.Entries {
 		returningEntry := Entry{}
 		if err := tx.QueryRow(ctx,
-			`INSERT INTO entry(id, transaction_id, debit_account, credit_account, amount_value, amount_currency, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7)
-			RETURNING id, transaction_id, debit_account, credit_account, amount_value, amount_currency, created_at;`,
-			entry.ID, returning.ID, entry.DebitAccount, entry.CreditAccount, entry.Amount.Value, entry.Amount.Currency, entry.CreatedAt).Scan(
+			`INSERT INTO entry(id, transaction_id, description, debit_account, credit_account, amount_value, amount_currency, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+			RETURNING id, transaction_id, description, debit_account, credit_account, amount_value, amount_currency, created_at;`,
+			entry.ID, returning.ID, entry.Description, entry.DebitAccount, entry.CreditAccount, entry.Amount.Value, entry.Amount.Currency, entry.CreatedAt).Scan(
 			&returningEntry.ID,
 			&returningEntry.TransactionID,
+			&returningEntry.Description,
 			&returningEntry.DebitAccount,
 			&returningEntry.CreditAccount,
 			&returningEntry.Amount.Value,
