@@ -2,12 +2,15 @@ package validate
 
 import (
 	"github.com/go-playground/validator/v10"
+
+	modelv1 "github.com/hampgoodwin/GoLuca/gen/proto/go/goluca/model/v1"
+	servicev1 "github.com/hampgoodwin/GoLuca/gen/proto/go/goluca/service/v1"
 )
 
 // Validate wraps the logic for using go-playground/validator.
 func Validate(i interface{}) error {
 	v := validator.New()
-	registerCustomerFunctions(v)
+	registerCustomValidations(v)
 	if err := v.Struct(i); err != nil {
 		if _, ok := err.(*validator.InvalidValidationError); ok {
 			return nil
@@ -20,7 +23,14 @@ func Validate(i interface{}) error {
 	return nil
 }
 
-func registerCustomerFunctions(v *validator.Validate) {
+func registerCustomValidations(v *validator.Validate) {
+	// custom validations
 	_ = v.RegisterValidation("stringAsInt64", stringAsInt64)
 	_ = v.RegisterValidation("KSUID", KSUID)
+
+	// custom structs
+	v.RegisterStructValidationMapRules(listAccountsResponseValidation, &servicev1.ListAccountsResponse{})
+	v.RegisterStructValidationMapRules(accountValidation, &modelv1.Account{})
+	v.RegisterStructValidationMapRules(getAccountRequest, &servicev1.GetAccountRequest{})
+	v.RegisterStructValidationMapRules(createAccountRequest, &servicev1.CreateAccountRequest{})
 }

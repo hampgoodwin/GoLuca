@@ -41,7 +41,7 @@ func (c *Controller) respondError(w http.ResponseWriter, log *zap.Logger, err er
 		message = "bad request data, check request meta data."
 	case errors.Is(err, errors.NotValidRequestData):
 		if message == "" {
-			message = "bad request data."
+			message = "bad request data"
 		}
 		if c.respondOnValidationErrors(w, err, message) {
 			return

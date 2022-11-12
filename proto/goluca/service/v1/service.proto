@@ -44,12 +44,12 @@ message GetAccountResponse {
 }
 
 message ListAccountsRequest{
-  int32 page_size = 2047;
+  uint64 page_size = 2047;
   string page_token = 2046;
 }
 
 message ListAccountsResponse {
-  repeated goluca.model.v1.Account account = 1;
+  repeated goluca.model.v1.Account accounts = 1;
   string next_page_token = 2047;
 }
 

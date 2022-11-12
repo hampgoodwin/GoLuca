@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi"
 	"github.com/hampgoodwin/GoLuca/internal/transformer"
@@ -62,7 +63,11 @@ func (c *Controller) listAccounts(w http.ResponseWriter, r *http.Request) {
 	if limit == "" {
 		limit = "10"
 	}
-	accounts, nextCursor, err := c.service.ListAccounts(ctx, cursor, limit)
+	limitUInt64, err := strconv.ParseUint(limit, 10, 64)
+	if err != nil {
+		c.respondError(w, c.log, errors.Wrap(err, "converting page size"))
+	}
+	accounts, nextCursor, err := c.service.ListAccounts(ctx, cursor, limitUInt64)
 	if err != nil {
 		c.respondError(w, c.log, errors.Wrap(err, "getting accounts from service"))
 		return
@@ -77,7 +82,7 @@ func (c *Controller) listAccounts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res := &accountsResponse{Accounts: responseAccounts, NextCursor: *nextCursor}
+	res := &accountsResponse{Accounts: responseAccounts, NextCursor: nextCursor}
 	c.respond(w, res, http.StatusOK)
 }
 
