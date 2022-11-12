@@ -9,6 +9,7 @@ import (
 	"net/http"
 
 	"github.com/golang-migrate/migrate/v4"
+	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
 	"github.com/hampgoodwin/GoLuca/internal/database"
 	"github.com/hampgoodwin/GoLuca/internal/environment"
 	grpccontroller "github.com/hampgoodwin/GoLuca/internal/grpc/v1/controller"
@@ -62,7 +63,9 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(
+		grpc_zap.UnaryServerInterceptor(env.Log),
+	))
 	grpcrouter.Register(grpcServer, grpcController)
 
 	if err := grpcServer.Serve(lis); err != nil {

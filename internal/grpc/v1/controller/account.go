@@ -27,6 +27,7 @@ func (c *Controller) GetAccount(ctx context.Context, req *servicev1.GetAccountRe
 }
 
 func (c *Controller) ListAccounts(ctx context.Context, req *servicev1.ListAccountsRequest) (*servicev1.ListAccountsResponse, error) {
+
 	return &servicev1.ListAccountsResponse{}, nil
 }
 
