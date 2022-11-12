@@ -75,7 +75,7 @@ func NewRepoAccountFromAccount(in account.Account) repository.Account {
 	return out
 }
 
-func NewPBAccountFromAccount(in account.Account) *modelv1.Account {
+func NewProtoAccountFromAccount(in account.Account) *modelv1.Account {
 	if in == (account.Account{}) {
 		return nil
 	}
@@ -96,7 +96,7 @@ func NewPBAccountFromAccount(in account.Account) *modelv1.Account {
 	return out
 }
 
-func NewAccountFromPBCreateAccount(in *servicev1.CreateAccountRequest) account.Account {
+func NewAccountFromProtoCreateAccount(in *servicev1.CreateAccountRequest) account.Account {
 	out := account.Account{}
 
 	if in == nil {

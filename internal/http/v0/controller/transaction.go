@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi"
 	"github.com/hampgoodwin/GoLuca/internal/transformer"
@@ -39,8 +40,12 @@ func (c *Controller) listTransactions(w http.ResponseWriter, r *http.Request) {
 	if limit == "" {
 		limit = "10"
 	}
+	limitUInt64, err := strconv.ParseUint(limit, 10, 64)
+	if err != nil {
+		c.respondError(w, c.log, errors.Wrap(err, "converting page size"))
+	}
 
-	transactions, nextCursor, err := c.service.ListTransactions(ctx, cursor, limit)
+	transactions, nextCursor, err := c.service.ListTransactions(ctx, cursor, limitUInt64)
 	if err != nil {
 		c.respondError(w, c.log, errors.Wrap(err, "getting transactions from service"))
 		return
@@ -55,7 +60,7 @@ func (c *Controller) listTransactions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res := &transactionsResponse{Transactions: responseTransactions, NextCursor: *nextCursor}
+	res := &transactionsResponse{Transactions: responseTransactions, NextCursor: nextCursor}
 	c.respond(w, res, http.StatusOK)
 }
 

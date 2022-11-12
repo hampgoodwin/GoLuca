@@ -3,6 +3,8 @@ package test
 import (
 	"context"
 	"fmt"
+	"log"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -10,13 +12,19 @@ import (
 	"time"
 
 	"github.com/brianvoe/gofakeit"
-	"github.com/hampgoodwin/GoLuca/internal/config"
-	"github.com/hampgoodwin/GoLuca/internal/database"
-	"github.com/hampgoodwin/GoLuca/internal/environment"
-	"github.com/hampgoodwin/errors"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/matryer/is"
 	"go.uber.org/zap"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/test/bufconn"
+
+	"github.com/hampgoodwin/errors"
+
+	servicev1 "github.com/hampgoodwin/GoLuca/gen/proto/go/goluca/service/v1"
+	"github.com/hampgoodwin/GoLuca/internal/config"
+	"github.com/hampgoodwin/GoLuca/internal/database"
+	"github.com/hampgoodwin/GoLuca/internal/environment"
 )
 
 type Scope struct {
@@ -25,6 +33,11 @@ type Scope struct {
 
 	Ctx context.Context
 	Is  *is.I
+
+	GRPCTestServer     *grpc.Server
+	GRPCBufConn        *bufconn.Listener
+	GRPCTestClient     servicev1.GoLucaServiceClient
+	GRPCTestClientConn *grpc.ClientConn
 
 	HTTPTestServer *httptest.Server
 	HTTPClient     *http.Client
@@ -50,7 +63,7 @@ func NewScope(t *testing.T) (Scope, error) {
 	s.Env = environment.TestEnvironment
 	s.Env.Log = zap.NewNop()
 	s.Is = is.New(t)
-	s.HTTPClient = &http.Client{Timeout: time.Second * 30}
+	s.HTTPClient = &http.Client{Timeout: time.Second * 30} // TODO: Is this needed?
 
 	if err := s.NewDatabase(t); err != nil {
 		return s, errors.Wrap(err, "creating new test db")
@@ -101,13 +114,52 @@ func (s *Scope) SetHTTP(t *testing.T, handler http.Handler) {
 	s.HTTPClient = &http.Client{Timeout: time.Second * 30}
 }
 
+func (s *Scope) SetGRPC(t *testing.T, controller servicev1.GoLucaServiceServer) {
+	t.Helper()
+
+	buffer := 101024 * 1024
+	listener := bufconn.Listen(buffer)
+	s.GRPCBufConn = listener
+
+	grpcServer := grpc.NewServer()
+	servicev1.RegisterGoLucaServiceServer(grpcServer, controller)
+	go func() {
+		if err := grpcServer.Serve(listener); err != nil {
+			log.Printf("error serving server: %v", err)
+		}
+	}()
+
+	conn, err := grpc.DialContext(s.Ctx, "",
+		grpc.WithContextDialer(func(context.Context, string) (net.Conn, error) {
+			return listener.Dial()
+		}), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Printf("error connecting to server: %v", err)
+	}
+	s.GRPCTestClientConn = conn
+
+	goLucaServiceClient := servicev1.NewGoLucaServiceClient(conn)
+	s.GRPCTestClient = goLucaServiceClient
+}
+
 func (s *Scope) CleanupScope(t *testing.T) {
 	t.Helper()
-	s.DB.Close()
 
 	if s.HTTPTestServer != nil {
 		s.HTTPTestServer.Close()
 	}
+
+	if s.GRPCTestClientConn != nil {
+		s.GRPCTestClientConn.Close()
+	}
+	if s.GRPCBufConn != nil {
+		s.GRPCBufConn.Close()
+	}
+	if s.GRPCTestServer != nil {
+		s.GRPCTestServer.GracefulStop()
+	}
+
+	s.DB.Close()
 
 	db, _ := database.NewDatabasePool(s.Ctx, s.Env.Config.Database.ConnectionString())
 	err := database.DropDatabase(db, s.dbDatabase)

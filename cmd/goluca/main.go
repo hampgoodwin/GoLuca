@@ -9,6 +9,7 @@ import (
 	"net/http"
 
 	"github.com/golang-migrate/migrate/v4"
+	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
 	"github.com/hampgoodwin/GoLuca/internal/database"
 	"github.com/hampgoodwin/GoLuca/internal/environment"
 	grpccontroller "github.com/hampgoodwin/GoLuca/internal/grpc/v1/controller"
@@ -17,6 +18,7 @@ import (
 	httprouter "github.com/hampgoodwin/GoLuca/internal/http/v0/router"
 	"github.com/hampgoodwin/GoLuca/internal/repository"
 	"github.com/hampgoodwin/GoLuca/internal/service"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
@@ -62,18 +64,39 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(
+		grpc_zap.UnaryServerInterceptor(env.Log),
+	))
 	grpcrouter.Register(grpcServer, grpcController)
 
-	if err := grpcServer.Serve(lis); err != nil {
-		env.Log.Panic("grpc server failed", zap.Error(err))
-	}
+	grpcErr := make(chan error)
+	go func() {
+		env.Log.Info("starting grpc server", zap.Any("service_info", grpcServer.GetServiceInfo()))
+		grpcErr <- grpcServer.Serve(lis)
+	}()
 
-	if err := httpServer.ListenAndServe(); err != nil {
-		env.Log.Panic("http server failed", zap.Error(err))
-	}
+	httpErr := make(chan error)
+	go func() {
+		env.Log.Info("starting http server", zap.String("service_info", httpServer.Addr))
+		httpErr <- httpServer.ListenAndServe()
+	}()
 
+	for {
+		select {
+		case err := <-grpcErr:
+			env.Log.Error("grpc server error, shutting down", zap.Error(err))
+			close(ctx, db, grpcServer, httpServer)
+		case err := <-httpErr:
+			env.Log.Error("http server error, shutting down", zap.Error(err))
+			close(ctx, db, grpcServer, httpServer)
+		}
+	}
+}
+
+func close(ctx context.Context, db *pgxpool.Pool, grpcServer *grpc.Server, httpServer *http.Server) {
+	grpcServer.GracefulStop()
 	if err := httpServer.Shutdown(ctx); err != nil {
-		env.Log.Fatal("shutting server down", zap.Error(err))
+		httpServer.Close()
 	}
+	db.Close()
 }

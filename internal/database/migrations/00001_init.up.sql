@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS transaction(
 CREATE TABLE IF NOT EXISTS entry(
 	id VARCHAR(256) PRIMARY KEY,
 	transaction_id VARCHAR(256),
+	description TEXT,
 	debit_account VARCHAR(256),
 	credit_account VARCHAR(256),
 	amount_value BIGINT,

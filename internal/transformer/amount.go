@@ -3,6 +3,7 @@ package transformer
 import (
 	"strconv"
 
+	modelv1 "github.com/hampgoodwin/GoLuca/gen/proto/go/goluca/model/v1"
 	"github.com/hampgoodwin/GoLuca/internal/amount"
 	"github.com/hampgoodwin/GoLuca/internal/repository"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
@@ -59,6 +60,19 @@ func NewRepoAmountFromAmount(in amount.Amount) repository.Amount {
 	out := repository.Amount{}
 
 	if in == (amount.Amount{}) {
+		return out
+	}
+
+	out.Value = in.Value
+	out.Currency = in.Currency
+
+	return out
+}
+
+func NewAmountFromProtoAmount(in *modelv1.Amount) amount.Amount {
+	out := amount.Amount{}
+
+	if in == nil {
 		return out
 	}
 

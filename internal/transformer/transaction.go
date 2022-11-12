@@ -2,6 +2,7 @@ package transformer
 
 import (
 	modelv1 "github.com/hampgoodwin/GoLuca/gen/proto/go/goluca/model/v1"
+	servicev1 "github.com/hampgoodwin/GoLuca/gen/proto/go/goluca/service/v1"
 	"github.com/hampgoodwin/GoLuca/internal/amount"
 	"github.com/hampgoodwin/GoLuca/internal/repository"
 	"github.com/hampgoodwin/GoLuca/internal/transaction"
@@ -175,7 +176,7 @@ func NewRepoEntryFromEntry(in transaction.Entry) repository.Entry {
 	return out
 }
 
-func NewPBTransactionFromTransaction(in transaction.Transaction) *modelv1.Transaction {
+func NewProtoTransactionFromTransaction(in transaction.Transaction) *modelv1.Transaction {
 	if in.IsZero() {
 		return nil
 	}
@@ -189,7 +190,7 @@ func NewPBTransactionFromTransaction(in transaction.Transaction) *modelv1.Transa
 
 	var entries []*modelv1.Entry
 	for _, entry := range in.Entries {
-		entry := NewPBEntryFromEntry(entry)
+		entry := NewProtoEntryFromEntry(entry)
 		entries = append(entries, entry)
 	}
 	if len(entries) > 0 {
@@ -199,7 +200,7 @@ func NewPBTransactionFromTransaction(in transaction.Transaction) *modelv1.Transa
 	return out
 }
 
-func NewPBEntryFromEntry(in transaction.Entry) *modelv1.Entry {
+func NewProtoEntryFromEntry(in transaction.Entry) *modelv1.Entry {
 	if in == (transaction.Entry{}) {
 		return nil
 	}
@@ -210,14 +211,14 @@ func NewPBEntryFromEntry(in transaction.Entry) *modelv1.Entry {
 		Description:   in.Description,
 		DebitAccount:  in.DebitAccount,
 		CreditAccount: in.CreditAccount,
-		Amount:        NewPBAmountFromAmount(in.Amount),
+		Amount:        NewProtoAmountFromAmount(in.Amount),
 		CreatedAt:     timestamppb.New(in.CreatedAt),
 	}
 
 	return out
 }
 
-func NewPBAmountFromAmount(in amount.Amount) *modelv1.Amount {
+func NewProtoAmountFromAmount(in amount.Amount) *modelv1.Amount {
 	if in == (amount.Amount{}) {
 		return nil
 	}
@@ -226,6 +227,37 @@ func NewPBAmountFromAmount(in amount.Amount) *modelv1.Amount {
 		Value:    in.Value,
 		Currency: in.Currency,
 	}
+
+	return out
+}
+
+func NewTransactionFromProtoCreateTransaction(in *servicev1.CreateTransactionRequest) transaction.Transaction {
+	out := transaction.Transaction{}
+
+	if in == nil {
+		return out
+	}
+
+	out.Description = in.GetDescription()
+
+	for _, entry := range in.Entries {
+		out.Entries = append(out.Entries, NewEntryFromProtoCreateEntry(entry))
+	}
+
+	return out
+}
+
+func NewEntryFromProtoCreateEntry(in *servicev1.CreateEntry) transaction.Entry {
+	out := transaction.Entry{}
+
+	if in == nil {
+		return out
+	}
+
+	out.Description = in.GetDescription()
+	out.DebitAccount = in.GetDebitAccount()
+	out.CreditAccount = in.GetCreditAccount()
+	out.Amount = NewAmountFromProtoAmount(in.Amount)
 
 	return out
 }

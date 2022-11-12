@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi"
 	"github.com/hampgoodwin/GoLuca/internal/transformer"
@@ -23,8 +24,8 @@ type accountResponse struct {
 }
 
 type accountsResponse struct {
-	Accounts   []httpaccount.Account `json:"accounts" validated:"required"`
-	NextCursor string                `json:"nextCursor,omitempty" validated:"base64"`
+	Accounts   []httpaccount.Account `json:"accounts" validate:"required"`
+	NextCursor string                `json:"nextCursor,omitempty" validate:"cursor"`
 }
 
 func (c *Controller) RegisterAccountRoutes(r *chi.Mux) {
@@ -62,7 +63,19 @@ func (c *Controller) listAccounts(w http.ResponseWriter, r *http.Request) {
 	if limit == "" {
 		limit = "10"
 	}
-	accounts, nextCursor, err := c.service.ListAccounts(ctx, cursor, limit)
+	limitUInt64, err := strconv.ParseUint(limit, 10, 64)
+	if err != nil {
+		c.respondError(w, c.log, errors.Wrap(err, "converting page size"))
+	}
+	if cursor == "\"\"" {
+		cursor = ""
+	}
+	if err := validate.Var(cursor, "omitempty,base64"); err != nil {
+		c.respondError(w, c.log, errors.WithErrorMessage(err, errors.NotValidRequest, "invalid cursor or token"))
+		return
+	}
+
+	accounts, nextCursor, err := c.service.ListAccounts(ctx, cursor, limitUInt64)
 	if err != nil {
 		c.respondError(w, c.log, errors.Wrap(err, "getting accounts from service"))
 		return
@@ -77,7 +90,7 @@ func (c *Controller) listAccounts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res := &accountsResponse{Accounts: responseAccounts, NextCursor: *nextCursor}
+	res := &accountsResponse{Accounts: responseAccounts, NextCursor: nextCursor}
 	c.respond(w, res, http.StatusOK)
 }
 
