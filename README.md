@@ -21,13 +21,8 @@ A Simple Accounting Ledger
 ---
 
 TODO
-- [ ] better startup logging
-    - [ ] info and such about what's starting.
 - [ ] health endpoint..?
 - [ ] retry startup dependecies
-- [ ] add gRPC methods, matching http spec
-    - [ ] add gRPC server start to main?
-    - [ ] add gRPC method tests..? idk
 - [ ] Events
     - [ ] Add eventing
     - [ ] explore NATS
@@ -43,6 +38,7 @@ TODO
     - [x] Add fail case account controller testing
     - [x] Use httptest for tests instead of setting up an http server for each test
         - [x] Fix bug where connection is rejected (I sus due to db+http connection limitations in unix)
+    - [ ] Improve test coverage by testing more grpc methods
     - [ ] Add cursor testing for listing accounts
     - [ ] Add fuzzing
     - [ ] Create a seeder for a basic dev environment of data
@@ -53,6 +49,11 @@ TODO
     - [ ] add default limit size as a configurable somewhere
 - [ ] improve pagination by displaying page number of result.
     - [ ] set up configuration loader or a new secrets loader to load values from appvault
+- [x] add gRPC methods, matching http spec
+    - [x] add gRPC server start to main?
+    - [x] add gRPC method tests..? idk
+- [x] better startup logging
+    - [x] info and such about what's starting.
 - [x] make basis an enum
 - [x] re-evaluate type validation logic in the service
 - [x] implement db types and transformers
