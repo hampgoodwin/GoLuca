@@ -12,7 +12,7 @@ import (
 // GetEntriesByTransactionID gets entries by transaction ID
 func getEntriesByTransactionID(ctx context.Context, tx pgx.Tx, transactionID string) ([]Entry, error) {
 	rows, err := tx.Query(ctx,
-		`SELECT id, transaction_id, debit_account, credit_account, amount_value, amount_currency, created_at
+		`SELECT id, transaction_id, description, debit_account, credit_account, amount_value, amount_currency, created_at
 		FROM entry
 		WHERE transaction_id=$1
 		;`,
@@ -28,6 +28,7 @@ func getEntriesByTransactionID(ctx context.Context, tx pgx.Tx, transactionID str
 		if err := rows.Scan(
 			&entry.ID,
 			&entry.TransactionID,
+			&entry.Description,
 			&entry.DebitAccount,
 			&entry.CreditAccount,
 			&entry.Amount.Value,

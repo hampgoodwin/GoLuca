@@ -27,4 +27,18 @@ var (
 		"Entries":     "dive,gte=1",
 		"CreatedAt":   "required",
 	}
+	createTransactionRequest = map[string]string{
+		"Description": "required",
+		"Entries":     "required,dive,gte=1",
+	}
+	createEntry = map[string]string{
+		"Description":   "required",
+		"DebitAccount":  "required,KSUID",
+		"CreditAccount": "required,KSUID",
+		"Amount":        "required",
+	}
+	amount = map[string]string{
+		"Value":    "gte=0",
+		"Currency": "len=3,alpha",
+	}
 )

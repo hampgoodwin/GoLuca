@@ -50,5 +50,8 @@ func registerCustomValidations(v *validator.Validate) {
 
 	v.RegisterStructValidationMapRules(transaction, &modelv1.Transaction{})
 	v.RegisterStructValidationMapRules(getTransactionRequest, &servicev1.GetTransactionRequest{})
+	v.RegisterStructValidationMapRules(createTransactionRequest, &servicev1.CreateTransactionRequest{})
+	v.RegisterStructValidationMapRules(createEntry, &servicev1.CreateEntry{})
+	v.RegisterStructValidationMapRules(amount, &modelv1.Amount{})
 
 }
