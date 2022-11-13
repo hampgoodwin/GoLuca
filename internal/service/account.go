@@ -6,14 +6,23 @@ import (
 	"time"
 
 	"github.com/hampgoodwin/GoLuca/internal/account"
+	"github.com/hampgoodwin/GoLuca/internal/meta"
 	"github.com/hampgoodwin/GoLuca/internal/transformer"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
 	"github.com/hampgoodwin/GoLuca/pkg/pagination"
 	"github.com/hampgoodwin/errors"
 	"github.com/segmentio/ksuid"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 )
 
 func (s *Service) GetAccount(ctx context.Context, accountID string) (account.Account, error) {
+	ctx, span := otel.Tracer(meta.ServiceName).Start(ctx, "service.GetAccount", trace.WithAttributes(
+		attribute.String("account_id", accountID),
+	))
+	defer span.End()
+
 	repoAccount, err := s.repository.GetAccount(ctx, accountID)
 	if err != nil {
 		return account.Account{}, errors.Wrap(err, "fetching account from database")

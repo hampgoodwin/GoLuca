@@ -5,15 +5,24 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hampgoodwin/GoLuca/internal/meta"
 	"github.com/hampgoodwin/GoLuca/internal/transaction"
 	"github.com/hampgoodwin/GoLuca/internal/transformer"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
 	"github.com/hampgoodwin/GoLuca/pkg/pagination"
 	"github.com/hampgoodwin/errors"
 	"github.com/segmentio/ksuid"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 )
 
 func (s *Service) GetTransaction(ctx context.Context, transactionID string) (transaction.Transaction, error) {
+	ctx, span := otel.Tracer(meta.ServiceName).Start(ctx, "service.GetTransaction", trace.WithAttributes(
+		attribute.String("transaction_id", transactionID),
+	))
+	defer span.End()
+
 	repoTransaction, err := s.repository.GetTransaction(ctx, transactionID)
 	if err != nil {
 		return transaction.Transaction{}, errors.Wrap(err, fmt.Sprintf("getting transaction %q", transactionID))
@@ -27,6 +36,12 @@ func (s *Service) GetTransaction(ctx context.Context, transactionID string) (tra
 }
 
 func (s *Service) ListTransactions(ctx context.Context, cursor string, limit uint64) ([]transaction.Transaction, string, error) {
+	ctx, span := otel.Tracer(meta.ServiceName).Start(ctx, "service.ListTransaction", trace.WithAttributes(
+		attribute.String("cursor", cursor),
+		attribute.Int64("limit", int64(limit)),
+	))
+	defer span.End()
+
 	limit++ // we always want one more than the size of the page, the extra at the end of the resultset serves as starting record for the next page
 
 	var id string
@@ -39,6 +54,10 @@ func (s *Service) ListTransactions(ctx context.Context, cursor string, limit uin
 		id = cursor.ID
 		createdAt = cursor.Time
 	}
+	span.SetAttributes(
+		attribute.String("cursor.id", id),
+		attribute.String("cursor.created_at", createdAt.String()),
+	)
 
 	repoTransactions, err := s.repository.ListTransactions(ctx, id, createdAt, limit)
 	if err != nil {

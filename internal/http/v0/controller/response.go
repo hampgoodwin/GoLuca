@@ -1,12 +1,17 @@
 package controller
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/hampgoodwin/GoLuca/internal/meta"
 	"github.com/hampgoodwin/errors"
+	"go.opentelemetry.io/otel"
+	otelcodes "go.opentelemetry.io/otel/codes"
+
 	"go.uber.org/zap"
 )
 
@@ -23,7 +28,9 @@ func (c *Controller) respond(w http.ResponseWriter, i interface{}, statuseCode i
 	}
 }
 
-func (c *Controller) respondError(w http.ResponseWriter, log *zap.Logger, err error) {
+func (c *Controller) respondError(ctx context.Context, w http.ResponseWriter, log *zap.Logger, err error) {
+	_, span := otel.Tracer(meta.ServiceName).Start(ctx, "http.v0.controller.respondError")
+	span.RecordError(err)
 	log.Error("responding", zap.Error(err))
 
 	var statuscode int
@@ -32,6 +39,7 @@ func (c *Controller) respondError(w http.ResponseWriter, log *zap.Logger, err er
 	if errors.As(err, &msg) {
 		message = msg.Value
 	}
+	span.SetStatus(otelcodes.Error, message)
 
 	switch {
 	case errors.Is(err, errors.NotKnown):

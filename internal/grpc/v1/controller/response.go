@@ -1,23 +1,32 @@
 package controller
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/hampgoodwin/GoLuca/internal/meta"
 	"github.com/hampgoodwin/errors"
+	"go.opentelemetry.io/otel"
+	otelcodes "go.opentelemetry.io/otel/codes"
 	"go.uber.org/zap"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-func (c *Controller) respondError(err error) error {
+func (c *Controller) respondError(ctx context.Context, log *zap.Logger, err error) error {
+	_, span := otel.Tracer(meta.ServiceName).Start(ctx, "http.v0.controller.respondError")
+	span.RecordError(err)
+	log.Error("responding", zap.Error(err))
+
 	var statuscode codes.Code
 	var message string
 	var msg errors.Message
 	if errors.As(err, &msg) {
 		message = msg.Value
 	}
+	span.SetStatus(otelcodes.Error, message)
 
 	switch {
 	case errors.Is(err, errors.NotKnown):

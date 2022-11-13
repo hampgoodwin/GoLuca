@@ -5,13 +5,22 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hampgoodwin/GoLuca/internal/meta"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
 	"github.com/hampgoodwin/errors"
 	"github.com/jackc/pgx/v4"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 )
 
 // GetAccount gets an account from the database
 func (r *Repository) GetAccount(ctx context.Context, accountID string) (Account, error) {
+	ctx, span := otel.Tracer(meta.ServiceName).Start(ctx, "repositry.GetAccount", trace.WithAttributes(
+		attribute.String("account_id", accountID),
+	))
+	defer span.End()
+
 	acct := Account{}
 	if err := r.database.QueryRow(ctx,
 		`SELECT id, parent_id, name, type, basis, created_at
