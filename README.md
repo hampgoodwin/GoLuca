@@ -21,8 +21,7 @@ A Simple Accounting Ledger
 ---
 
 TODO
-- [ ] health endpoint..?
-- [ ] retry startup dependecies
+- [ ] make a frontend with some dashboard functionality, (vue3 plz) OOOOH!!!
 - [ ] Events
     - [ ] Add eventing
     - [ ] explore NATS
@@ -31,14 +30,15 @@ TODO
     - [ ] Add metrics
         - [ ] OpenTelemetry metrics ready?
     - [ ] Log Collector?
-- [ ] make a frontend with some dashboard functionality, (vue3 plz) OOOOH!!!
+- [ ] retry startup dependecies
+- [ ] health endpoint..?
 - [ ] Testing
     - [x] Add more unit tests, solitary and sociable
     - [x] Add Integration testing
     - [x] Add fail case account controller testing
     - [x] Use httptest for tests instead of setting up an http server for each test
         - [x] Fix bug where connection is rejected (I sus due to db+http connection limitations in unix)
-    - [ ] Improve test coverage by testing more grpc methods
+    - [x] Improve test coverage by testing more grpc methods
     - [ ] Add cursor testing for listing accounts
     - [ ] Add fuzzing
     - [ ] Create a seeder for a basic dev environment of data
@@ -49,6 +49,7 @@ TODO
     - [ ] add default limit size as a configurable somewhere
 - [ ] improve pagination by displaying page number of result.
     - [ ] set up configuration loader or a new secrets loader to load values from appvault
+- [ ] redis datastore? Maybe later.
 - [x] add gRPC methods, matching http spec
     - [x] add gRPC server start to main?
     - [x] add gRPC method tests..? idk
