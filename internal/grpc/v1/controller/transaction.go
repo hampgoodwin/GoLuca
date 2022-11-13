@@ -48,12 +48,12 @@ func (c *Controller) ListTransactions(ctx context.Context, req *servicev1.ListTr
 		limit = 10
 	}
 	if err := validate.Var(cursor, "omitempty,base64"); err != nil {
-		return nil, c.respondError(errors.WithErrorMessage(err, errors.NotValidRequest, "invalid cursor or token"))
+		return nil, c.respondError(ctx, c.log, errors.WithErrorMessage(err, errors.NotValidRequest, "invalid cursor or token"))
 	}
 
 	transactions, nextCursor, err := c.service.ListTransactions(ctx, cursor, limit)
 	if err != nil {
-		return nil, c.respondError(err)
+		return nil, c.respondError(ctx, c.log, err)
 	}
 
 	listTransactionsResponse := &servicev1.ListTransactionsResponse{
@@ -63,7 +63,7 @@ func (c *Controller) ListTransactions(ctx context.Context, req *servicev1.ListTr
 		listTransactionsResponse.Transactions = append(listTransactionsResponse.Transactions, transformer.NewProtoTransactionFromTransaction(transaction))
 	}
 	if err := validate.Validate(listTransactionsResponse); err != nil {
-		return nil, c.respondError(errors.WithErrorMessage(err, errors.NotValidInternalData, "validating list transactions response from transactions"))
+		return nil, c.respondError(ctx, c.log, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating list transactions response from transactions"))
 	}
 
 	return listTransactionsResponse, nil
@@ -77,7 +77,7 @@ func (c *Controller) CreateTransaction(ctx context.Context, create *servicev1.Cr
 	defer span.End()
 
 	if err := validate.Validate(create); err != nil {
-		return nil, c.respondError(errors.WithErrorMessage(err, errors.NotValidRequestData, "validating create transaction request"))
+		return nil, c.respondError(ctx, c.log, errors.WithErrorMessage(err, errors.NotValidRequestData, "validating create transaction request"))
 	}
 
 	serviceTransaction := transformer.NewTransactionFromProtoCreateTransaction(create)
@@ -89,7 +89,7 @@ func (c *Controller) CreateTransaction(ctx context.Context, create *servicev1.Cr
 
 	transaction := transformer.NewProtoTransactionFromTransaction(createdTransaction)
 	if err := validate.Validate(transaction); err != nil {
-		return nil, c.respondError(errors.WithErrorMessage(err, errors.NotValidInternalData, "validating transaction from created transaction"))
+		return nil, c.respondError(ctx, c.log, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating transaction from created transaction"))
 	}
 	return &servicev1.CreateTransactionResponse{Transaction: transaction}, nil
 }
