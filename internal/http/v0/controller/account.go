@@ -7,9 +7,12 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi"
+	"github.com/hampgoodwin/GoLuca/internal/meta"
 	"github.com/hampgoodwin/GoLuca/internal/transformer"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
 	httpaccount "github.com/hampgoodwin/GoLuca/pkg/http/v0/account"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 
 	"github.com/hampgoodwin/errors"
 	"go.uber.org/zap"
@@ -38,8 +41,13 @@ func (c *Controller) RegisterAccountRoutes(r *chi.Mux) {
 
 func (c *Controller) getAccount(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+
+	ctx, span := otel.Tracer(meta.ServiceName).Start(ctx, "http.v0.controller.getAccount")
+	defer span.End()
+
 	accountID := chi.URLParam(r, "accountId")
-	c.log.Info("getting account", zap.String("account", accountID))
+	span.SetAttributes(attribute.String("account_id", accountID))
+	c.log.Info("getting account", zap.String("account_id", accountID))
 
 	account, err := c.service.GetAccount(ctx, accountID)
 	if err != nil {
@@ -59,6 +67,10 @@ func (c *Controller) getAccount(w http.ResponseWriter, r *http.Request) {
 
 func (c *Controller) listAccounts(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+
+	ctx, span := otel.Tracer(meta.ServiceName).Start(ctx, "http.v0.controller.listAccounts")
+	defer span.End()
+
 	limit, cursor := r.URL.Query().Get("limit"), r.URL.Query().Get("cursor")
 	if limit == "" {
 		limit = "10"
@@ -70,6 +82,10 @@ func (c *Controller) listAccounts(w http.ResponseWriter, r *http.Request) {
 	if cursor == "\"\"" {
 		cursor = ""
 	}
+	span.SetAttributes(
+		attribute.String("cursor", cursor),
+		attribute.Int64("limit", int64(limitUInt64)),
+	)
 	if err := validate.Var(cursor, "omitempty,base64"); err != nil {
 		c.respondError(w, c.log, errors.WithErrorMessage(err, errors.NotValidRequest, "invalid cursor or token"))
 		return
@@ -96,6 +112,8 @@ func (c *Controller) listAccounts(w http.ResponseWriter, r *http.Request) {
 
 func (c *Controller) createAccount(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	ctx, span := otel.Tracer(meta.ServiceName).Start(ctx, "http.v0.controller.createAccount")
+	defer span.End()
 	req := &accountRequest{}
 	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
 		c.respondError(w, c.log, errors.WrapWithErrorMessage(err, errors.NotDeserializable, err.Error(), "deserializing request body"))

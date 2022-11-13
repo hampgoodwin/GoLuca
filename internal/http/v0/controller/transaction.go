@@ -7,10 +7,13 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi"
+	"github.com/hampgoodwin/GoLuca/internal/meta"
 	"github.com/hampgoodwin/GoLuca/internal/transformer"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
 	httptransaction "github.com/hampgoodwin/GoLuca/pkg/http/v0/transaction"
 	"github.com/hampgoodwin/errors"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 )
 
 func (c *Controller) RegisterTransactionRoutes(r *chi.Mux) {
@@ -36,6 +39,8 @@ type transactionsResponse struct {
 
 func (c *Controller) listTransactions(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	ctx, span := otel.Tracer(meta.ServiceName).Start(ctx, "http.v0.controller.listTransactions")
+	defer span.End()
 	limit, cursor := r.URL.Query().Get("limit"), r.URL.Query().Get("cursor")
 	if limit == "" {
 		limit = "10"
@@ -66,7 +71,10 @@ func (c *Controller) listTransactions(w http.ResponseWriter, r *http.Request) {
 
 func (c *Controller) getTransaction(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	ctx, span := otel.Tracer(meta.ServiceName).Start(ctx, "http.v0.controller.getTransaction")
+	defer span.End()
 	transactionID := chi.URLParam(r, "transactionId")
+	span.SetAttributes(attribute.String("transaction_id", transactionID))
 
 	transaction, err := c.service.GetTransaction(ctx, transactionID)
 	if err != nil {
@@ -86,6 +94,8 @@ func (c *Controller) getTransaction(w http.ResponseWriter, r *http.Request) {
 
 func (c *Controller) createTransaction(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	ctx, span := otel.Tracer(meta.ServiceName).Start(ctx, "http.v0.controller.createTransaction")
+	defer span.End()
 	req := &transactionRequest{}
 
 	if err := json.NewDecoder(r.Body).Decode(req); err != nil {

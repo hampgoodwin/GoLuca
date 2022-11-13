@@ -4,12 +4,21 @@ import (
 	"context"
 
 	servicev1 "github.com/hampgoodwin/GoLuca/gen/proto/go/goluca/service/v1"
+	"github.com/hampgoodwin/GoLuca/internal/meta"
 	"github.com/hampgoodwin/GoLuca/internal/transformer"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
 	"github.com/hampgoodwin/errors"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 )
 
 func (c *Controller) GetTransaction(ctx context.Context, req *servicev1.GetTransactionRequest) (*servicev1.GetTransactionResponse, error) {
+	ctx, span := otel.Tracer(meta.ServiceName).Start(ctx, "grpc.v1.controller.GetTransaction", trace.WithAttributes(
+		attribute.String("transaction_id", req.GetTransactionId()),
+	))
+	defer span.End()
+
 	if err := validate.Validate(req); err != nil {
 		return nil, errors.WithErrorMessage(err, errors.NotValidRequestData, "validating request")
 	}
@@ -28,6 +37,12 @@ func (c *Controller) GetTransaction(ctx context.Context, req *servicev1.GetTrans
 }
 
 func (c *Controller) ListTransactions(ctx context.Context, req *servicev1.ListTransactionsRequest) (*servicev1.ListTransactionsResponse, error) {
+	ctx, span := otel.Tracer(meta.ServiceName).Start(ctx, "grpc.v1.controller.ListTransaction", trace.WithAttributes(
+		attribute.Int64("page_size", int64(req.GetPageSize())),
+		attribute.String("page_token", req.GetPageToken()),
+	))
+	defer span.End()
+
 	limit, cursor := req.PageSize, req.PageToken
 	if limit == 0 {
 		limit = 10
@@ -55,6 +70,12 @@ func (c *Controller) ListTransactions(ctx context.Context, req *servicev1.ListTr
 }
 
 func (c *Controller) CreateTransaction(ctx context.Context, create *servicev1.CreateTransactionRequest) (*servicev1.CreateTransactionResponse, error) {
+	ctx, span := otel.Tracer(meta.ServiceName).Start(ctx, "grpc.v1.controller.CreateTransaction", trace.WithAttributes(
+		attribute.String("parent_id", create.GetDescription()),
+		attribute.Int64("count_entries", int64(len(create.GetEntries()))),
+	))
+	defer span.End()
+
 	if err := validate.Validate(create); err != nil {
 		return nil, c.respondError(errors.WithErrorMessage(err, errors.NotValidRequestData, "validating create transaction request"))
 	}

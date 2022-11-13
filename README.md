@@ -27,6 +27,7 @@ TODO
     - [ ] explore NATS
 - [ ] o11y
     - [ ] Add tracing
+      - [ ] Add tracing to respond.go files
     - [ ] Add metrics
         - [ ] OpenTelemetry metrics ready?
     - [ ] Log Collector?

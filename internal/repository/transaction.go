@@ -5,15 +5,24 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hampgoodwin/GoLuca/internal/meta"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
 	"github.com/hampgoodwin/errors"
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v4"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 )
 
 // GetTransaction get's a transaction record, without it's entries, by the transaction ID
 func (r *Repository) GetTransaction(ctx context.Context, transactionID string) (Transaction, error) {
+	ctx, span := otel.Tracer(meta.ServiceName).Start(ctx, "repository.GetTransaction", trace.WithAttributes(
+		attribute.String("transaction_id", transactionID),
+	))
+	defer span.End()
+
 	tx, err := r.database.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		return Transaction{}, errors.WithErrorMessage(err, errors.NotKnown, "beginning get transactions db transactoion")
@@ -55,6 +64,13 @@ func (r *Repository) GetTransaction(ctx context.Context, transactionID string) (
 
 // ListTransactions get's transactions paginated by cursor and limit
 func (r *Repository) ListTransactions(ctx context.Context, transactionID string, createdAt time.Time, limit uint64) ([]Transaction, error) {
+	ctx, span := otel.Tracer(meta.ServiceName).Start(ctx, "repository.ListTransaction", trace.WithAttributes(
+		attribute.String("cursor.id", transactionID),
+		attribute.String("cursor.created_at", createdAt.String()),
+		attribute.Int64("limit", int64(limit)),
+	))
+	defer span.End()
+
 	tx, err := r.database.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		return nil, errors.WithErrorMessage(err, errors.NotKnown, "beginning get transactions db transactoion")
