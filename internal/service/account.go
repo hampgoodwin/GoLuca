@@ -37,6 +37,11 @@ func (s *Service) GetAccount(ctx context.Context, accountID string) (account.Acc
 }
 
 func (s *Service) ListAccounts(ctx context.Context, cursor string, limit uint64) ([]account.Account, string, error) {
+	ctx, span := otel.Tracer(meta.ServiceName).Start(ctx, "internal.service.CreateAccount", trace.WithAttributes(
+		attribute.String("cursor", cursor),
+		attribute.Int64("limit", int64(limit)),
+	))
+	defer span.End()
 	limit++ // we always want one more than the size of the page, the extra at the end of the resultset serves as starting record for the next page
 
 	var id string
@@ -52,6 +57,9 @@ func (s *Service) ListAccounts(ctx context.Context, cursor string, limit uint64)
 		id = cursor.ID
 		createdAt = cursor.Time
 	}
+	span.SetAttributes(
+		attribute.String("cursor_id", id),
+		attribute.String("cursor_created_at", createdAt.String()))
 
 	repoAccounts, err := s.repository.ListAccounts(ctx, id, createdAt, limit)
 	if err != nil {
@@ -85,8 +93,17 @@ func (s *Service) ListAccounts(ctx context.Context, cursor string, limit uint64)
 }
 
 func (s *Service) CreateAccount(ctx context.Context, create account.Account) (account.Account, error) {
+	ctx, span := otel.Tracer(meta.ServiceName).Start(ctx, "internal.service.CreateAccount", trace.WithAttributes(
+		attribute.String("parent_id", create.ParentID),
+		attribute.String("name", create.Name),
+		attribute.String("type", create.Type.String()),
+		attribute.String("basis", create.Basis.String()),
+	))
+	defer span.End()
+
 	create.ID = ksuid.New().String()
 	create.CreatedAt = time.Now()
+	span.SetAttributes(attribute.String("id", create.ID))
 
 	if err := validate.Validate(create); err != nil {
 		return account.Account{}, errors.WithErrorMessage(err, errors.NotValidRequestData, "validating account")

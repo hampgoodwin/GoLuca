@@ -91,12 +91,29 @@ func (s *Service) ListTransactions(ctx context.Context, cursor string, limit uin
 }
 
 func (s *Service) CreateTransaction(ctx context.Context, create transaction.Transaction) (transaction.Transaction, error) {
+	ctx, span := otel.Tracer(meta.ServiceName).Start(ctx, "internal.service.CreateTransaction", trace.WithAttributes(
+		attribute.String("description", create.Description),
+		attribute.Int64("entries", int64(len(create.Entries))),
+	))
+	defer span.End()
+
 	create.ID = ksuid.New().String()
 	create.CreatedAt = time.Now()
 	for i := 0; i < len(create.Entries); i++ {
 		create.Entries[i].ID = ksuid.New().String()
 		create.Entries[i].TransactionID = create.ID
 		create.Entries[i].CreatedAt = create.CreatedAt
+		_, span := otel.Tracer(meta.ServiceName).Start(ctx, "intenal.service.CreateTransaction.entries")
+		defer span.End()
+
+		span.SetAttributes(
+			attribute.String("id", create.Entries[i].ID),
+			attribute.String("transaction_id", create.Entries[i].TransactionID),
+			attribute.String("description", create.Entries[i].Description),
+			attribute.String("debit_account", create.Entries[i].DebitAccount),
+			attribute.String("credit_account", create.Entries[i].CreditAccount),
+			attribute.String("amount", fmt.Sprintf("%d_%s", create.Entries[i].Amount.Value, create.Entries[i].Amount.Currency)),
+		)
 	}
 	if err := validate.Validate(create); err != nil {
 		return transaction.Transaction{}, errors.WithErrorMessage(err, errors.NotValidRequestData, "validating transaction before persisting to database")

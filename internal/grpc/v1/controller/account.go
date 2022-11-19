@@ -14,7 +14,7 @@ import (
 )
 
 func (c *Controller) GetAccount(ctx context.Context, req *servicev1.GetAccountRequest) (*servicev1.GetAccountResponse, error) {
-	ctx, span := otel.Tracer(meta.ServiceName).Start(ctx, "grpc.v1.controller.GetAccount", trace.WithAttributes(
+	ctx, span := otel.Tracer(meta.ServiceName).Start(ctx, "internal.grpc.v1.controller.GetAccount", trace.WithAttributes(
 		attribute.String("account_id", req.GetAccountId()),
 	))
 	defer span.End()
@@ -37,7 +37,7 @@ func (c *Controller) GetAccount(ctx context.Context, req *servicev1.GetAccountRe
 }
 
 func (c *Controller) ListAccounts(ctx context.Context, req *servicev1.ListAccountsRequest) (*servicev1.ListAccountsResponse, error) {
-	ctx, span := otel.Tracer(meta.ServiceName).Start(ctx, "grpc.v1.controller.ListAccounts", trace.WithAttributes(
+	ctx, span := otel.Tracer(meta.ServiceName).Start(ctx, "internal.grpc.v1.controller.ListAccounts", trace.WithAttributes(
 		attribute.Int64("page_size", int64(req.GetPageSize())),
 		attribute.String("page_token", req.GetPageToken()),
 	))
@@ -70,7 +70,7 @@ func (c *Controller) ListAccounts(ctx context.Context, req *servicev1.ListAccoun
 }
 
 func (c *Controller) CreateAccount(ctx context.Context, create *servicev1.CreateAccountRequest) (*servicev1.CreateAccountResponse, error) {
-	ctx, span := otel.Tracer(meta.ServiceName).Start(ctx, "grpc.v1.controller.CreateAccount", trace.WithAttributes(
+	ctx, span := otel.Tracer(meta.ServiceName).Start(ctx, "internal.grpc.v1.controller.CreateAccount", trace.WithAttributes(
 		attribute.String("parent_id", create.GetParentId()),
 		attribute.String("name", create.GetName()),
 		attribute.String("type", create.GetType().String()),

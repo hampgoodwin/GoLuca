@@ -14,7 +14,7 @@ import (
 )
 
 func (c *Controller) GetTransaction(ctx context.Context, req *servicev1.GetTransactionRequest) (*servicev1.GetTransactionResponse, error) {
-	ctx, span := otel.Tracer(meta.ServiceName).Start(ctx, "grpc.v1.controller.GetTransaction", trace.WithAttributes(
+	ctx, span := otel.Tracer(meta.ServiceName).Start(ctx, "internal.grpc.v1.controller.GetTransaction", trace.WithAttributes(
 		attribute.String("transaction_id", req.GetTransactionId()),
 	))
 	defer span.End()
@@ -37,7 +37,7 @@ func (c *Controller) GetTransaction(ctx context.Context, req *servicev1.GetTrans
 }
 
 func (c *Controller) ListTransactions(ctx context.Context, req *servicev1.ListTransactionsRequest) (*servicev1.ListTransactionsResponse, error) {
-	ctx, span := otel.Tracer(meta.ServiceName).Start(ctx, "grpc.v1.controller.ListTransaction", trace.WithAttributes(
+	ctx, span := otel.Tracer(meta.ServiceName).Start(ctx, "internal.grpc.v1.controller.ListTransaction", trace.WithAttributes(
 		attribute.Int64("page_size", int64(req.GetPageSize())),
 		attribute.String("page_token", req.GetPageToken()),
 	))
@@ -70,7 +70,7 @@ func (c *Controller) ListTransactions(ctx context.Context, req *servicev1.ListTr
 }
 
 func (c *Controller) CreateTransaction(ctx context.Context, create *servicev1.CreateTransactionRequest) (*servicev1.CreateTransactionResponse, error) {
-	ctx, span := otel.Tracer(meta.ServiceName).Start(ctx, "grpc.v1.controller.CreateTransaction", trace.WithAttributes(
+	ctx, span := otel.Tracer(meta.ServiceName).Start(ctx, "internal.grpc.v1.controller.CreateTransaction", trace.WithAttributes(
 		attribute.String("parent_id", create.GetDescription()),
 		attribute.Int64("count_entries", int64(len(create.GetEntries()))),
 	))
