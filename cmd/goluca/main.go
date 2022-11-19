@@ -7,7 +7,6 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"os"
 
 	"github.com/golang-migrate/migrate/v4"
 	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
@@ -28,23 +27,6 @@ import (
 
 func main() {
 	ctx := context.Background()
-
-	// Write telemetry data to a file.
-	f, err := os.Create("traces.txt")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer f.Close()
-
-	// tpShutdownFn, err := itrace.NewStdOutExporter(f)
-	// if err != nil {
-	// 	log.Panic("failed to create otlp grpc exporter")
-	// }
-	// defer func() {
-	// 	if err := tpShutdownFn(ctx); err != nil {
-	// 		log.Fatal(err)
-	// 	}
-	// }()
 
 	tpShutdownFn, err := itrace.SetOTLPGRPCTracerProvider(ctx)
 	if err != nil {

@@ -44,5 +44,3 @@ apipreview:
 jaegerup:
 	docker-compose -f $$(pwd)/build/package/docker-compose.yml up -d jaeger
 	@ echo "view jaeger at http://localhost:16686"
-jaegerdown:
-	docker-compose -f $$(pwd)/build/package/docker-compose.yml up -d jaeger
