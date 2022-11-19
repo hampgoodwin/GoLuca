@@ -30,6 +30,7 @@ func (c *Controller) respond(w http.ResponseWriter, i interface{}, statuseCode i
 
 func (c *Controller) respondError(ctx context.Context, w http.ResponseWriter, log *zap.Logger, err error) {
 	_, span := otel.Tracer(meta.ServiceName).Start(ctx, "http.v0.controller.respondError")
+	defer span.End()
 	span.RecordError(err)
 	log.Error("responding", zap.Error(err))
 

@@ -19,6 +19,7 @@ A Simple Accounting Ledger
 - [gofumpt](https://github.com/mvdan/gofumpt) for formatting.
 - [golangci-lint](https://github.com/golangci/golangci-lint) for linting.
 - [colima](https://github.com/abiosoft/colima) for container runtimes.
+- [jaerger](https://www.jaegertracing.io/) for local trace collector and ui.
 
 ---
 
@@ -28,8 +29,8 @@ TODO
     - [ ] Add eventing
     - [ ] explore NATS
 - [ ] o11y
-    - [ ] Add tracing
-      - [ ] Add tracing to respond.go files
+    - [X] Add tracing
+      - [x] Add tracing to respond.go files
     - [ ] Add metrics
         - [ ] OpenTelemetry metrics ready?
     - [ ] Log Collector?

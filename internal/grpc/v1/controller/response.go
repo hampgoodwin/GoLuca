@@ -17,6 +17,7 @@ import (
 
 func (c *Controller) respondError(ctx context.Context, log *zap.Logger, err error) error {
 	_, span := otel.Tracer(meta.ServiceName).Start(ctx, "http.v0.controller.respondError")
+	defer span.End()
 	span.RecordError(err)
 	log.Error("responding", zap.Error(err))
 
