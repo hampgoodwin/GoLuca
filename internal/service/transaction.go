@@ -104,6 +104,7 @@ func (s *Service) CreateTransaction(ctx context.Context, create transaction.Tran
 		create.Entries[i].TransactionID = create.ID
 		create.Entries[i].CreatedAt = create.CreatedAt
 		_, span := otel.Tracer(meta.ServiceName).Start(ctx, "intenal.service.CreateTransaction.entries")
+		defer span.End()
 
 		span.SetAttributes(
 			attribute.String("id", create.Entries[i].ID),

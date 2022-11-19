@@ -21,6 +21,12 @@ var migrations embed.FS
 
 // NewDatabasePool creates a new DB
 func NewDatabasePool(ctx context.Context, connString string) (*pgxpool.Pool, error) {
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	default:
+	}
+
 	var err error
 	config, err := pgxpool.ParseConfig(connString)
 	if err != nil {
