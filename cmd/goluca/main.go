@@ -11,6 +11,10 @@ import (
 
 	"github.com/golang-migrate/migrate/v4"
 	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"go.uber.org/zap"
+	"google.golang.org/grpc"
+
 	"github.com/hampgoodwin/GoLuca/internal/database"
 	"github.com/hampgoodwin/GoLuca/internal/environment"
 	grpccontroller "github.com/hampgoodwin/GoLuca/internal/grpc/v1/controller"
@@ -20,9 +24,6 @@ import (
 	"github.com/hampgoodwin/GoLuca/internal/repository"
 	"github.com/hampgoodwin/GoLuca/internal/service"
 	itrace "github.com/hampgoodwin/GoLuca/internal/trace"
-	"github.com/jackc/pgx/v5/pgxpool"
-	"go.uber.org/zap"
-	"google.golang.org/grpc"
 )
 
 func main() {

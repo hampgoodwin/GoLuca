@@ -12,6 +12,8 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
+
+	pgxtrace "github.com/hampgoodwin/GoLuca/internal/trace/pgx"
 )
 
 //go:embed migrations
@@ -20,7 +22,12 @@ var migrations embed.FS
 // NewDatabasePool creates a new DB
 func NewDatabasePool(ctx context.Context, connString string) (*pgxpool.Pool, error) {
 	var err error
-	DBPool, err := pgxpool.New(ctx, connString)
+	config, err := pgxpool.ParseConfig(connString)
+	if err != nil {
+		return nil, errors.Wrap(err, "")
+	}
+	config.ConnConfig.Tracer = &pgxtrace.Tracer{}
+	DBPool, err := pgxpool.NewWithConfig(ctx, config)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create pgx connection pool")
 	}
