@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os"
 
 	"github.com/golang-migrate/migrate/v4"
 	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
@@ -18,13 +19,42 @@ import (
 	httprouter "github.com/hampgoodwin/GoLuca/internal/http/v0/router"
 	"github.com/hampgoodwin/GoLuca/internal/repository"
 	"github.com/hampgoodwin/GoLuca/internal/service"
-	"github.com/jackc/pgx/v4/pgxpool"
+	itrace "github.com/hampgoodwin/GoLuca/internal/trace"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
 
 func main() {
 	ctx := context.Background()
+
+	// Write telemetry data to a file.
+	f, err := os.Create("traces.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+
+	// tpShutdownFn, err := itrace.NewStdOutExporter(f)
+	// if err != nil {
+	// 	log.Panic("failed to create otlp grpc exporter")
+	// }
+	// defer func() {
+	// 	if err := tpShutdownFn(ctx); err != nil {
+	// 		log.Fatal(err)
+	// 	}
+	// }()
+
+	tpShutdownFn, err := itrace.SetOTLPGRPCTracerProvider(ctx)
+	if err != nil {
+		log.Panic("failed to create otlp grpc exporter")
+	}
+	defer func() {
+		if err := tpShutdownFn(ctx); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
 	env, err := environment.New(environment.Environment{}, "/etc/goluca/.env.toml")
 	if err != nil {
 		log.Panic("failed to create new environment")

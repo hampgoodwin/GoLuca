@@ -7,7 +7,7 @@ import (
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/hampgoodwin/errors"
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/jackc/pgx/v5/pgxpool"
 
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
@@ -20,7 +20,7 @@ var migrations embed.FS
 // NewDatabasePool creates a new DB
 func NewDatabasePool(ctx context.Context, connString string) (*pgxpool.Pool, error) {
 	var err error
-	DBPool, err := pgxpool.Connect(ctx, connString)
+	DBPool, err := pgxpool.New(ctx, connString)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create pgx connection pool")
 	}

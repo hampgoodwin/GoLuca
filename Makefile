@@ -24,6 +24,7 @@ run:
 
 up:
 	docker-compose -f $$(pwd)/build/package/docker-compose.yml up -d
+	@ echo "view jaeger at http://localhost:16686"
 
 down:
 	docker-compose -f $$(pwd)/build/package/docker-compose.yml down
@@ -39,3 +40,9 @@ apilint:
 
 apipreview:
 	sh ./scripts/openapi_previewdocs.sh
+
+jaegerup:
+	docker-compose -f $$(pwd)/build/package/docker-compose.yml up -d jaeger
+	@ echo "view jaeger at http://localhost:16686"
+jaegerdown:
+	docker-compose -f $$(pwd)/build/package/docker-compose.yml up -d jaeger
