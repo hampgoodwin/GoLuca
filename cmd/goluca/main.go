@@ -11,6 +11,8 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/nats-io/nats.go"
+	"github.com/nats-io/nats.go/encoders/protobuf"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 
@@ -57,7 +59,18 @@ func main() {
 	}
 
 	repository := repository.NewRepository(db)
-	service := service.NewService(env.Log, repository)
+	nc, err := nats.Connect(nats.DefaultURL)
+	if err != nil {
+		env.Log.Error("connecting to nats", zap.Error(err))
+		log.Fatal("error connecting to nats")
+	}
+	nec, err := nats.NewEncodedConn(nc, protobuf.PROTOBUF_ENCODER)
+	if err != nil {
+		env.Log.Error("creating new encoded connection for protobuf")
+		log.Fatal("error creating new protobuf encoded nats connection")
+	}
+
+	service := service.NewService(env.Log, repository, nec)
 
 	httpController := httpcontroller.NewController(env.Log, service)
 	httpServer := &http.Server{

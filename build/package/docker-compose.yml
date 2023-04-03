@@ -19,7 +19,6 @@ services:
     ports:
       - "4222:4222"
       - "8222:8222"
-      - "6222:6222"
 
   jaeger:
     image: jaegertracing/all-in-one:latest

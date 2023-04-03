@@ -25,6 +25,7 @@ run:
 up:
 	docker-compose -f $$(pwd)/build/package/docker-compose.yml up -d
 	@ echo "view jaeger at http://localhost:16686"
+	@ echo "view nats at http://localhost:8222"
 
 down:
 	docker-compose -f $$(pwd)/build/package/docker-compose.yml down
@@ -34,13 +35,18 @@ downup: down up
 dbup:
 	docker-compose -f $$(pwd)/build/package/docker-compose.yml up -d db
 
+jaegerup:
+	docker-compose -f $$(pwd)/build/package/docker-compose.yml up -d jaeger
+	@ echo "view jaeger at http://localhost:16686"
+
+natsup:
+	docker-compose -f $$(pwd)/build/package/docker-compose.yml up -d nats
+	@ echo "view nats at http://localhost:8222"
+	
 # OPEN API COMMANDS
 apilint:
 	docker run --rm -v $$PWD/http/v0/spec:/spec redocly/openapi-cli lint /spec/openapi.yml
 
+
 apipreview:
 	sh ./scripts/openapi_previewdocs.sh
-
-jaegerup:
-	docker-compose -f $$(pwd)/build/package/docker-compose.yml up -d jaeger
-	@ echo "view jaeger at http://localhost:16686"

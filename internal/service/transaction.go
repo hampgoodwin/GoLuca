@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	event "github.com/hampgoodwin/GoLuca/internal/event"
 	"github.com/hampgoodwin/GoLuca/internal/meta"
 	"github.com/hampgoodwin/GoLuca/internal/transaction"
 	"github.com/hampgoodwin/GoLuca/internal/transformer"
@@ -15,6 +16,7 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
+	"go.uber.org/zap"
 )
 
 func (s *Service) GetTransaction(ctx context.Context, transactionID string) (transaction.Transaction, error) {
@@ -129,6 +131,12 @@ func (s *Service) CreateTransaction(ctx context.Context, create transaction.Tran
 	transaction := transformer.NewTransactionFromRepoTransaction(created)
 	if err := validate.Validate(transaction); err != nil {
 		return transaction, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating transfer from repository transfer")
+	}
+
+	protoCreated := transformer.NewProtoTransactionFromTransaction(transaction)
+	if err := s.publisher.Publish(event.SubjectTransactionCreated, protoCreated); err != nil {
+		// should we return/fail on a failed production of a msg..?
+		s.log.Error("publishing transaction created message", zap.Error(err))
 	}
 
 	return transaction, nil

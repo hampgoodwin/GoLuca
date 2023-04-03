@@ -25,10 +25,10 @@ A Simple Accounting Ledger
 ---
 
 TODO
-- [ ] Events
-    - [ ] NATS
+- [x] Events
+    - [x] NATS
         - [ ] Run NATS locally in a cluster
-    - [ ] Instrument account.created, transaction.created events
+    - [x] Instrument account.created, transaction.created events
 - [ ] make a frontend with some dashboard functionality, (vue3 plz) OOOOH!!!
 - [ ] o11y
     - [X] Add tracing
