@@ -21,6 +21,8 @@ check: lint test
 
 run:
 	go run $$(pwd)/cmd/goluca/main.go
+runwiretap:
+	go run $$(pwd)/cmd/wiretap/main.go
 
 up:
 	docker-compose -f $$(pwd)/build/package/docker-compose.yml up -d

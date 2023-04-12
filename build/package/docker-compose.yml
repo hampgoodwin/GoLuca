@@ -19,6 +19,8 @@ services:
     ports:
       - "4222:4222"
       - "8222:8222"
+    command:
+      - --jetstream
 
   jaeger:
     image: jaegertracing/all-in-one:latest
