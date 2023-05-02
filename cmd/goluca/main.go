@@ -12,12 +12,12 @@ import (
 	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/nats-io/nats.go"
-	"github.com/nats-io/nats.go/encoders/protobuf"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 
 	"github.com/hampgoodwin/GoLuca/internal/database"
 	"github.com/hampgoodwin/GoLuca/internal/environment"
+	inats "github.com/hampgoodwin/GoLuca/internal/event/nats"
 	grpccontroller "github.com/hampgoodwin/GoLuca/internal/grpc/v1/controller"
 	grpcrouter "github.com/hampgoodwin/GoLuca/internal/grpc/v1/router"
 	httpcontroller "github.com/hampgoodwin/GoLuca/internal/http/v0/controller"
@@ -59,17 +59,15 @@ func main() {
 	}
 
 	repository := repository.NewRepository(db)
-	nc, err := nats.Connect(nats.DefaultURL)
+	nec, err := inats.NewNATSEncodedConn(nats.DefaultURL)
 	if err != nil {
-		env.Log.Error("connecting to nats", zap.Error(err))
-		log.Fatal("error connecting to nats")
+		env.Log.Error("creating new nats encoded connection", zap.Error(err))
+		log.Fatal("creating new nats encoded connection")
 	}
-	nec, err := nats.NewEncodedConn(nc, protobuf.PROTOBUF_ENCODER)
-	if err != nil {
-		env.Log.Error("creating new encoded connection for protobuf")
-		log.Fatal("error creating new protobuf encoded nats connection")
+	if _, err := inats.NewNATSJetStream(nec); err != nil {
+		env.Log.Error("creating streams", zap.Error(err))
+		log.Fatal("creating steams")
 	}
-
 	service := service.NewService(env.Log, repository, nec)
 
 	httpController := httpcontroller.NewController(env.Log, service)
