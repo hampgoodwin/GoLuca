@@ -6,10 +6,10 @@ managed:
     except:
       - buf.build/googleapis/googleapis
 plugins:
-  - name: go
+  - plugin: buf.build/protocolbuffers/go
     out: gen/proto/go
     opt: paths=source_relative
-  - name: go-grpc
+  - plugin: buf.build/grpc/go
     out: gen/proto/go
     opt:
       - paths=source_relative
