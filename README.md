@@ -20,22 +20,26 @@ A Simple Accounting Ledger
 - [golangci-lint](https://github.com/golangci/golangci-lint) for linting.
 - [colima](https://github.com/abiosoft/colima) for container runtimes.
 - [jaeger](https://www.jaegertracing.io/) for local trace collector and ui.
+- [nats](https://nats.io/) for eventing.
 
 ---
 
 TODO
+- [ ] improve startup configurations
+    - [ ] update env config to include configurations for nats
+    - [ ] add configuration for starting nats wire tap in main-app
 - [ ] make a frontend with some dashboard functionality, (vue3 plz) OOOOH!!!
-- [ ] Events
-    - [ ] Add eventing
-    - [ ] explore NATS
 - [ ] o11y
     - [X] Add tracing
       - [x] Add tracing to respond.go files
     - [ ] Add metrics
         - [ ] OpenTelemetry metrics ready?
     - [ ] Log Collector?
+    - [ ] move off Jaeger, and all in on Grafana stack
 - [ ] retry startup dependecies
-- [ ] health endpoint..?
+- [ ] health checks
+    - [ ] add a health reporter
+    - [ ] add health checks
 - [ ] Testing
     - [x] Add more unit tests, solitary and sociable
     - [x] Add Integration testing
@@ -51,8 +55,12 @@ TODO
 - [ ] Add a stress testing system
 - [ ] set up dev appvault and set secrets
     - [ ] add default limit size as a configurable somewhere
-- [ ] improve pagination by displaying page number of result.
     - [ ] set up configuration loader or a new secrets loader to load values from appvault
+- [ ] improve pagination by displaying page number of result.
+- [x] Events
+    - [x] NATS
+        - [ ] Run NATS locally in a cluster
+    - [x] Instrument account.created, transaction.created events
 - [ ] redis datastore? Maybe later.
 - [x] add gRPC methods, matching http spec
     - [x] add gRPC server start to main?

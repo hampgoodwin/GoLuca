@@ -5,16 +5,20 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hampgoodwin/GoLuca/internal/account"
-	"github.com/hampgoodwin/GoLuca/internal/meta"
-	"github.com/hampgoodwin/GoLuca/internal/transformer"
-	"github.com/hampgoodwin/GoLuca/internal/validate"
-	"github.com/hampgoodwin/GoLuca/pkg/pagination"
-	"github.com/hampgoodwin/errors"
 	"github.com/segmentio/ksuid"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
+	"go.uber.org/zap"
+
+	"github.com/hampgoodwin/errors"
+
+	"github.com/hampgoodwin/GoLuca/internal/account"
+	event "github.com/hampgoodwin/GoLuca/internal/event"
+	"github.com/hampgoodwin/GoLuca/internal/meta"
+	"github.com/hampgoodwin/GoLuca/internal/transformer"
+	"github.com/hampgoodwin/GoLuca/internal/validate"
+	"github.com/hampgoodwin/GoLuca/pkg/pagination"
 )
 
 func (s *Service) GetAccount(ctx context.Context, accountID string) (account.Account, error) {
@@ -119,6 +123,12 @@ func (s *Service) CreateAccount(ctx context.Context, create account.Account) (ac
 	account := transformer.NewAccountFromRepoAccount(created)
 	if err := validate.Validate(account); err != nil {
 		return account, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating account from repository account")
+	}
+
+	protoCreated := transformer.NewProtoAccountFromAccount(account)
+	if err := s.publisher.Publish(event.SubjectAccountCreated, protoCreated); err != nil {
+		// should we return/fail on a failed production of a msg..?
+		s.log.Error("publishing account created message", zap.Error(err))
 	}
 
 	return account, nil

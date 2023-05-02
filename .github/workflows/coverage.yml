@@ -17,6 +17,7 @@ jobs:
           go-version: 1.19
       - uses: actions/checkout@v2
       - run: make dbup
+      - run: make natsup
       - run: docker container ls -a
       - run: make test
       - run: make down

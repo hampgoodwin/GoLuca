@@ -9,6 +9,8 @@ import (
 	"github.com/hampgoodwin/GoLuca/internal/repository"
 	"github.com/hampgoodwin/GoLuca/internal/service"
 	"github.com/hampgoodwin/GoLuca/internal/test"
+	"github.com/nats-io/nats.go"
+	"github.com/nats-io/nats.go/encoders/protobuf"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -17,7 +19,9 @@ import (
 func TestCreateAccount(t *testing.T) {
 	s := test.GetScope(t)
 	repository := repository.NewRepository(s.DB)
-	service := service.NewService(s.Env.Log, repository)
+	nc, _ := nats.Connect(nats.DefaultURL)
+	nec, _ := nats.NewEncodedConn(nc, protobuf.PROTOBUF_ENCODER)
+	service := service.NewService(s.Env.Log, repository, nec)
 	controller := NewController(s.Env.Log, service)
 	s.SetGRPC(t, controller)
 
@@ -43,7 +47,9 @@ func TestCreateAccount(t *testing.T) {
 func TestCreateAccount_InvalidRequestBody(t *testing.T) {
 	s := test.GetScope(t)
 	repository := repository.NewRepository(s.DB)
-	service := service.NewService(s.Env.Log, repository)
+	nc, _ := nats.Connect(nats.DefaultURL)
+	nec, _ := nats.NewEncodedConn(nc, protobuf.PROTOBUF_ENCODER)
+	service := service.NewService(s.Env.Log, repository, nec)
 	controller := NewController(s.Env.Log, service)
 	s.SetGRPC(t, controller)
 
@@ -82,7 +88,9 @@ func TestCreateAccount_InvalidRequestBody(t *testing.T) {
 func TestGetAccount(t *testing.T) {
 	s := test.GetScope(t)
 	repository := repository.NewRepository(s.DB)
-	service := service.NewService(s.Env.Log, repository)
+	nc, _ := nats.Connect(nats.DefaultURL)
+	nec, _ := nats.NewEncodedConn(nc, protobuf.PROTOBUF_ENCODER)
+	service := service.NewService(s.Env.Log, repository, nec)
 	controller := NewController(s.Env.Log, service)
 	s.SetGRPC(t, controller)
 
@@ -113,7 +121,9 @@ func TestGetAccount(t *testing.T) {
 func TestGetAccount_InvalidRequestBody(t *testing.T) {
 	s := test.GetScope(t)
 	repository := repository.NewRepository(s.DB)
-	service := service.NewService(s.Env.Log, repository)
+	nc, _ := nats.Connect(nats.DefaultURL)
+	nec, _ := nats.NewEncodedConn(nc, protobuf.PROTOBUF_ENCODER)
+	service := service.NewService(s.Env.Log, repository, nec)
 	controller := NewController(s.Env.Log, service)
 	s.SetGRPC(t, controller)
 
@@ -151,7 +161,9 @@ func TestGetAccount_InvalidRequestBody(t *testing.T) {
 func TestListAccount(t *testing.T) {
 	s := test.GetScope(t)
 	repository := repository.NewRepository(s.DB)
-	service := service.NewService(s.Env.Log, repository)
+	nc, _ := nats.Connect(nats.DefaultURL)
+	nec, _ := nats.NewEncodedConn(nc, protobuf.PROTOBUF_ENCODER)
+	service := service.NewService(s.Env.Log, repository, nec)
 	controller := NewController(s.Env.Log, service)
 	s.SetGRPC(t, controller)
 
@@ -184,7 +196,9 @@ func TestListAccount(t *testing.T) {
 func TestListAccount_InvalidRequestBody(t *testing.T) {
 	s := test.GetScope(t)
 	repository := repository.NewRepository(s.DB)
-	service := service.NewService(s.Env.Log, repository)
+	nc, _ := nats.Connect(nats.DefaultURL)
+	nec, _ := nats.NewEncodedConn(nc, protobuf.PROTOBUF_ENCODER)
+	service := service.NewService(s.Env.Log, repository, nec)
 	controller := NewController(s.Env.Log, service)
 	s.SetGRPC(t, controller)
 
