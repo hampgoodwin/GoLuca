@@ -10,7 +10,7 @@ var Local = Config{
 		Database: "goluca",
 		SSLMode:  "disable",
 	},
-	HTTPAPI: HTTPAPI{
+	HTTPServer: HTTPServer{
 		Host: "localhost",
 		Port: "3333",
 	},

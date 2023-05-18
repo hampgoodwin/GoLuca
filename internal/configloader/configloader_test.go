@@ -43,9 +43,22 @@ func TestLoad(t *testing.T) {
 					Database: "goluca",
 					SSLMode:  "disable",
 				},
-				HTTPAPI: config.HTTPAPI{
+				HTTPServer: config.HTTPServer{
 					Host: "localhost",
 					Port: "3333",
+				},
+				GRPCServer: config.GRPCServer{
+					Host: "localhost",
+					Port: "5000",
+				},
+				NATS: config.NATS{
+					Host: "localhost",
+					Port: "4222",
+					Wiretap: config.NATSWiretap{
+						Enable: config.WiretapEnabled,
+						Host:   "localhost",
+						Port:   "4222",
+					},
 				},
 			},
 		},
@@ -53,29 +66,49 @@ func TestLoad(t *testing.T) {
 			description: "full-file-full-vars-empty-config-overwrite-file",
 			filepath:    "../../.env.toml.example",
 			envVars: map[string]string{
-				EnvType:    "DEV",
-				DBHost:     "GOLUCA_DBHOST",
-				DBPort:     "GOLUCA_DBPORT",
-				DBUser:     "GOLUCA_DBUSER",
-				DBPass:     "GOLUCA_DBPASS",
-				DBDatabase: "GOLUCA_DBDATABASE",
-				DBSSLMode:  "GOLUCA_DBSSLMODE",
-				APIHost:    "GOLUCA_APIHOST",
-				APIPort:    "GOLUCA_APIPORT",
+				EnvType:        "DEV",
+				DBHost:         "GOLUCA_DB_HOST",
+				DBPort:         "GOLUCA_DB_PORT",
+				DBUser:         "GOLUCA_DB_USER",
+				DBPass:         "GOLUCA_DB_PASS",
+				DBDatabase:     "GOLUCA_DB_DATABASE",
+				DBSSLMode:      "GOLUCA_DB_SSLMODE",
+				HTTPServerHost: "GOLUCA_HTTP_SERVER_HOST",
+				HTTPServerPort: "GOLUCA_HTTP_SERVER_PORT",
+				GRPCServerHost: "GOLUCA_GRPC_SERVER_HOST",
+				GRPCServerPort: "GOLUCA_GRPC_SERVER_PORT",
+				NATSHost:       "GOLUCA_NATS_HOST",
+				NATSPort:       "GOLUCA_NATS_PORT",
+				WiretapEnable:  "GOLUCA_WIRETAP_ENABLE",
+				WiretapHost:    "GOLUCA_WIRETAP_HOST",
+				WiretapPort:    "GOLUCA_WIRETAP_PORT",
 			},
 			expected: config.Config{
 				Environment: config.Environment{Type: "DEV"},
 				Database: config.Database{
-					Host:     "GOLUCA_DBHOST",
-					Port:     "GOLUCA_DBPORT",
-					User:     "GOLUCA_DBUSER",
-					Pass:     "GOLUCA_DBPASS",
-					Database: "GOLUCA_DBDATABASE",
-					SSLMode:  "GOLUCA_DBSSLMODE",
+					Host:     "GOLUCA_DB_HOST",
+					Port:     "GOLUCA_DB_PORT",
+					User:     "GOLUCA_DB_USER",
+					Pass:     "GOLUCA_DB_PASS",
+					Database: "GOLUCA_DB_DATABASE",
+					SSLMode:  "GOLUCA_DB_SSLMODE",
 				},
-				HTTPAPI: config.HTTPAPI{
-					Host: "GOLUCA_APIHOST",
-					Port: "GOLUCA_APIPORT",
+				HTTPServer: config.HTTPServer{
+					Host: "GOLUCA_HTTP_SERVER_HOST",
+					Port: "GOLUCA_HTTP_SERVER_PORT",
+				},
+				GRPCServer: config.GRPCServer{
+					Host: "GOLUCA_GRPC_SERVER_HOST",
+					Port: "GOLUCA_GRPC_SERVER_PORT",
+				},
+				NATS: config.NATS{
+					Host: "GOLUCA_NATS_HOST",
+					Port: "GOLUCA_NATS_PORT",
+					Wiretap: config.NATSWiretap{
+						Enable: config.WiretapEnabled,
+						Host:   "GOLUCA_WIRETAP_HOST",
+						Port:   "GOLUCA_WIRETAP_PORT",
+					},
 				},
 			},
 		},
@@ -83,9 +116,9 @@ func TestLoad(t *testing.T) {
 			description: "full-file-partial-vars-empty-config-overwrite-file",
 			filepath:    "../../.env.toml.example",
 			envVars: map[string]string{
-				EnvType: "DEV",
-				APIHost: "GOLUCA_APIHOST",
-				APIPort: "GOLUCA_APIPORT",
+				EnvType:        "DEV",
+				HTTPServerHost: "GOLUCA_HTTP_SERVER_HOST",
+				HTTPServerPort: "GOLUCA_HTTP_SERVER_PORT",
 			},
 			expected: config.Config{
 				Environment: config.Environment{Type: "DEV"},
@@ -97,9 +130,22 @@ func TestLoad(t *testing.T) {
 					Database: "goluca",
 					SSLMode:  "disable",
 				},
-				HTTPAPI: config.HTTPAPI{
-					Host: "GOLUCA_APIHOST",
-					Port: "GOLUCA_APIPORT",
+				HTTPServer: config.HTTPServer{
+					Host: "GOLUCA_HTTP_SERVER_HOST",
+					Port: "GOLUCA_HTTP_SERVER_PORT",
+				},
+				GRPCServer: config.GRPCServer{
+					Host: "localhost",
+					Port: "5000",
+				},
+				NATS: config.NATS{
+					Host: "localhost",
+					Port: "4222",
+					Wiretap: config.NATSWiretap{
+						Enable: config.WiretapEnabled,
+						Host:   "localhost",
+						Port:   "4222",
+					},
 				},
 			},
 		},
@@ -108,9 +154,9 @@ func TestLoad(t *testing.T) {
 			cfg:         config.Config{Environment: config.Environment{Type: "DEV"}},
 			filepath:    "../../.env.toml.example",
 			envVars: map[string]string{
-				EnvType: "LOCAL",
-				APIHost: "GOLUCA_APIHOST",
-				APIPort: "GOLUCA_APIPORT",
+				EnvType:        "LOCAL",
+				HTTPServerHost: "GOLUCA_HTTP_SERVER_HOST",
+				HTTPServerPort: "GOLUCA_HTTP_SERVER_PORT",
 			},
 			expected: config.Config{
 				Environment: config.Environment{Type: "LOCAL"},
@@ -122,9 +168,22 @@ func TestLoad(t *testing.T) {
 					Database: "goluca",
 					SSLMode:  "disable",
 				},
-				HTTPAPI: config.HTTPAPI{
-					Host: "GOLUCA_APIHOST",
-					Port: "GOLUCA_APIPORT",
+				HTTPServer: config.HTTPServer{
+					Host: "GOLUCA_HTTP_SERVER_HOST",
+					Port: "GOLUCA_HTTP_SERVER_PORT",
+				},
+				GRPCServer: config.GRPCServer{
+					Host: "localhost",
+					Port: "5000",
+				},
+				NATS: config.NATS{
+					Host: "localhost",
+					Port: "4222",
+					Wiretap: config.NATSWiretap{
+						Enable: config.WiretapEnabled,
+						Host:   "localhost",
+						Port:   "4222",
+					},
 				},
 			},
 		},
@@ -133,8 +192,8 @@ func TestLoad(t *testing.T) {
 			cfg:         config.Config{Environment: config.Environment{Type: "DEV"}},
 			filepath:    "../../.env.toml.example",
 			envVars: map[string]string{
-				APIHost: "GOLUCA_APIHOST",
-				APIPort: "GOLUCA_APIPORT",
+				HTTPServerHost: "GOLUCA_HTTP_SERVER_HOST",
+				HTTPServerPort: "GOLUCA_HTTP_SERVER_PORT",
 			},
 			expected: config.Config{
 				Environment: config.Environment{Type: "LOCAL"},
@@ -146,9 +205,22 @@ func TestLoad(t *testing.T) {
 					Database: "goluca",
 					SSLMode:  "disable",
 				},
-				HTTPAPI: config.HTTPAPI{
-					Host: "GOLUCA_APIHOST",
-					Port: "GOLUCA_APIPORT",
+				HTTPServer: config.HTTPServer{
+					Host: "GOLUCA_HTTP_SERVER_HOST",
+					Port: "GOLUCA_HTTP_SERVER_PORT",
+				},
+				GRPCServer: config.GRPCServer{
+					Host: "localhost",
+					Port: "5000",
+				},
+				NATS: config.NATS{
+					Host: "localhost",
+					Port: "4222",
+					Wiretap: config.NATSWiretap{
+						Enable: config.WiretapEnabled,
+						Host:   "localhost",
+						Port:   "4222",
+					},
 				},
 			},
 		},
@@ -206,9 +278,22 @@ func TestLoadConfigurationFile(t *testing.T) {
 					Database: "goluca",
 					SSLMode:  "disable",
 				},
-				HTTPAPI: config.HTTPAPI{
+				HTTPServer: config.HTTPServer{
 					Host: "localhost",
 					Port: "3333",
+				},
+				GRPCServer: config.GRPCServer{
+					Host: "localhost",
+					Port: "5000",
+				},
+				NATS: config.NATS{
+					Host: "localhost",
+					Port: "4222",
+					Wiretap: config.NATSWiretap{
+						Enable: config.WiretapEnabled,
+						Host:   "localhost",
+						Port:   "4222",
+					},
 				},
 			},
 		},
@@ -217,7 +302,7 @@ func TestLoadConfigurationFile(t *testing.T) {
 			filepath:    "../../test/data/configloader/partial.env.toml",
 			expected: config.Config{
 				Environment: config.Environment{Type: "DEV"},
-				HTTPAPI: config.HTTPAPI{
+				HTTPServer: config.HTTPServer{
 					Host: "localhost",
 					Port: "3333",
 				},
@@ -250,27 +335,41 @@ func TestLoadEnvironmentVariables(t *testing.T) {
 		{
 			description: "empty-vars",
 			envVars: map[string]string{
-				EnvType:    "",
-				DBHost:     "",
-				DBUser:     "",
-				DBPass:     "",
-				DBDatabase: "",
-				DBPort:     "",
-				APIHost:    "",
-				APIPort:    "",
+				EnvType:        "",
+				DBHost:         "",
+				DBUser:         "",
+				DBPass:         "",
+				DBDatabase:     "",
+				DBPort:         "",
+				HTTPServerHost: "",
+				HTTPServerPort: "",
+				GRPCServerHost: "",
+				GRPCServerPort: "",
+				NATSHost:       "",
+				NATSPort:       "",
+				WiretapEnable:  "",
+				WiretapHost:    "",
+				WiretapPort:    "",
 			},
 		},
 		{
 			description: "filled-vars",
 			envVars: map[string]string{
-				EnvType:    "GOLUCA_ENVTYPE",
-				DBHost:     "GOLUCA_DBHOST",
-				DBPort:     "GOLUCA_DBPORT",
-				DBUser:     "GOLUCA_DBUSER",
-				DBPass:     "GOLUCA_DBPASS",
-				DBDatabase: "GOLUCA_DBDATABASE",
-				APIHost:    "GOLUCA_APIHOST",
-				APIPort:    "GOLUCA_APIPORT",
+				EnvType:        "GOLUCA_ENVTYPE",
+				DBHost:         "GOLUCA_DBHOST",
+				DBPort:         "GOLUCA_DBPORT",
+				DBUser:         "GOLUCA_DBUSER",
+				DBPass:         "GOLUCA_DBPASS",
+				DBDatabase:     "GOLUCA_DBDATABASE",
+				HTTPServerHost: "GOLUCA_HTTP_SERVER_HOST",
+				HTTPServerPort: "GOLUCA_HTTP_SERVER_PORT",
+				GRPCServerHost: "GOLUCA_GRPC_SERVER_HOST",
+				GRPCServerPort: "GOLUCA_GRPC_SERVER_PORT",
+				NATSHost:       "GOLUCA_NATS_HOST",
+				NATSPort:       "GOLUCA_NATS_PORT",
+				WiretapEnable:  "enabled",
+				WiretapHost:    "GOLUCA_WIRETAP_HOST",
+				WiretapPort:    "GOLUCA_WIRETAP_PORT",
 			},
 			expected: config.Config{
 				Environment: config.Environment{Type: "GOLUCA_ENVTYPE"},
@@ -281,24 +380,37 @@ func TestLoadEnvironmentVariables(t *testing.T) {
 					Pass:     "GOLUCA_DBPASS",
 					Database: "GOLUCA_DBDATABASE",
 				},
-				HTTPAPI: config.HTTPAPI{
-					Host: "GOLUCA_APIHOST",
-					Port: "GOLUCA_APIPORT",
+				HTTPServer: config.HTTPServer{
+					Host: "GOLUCA_HTTP_SERVER_HOST",
+					Port: "GOLUCA_HTTP_SERVER_PORT",
+				},
+				GRPCServer: config.GRPCServer{
+					Host: "GOLUCA_GRPC_SERVER_HOST",
+					Port: "GOLUCA_GRPC_SERVER_PORT",
+				},
+				NATS: config.NATS{
+					Host: "GOLUCA_NATS_HOST",
+					Port: "GOLUCA_NATS_PORT",
+					Wiretap: config.NATSWiretap{
+						Enable: config.WiretapEnabled,
+						Host:   "GOLUCA_WIRETAP_HOST",
+						Port:   "GOLUCA_WIRETAP_PORT",
+					},
 				},
 			},
 		},
 		{
 			description: "partial-vars",
 			envVars: map[string]string{
-				EnvType: "GOLUCA_ENVTYPE",
-				APIHost: "GOLUCA_APIHOST",
-				APIPort: "GOLUCA_APIPORT",
+				EnvType:        "GOLUCA_ENVTYPE",
+				HTTPServerHost: "GOLUCA_HTTP_SERVER_HOST",
+				HTTPServerPort: "GOLUCA_HTTP_SERVER_PORT",
 			},
 			expected: config.Config{
 				Environment: config.Environment{Type: "GOLUCA_ENVTYPE"},
-				HTTPAPI: config.HTTPAPI{
-					Host: "GOLUCA_APIHOST",
-					Port: "GOLUCA_APIPORT",
+				HTTPServer: config.HTTPServer{
+					Host: "GOLUCA_HTTP_SERVER_HOST",
+					Port: "GOLUCA_HTTP_SERVER_PORT",
 				},
 			},
 		},

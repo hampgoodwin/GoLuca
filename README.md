@@ -26,7 +26,7 @@ A Simple Accounting Ledger
 
 TODO
 - [ ] improve startup configurations
-    - [ ] update env config to include configurations for nats
+    - [x] update env config to include configurations for nats
     - [ ] add configuration for starting nats wire tap in main-app
 - [ ] make a frontend with some dashboard functionality, (vue3 plz) OOOOH!!!
 - [ ] o11y
