@@ -1,6 +1,13 @@
 
 GOLANGCI_LINT_VERSION = latest
 
+.PHONY: buf
+buf:
+	@ sh ./tools/buf.sh
+	@buf lint proto
+	@buf format proto -w
+	@buf generate proto
+
 .PHONY: test
 test:
 	go test ./... -v --bench . --benchmem --coverprofile=cover.out
