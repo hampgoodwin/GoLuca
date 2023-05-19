@@ -351,7 +351,6 @@ func TestLoadEnvironmentVariables(t *testing.T) {
 				WiretapHost:    "",
 				WiretapPort:    "",
 			},
-			expected: config.Config{NATS: config.NATS{Wiretap: config.NATSWiretap{Enable: true}}},
 		},
 		{
 			description: "filled-vars",
@@ -368,7 +367,7 @@ func TestLoadEnvironmentVariables(t *testing.T) {
 				GRPCServerPort: "GOLUCA_GRPC_SERVER_PORT",
 				NATSHost:       "GOLUCA_NATS_HOST",
 				NATSPort:       "GOLUCA_NATS_PORT",
-				WiretapEnable:  "true",
+				WiretapEnable:  "GOLUCA_WIRETAP_ENABLE",
 				WiretapHost:    "GOLUCA_WIRETAP_HOST",
 				WiretapPort:    "GOLUCA_WIRETAP_PORT",
 			},
@@ -393,7 +392,7 @@ func TestLoadEnvironmentVariables(t *testing.T) {
 					Host: "GOLUCA_NATS_HOST",
 					Port: "GOLUCA_NATS_PORT",
 					Wiretap: config.NATSWiretap{
-						Enable: true,
+						Enable: false,
 						Host:   "GOLUCA_WIRETAP_HOST",
 						Port:   "GOLUCA_WIRETAP_PORT",
 					},
@@ -413,7 +412,6 @@ func TestLoadEnvironmentVariables(t *testing.T) {
 					Host: "GOLUCA_HTTP_SERVER_HOST",
 					Port: "GOLUCA_HTTP_SERVER_PORT",
 				},
-				NATS: config.NATS{Wiretap: config.NATSWiretap{Enable: true}},
 			},
 		},
 	}
@@ -429,7 +427,7 @@ func TestLoadEnvironmentVariables(t *testing.T) {
 				os.Setenv(k, v)
 			}
 
-			actual := loadEnvironmentVariables()
+			actual := loadAndMergeEnvironmentVariables(config.Config{})
 			a.Equal(tc.expected, actual)
 		})
 

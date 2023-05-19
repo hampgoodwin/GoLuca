@@ -15,13 +15,7 @@ import (
 // Second, load environmental variables to the local configuration store, overwriting pre-existing values, if any.
 // Lastly, set configuration values with cli flags, overwriting pre-existing values, if any.
 func Load(c config.Config, fp string) (config.Config, error) {
-	cfg := config.Config{
-		NATS: config.NATS{
-			Wiretap: config.NATSWiretap{
-				Enable: true,
-			},
-		},
-	}
+	cfg := config.Config{}
 	if c != (config.Config{}) {
 		cfg = c
 	}
@@ -32,8 +26,7 @@ func Load(c config.Config, fp string) (config.Config, error) {
 	}
 	cfg = merge(cfg, fileCfg)
 
-	envCfg := loadEnvironmentVariables()
-	cfg = merge(cfg, envCfg)
+	cfg = loadAndMergeEnvironmentVariables(cfg)
 
 	// TODO: Load command line flags
 
@@ -100,9 +93,12 @@ var EnvironmentVariableKeys = []string{
 	WiretapPort,
 }
 
-// loadEnvironmentVariables reads environmental variables and stores then into the
+// loadAndMergeEnvironmentVariables reads environmental variables and stores then into the
 // named return cfg
-func loadEnvironmentVariables() (cfg config.Config) {
+func loadAndMergeEnvironmentVariables(in config.Config) (cfg config.Config) {
+	if in != (config.Config{}) {
+		cfg = in
+	}
 	if val := os.Getenv(EnvType); val != "" {
 		cfg.Environment.Type = val
 	}
@@ -142,7 +138,6 @@ func loadEnvironmentVariables() (cfg config.Config) {
 	if val := os.Getenv(NATSPort); val != "" {
 		cfg.NATS.Port = val
 	}
-	cfg.NATS.Wiretap.Enable = true
 	if val := os.Getenv(WiretapEnable); val != "" {
 		enabled, _ := strconv.ParseBool(val)
 		cfg.NATS.Wiretap.Enable = enabled
