@@ -33,6 +33,7 @@ TODO
     - [ ] Log Collector?
     - [ ] move off Jaeger, and all in on Grafana stack
 - [ ] make a frontend with some dashboard functionality, (vue3 plz) OOOOH!!!
+- [ ] replace hampgoodwin/errors with go std lib multi-errors <3!!!
 - [ ] health checks
     - [ ] add a health reporter
     - [ ] add health checks
