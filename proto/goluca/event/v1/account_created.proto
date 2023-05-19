@@ -5,5 +5,5 @@ package goluca.event.v1;
 import "goluca/model/v1/account.proto";
 
 message AccountCreated {
-    goluca.model.v1.Account account = 1;
+  goluca.model.v1.Account account = 1;
 }

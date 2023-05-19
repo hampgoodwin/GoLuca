@@ -1,6 +1,13 @@
 
 GOLANGCI_LINT_VERSION = latest
 
+.PHONY: buf
+buf:
+	@ sh ./scripts/buf.sh
+	@buf lint proto
+	@buf format proto -w
+	@buf generate proto
+
 .PHONY: test
 test:
 	go test ./... -v --bench . --benchmem --coverprofile=cover.out
@@ -27,7 +34,6 @@ runwiretap:
 up:
 	docker-compose -f $$(pwd)/build/package/docker-compose.yml up -d
 	@ echo "view jaeger at http://localhost:16686"
-	@ echo "view nats at http://localhost:8222"
 
 down:
 	docker-compose -f $$(pwd)/build/package/docker-compose.yml down
@@ -43,7 +49,6 @@ jaegerup:
 
 natsup:
 	docker-compose -f $$(pwd)/build/package/docker-compose.yml up -d nats
-	@ echo "view nats at http://localhost:8222"
 	
 # OPEN API COMMANDS
 apilint:

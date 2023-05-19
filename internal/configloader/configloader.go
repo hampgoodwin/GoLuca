@@ -2,6 +2,7 @@ package configloader
 
 import (
 	"os"
+	"strconv"
 
 	"github.com/hampgoodwin/GoLuca/internal/config"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
@@ -25,8 +26,7 @@ func Load(c config.Config, fp string) (config.Config, error) {
 	}
 	cfg = merge(cfg, fileCfg)
 
-	envCfg := loadEnvironmentVariables()
-	cfg = merge(cfg, envCfg)
+	cfg = loadAndMergeEnvironmentVariables(cfg)
 
 	// TODO: Load command line flags
 
@@ -41,10 +41,13 @@ func loadConfigurationFile(fp string) (config.Config, error) {
 	if fp == "" {
 		return cfg, nil
 	}
+
 	f, err := os.Open(fp)
 	if err != nil {
 		return config.Config{}, err
 	}
+	defer f.Close()
+
 	err = toml.NewDecoder(f).Decode(&cfg)
 	if err != nil {
 		return config.Config{}, err
@@ -53,15 +56,22 @@ func loadConfigurationFile(fp string) (config.Config, error) {
 }
 
 const (
-	EnvType    = "GOLUCA_ENVTYPE"
-	DBHost     = "GOLUCA_DBHOST"
-	DBPort     = "GOLUCA_DBPORT"
-	DBUser     = "GOLUCA_DBUSER"
-	DBPass     = "GOLUCA_DBPass"
-	DBDatabase = "GOLUCA_DBDatabase"
-	DBSSLMode  = "GOLUCA_DBSSLMode"
-	APIHost    = "GOLUCA_APIHost"
-	APIPort    = "GOLUCA_APIPort"
+	EnvType        = "GOLUCA_ENV_TYPE"
+	DBHost         = "GOLUCA_DB_HOST"
+	DBPort         = "GOLUCA_DB_PORT"
+	DBUser         = "GOLUCA_DB_USER"
+	DBPass         = "GOLUCA_DB_PASS"
+	DBDatabase     = "GOLUCA_DB_DATABASE"
+	DBSSLMode      = "GOLUCA_DB_SSLMODE"
+	HTTPServerHost = "GOLUCA_HTTP_SERVER_HOST"
+	HTTPServerPort = "GOLUCA_HTTP_SERVER_PORT"
+	GRPCServerHost = "GOLUCA_GRPC_SERVER_HOST"
+	GRPCServerPort = "GOLUCA_GRPC_SERVER_PORT"
+	NATSHost       = "GOLUCA_NATS_HOST"
+	NATSPort       = "GOLUCA_NATS_PORT"
+	WiretapEnable  = "GOLUCA_WIRETAP_ENABLE"
+	WiretapHost    = "GOLUCA_WIRETAP_HOST"
+	WiretapPort    = "GOLUCA_WIRETAP_PORT"
 )
 
 var EnvironmentVariableKeys = []string{
@@ -72,13 +82,23 @@ var EnvironmentVariableKeys = []string{
 	DBPass,
 	DBDatabase,
 	DBSSLMode,
-	APIHost,
-	APIPort,
+	HTTPServerHost,
+	HTTPServerPort,
+	GRPCServerHost,
+	GRPCServerPort,
+	NATSHost,
+	NATSPort,
+	WiretapEnable,
+	WiretapHost,
+	WiretapPort,
 }
 
-// loadEnvironmentVariables reads environmental variables and stores then into the
+// loadAndMergeEnvironmentVariables reads environmental variables and stores then into the
 // named return cfg
-func loadEnvironmentVariables() (cfg config.Config) {
+func loadAndMergeEnvironmentVariables(in config.Config) (cfg config.Config) {
+	if in != (config.Config{}) {
+		cfg = in
+	}
 	if val := os.Getenv(EnvType); val != "" {
 		cfg.Environment.Type = val
 	}
@@ -100,11 +120,33 @@ func loadEnvironmentVariables() (cfg config.Config) {
 	if val := os.Getenv(DBSSLMode); val != "" {
 		cfg.Database.SSLMode = val
 	}
-	if val := os.Getenv(APIHost); val != "" {
-		cfg.HTTPAPI.Host = val
+	if val := os.Getenv(HTTPServerHost); val != "" {
+		cfg.HTTPServer.Host = val
 	}
-	if val := os.Getenv(APIPort); val != "" {
-		cfg.HTTPAPI.Port = val
+	if val := os.Getenv(HTTPServerPort); val != "" {
+		cfg.HTTPServer.Port = val
+	}
+	if val := os.Getenv(GRPCServerHost); val != "" {
+		cfg.GRPCServer.Host = val
+	}
+	if val := os.Getenv(GRPCServerPort); val != "" {
+		cfg.GRPCServer.Port = val
+	}
+	if val := os.Getenv(NATSHost); val != "" {
+		cfg.NATS.Host = val
+	}
+	if val := os.Getenv(NATSPort); val != "" {
+		cfg.NATS.Port = val
+	}
+	if val := os.Getenv(WiretapEnable); val != "" {
+		enabled, _ := strconv.ParseBool(val)
+		cfg.NATS.Wiretap.Enable = enabled
+	}
+	if val := os.Getenv(WiretapHost); val != "" {
+		cfg.NATS.Wiretap.Host = val
+	}
+	if val := os.Getenv(WiretapPort); val != "" {
+		cfg.NATS.Wiretap.Port = val
 	}
 	return
 }
@@ -131,11 +173,30 @@ func merge(a, b config.Config) config.Config {
 	if b.Database.SSLMode != "" {
 		a.Database.SSLMode = b.Database.SSLMode
 	}
-	if b.HTTPAPI.Host != "" {
-		a.HTTPAPI.Host = b.HTTPAPI.Host
+	if b.HTTPServer.Host != "" {
+		a.HTTPServer.Host = b.HTTPServer.Host
 	}
-	if b.HTTPAPI.Port != "" {
-		a.HTTPAPI.Port = b.HTTPAPI.Port
+	if b.HTTPServer.Port != "" {
+		a.HTTPServer.Port = b.HTTPServer.Port
+	}
+	if b.GRPCServer.Host != "" {
+		a.GRPCServer.Host = b.GRPCServer.Host
+	}
+	if b.GRPCServer.Port != "" {
+		a.GRPCServer.Port = b.GRPCServer.Port
+	}
+	if b.NATS.Host != "" {
+		a.NATS.Host = b.NATS.Host
+	}
+	if b.NATS.Port != "" {
+		a.NATS.Port = b.NATS.Port
+	}
+	a.NATS.Wiretap.Enable = b.NATS.Wiretap.Enable
+	if b.NATS.Wiretap.Host != "" {
+		a.NATS.Wiretap.Host = b.NATS.Wiretap.Host
+	}
+	if b.NATS.Wiretap.Port != "" {
+		a.NATS.Wiretap.Port = b.NATS.Wiretap.Port
 	}
 	return a
 }
