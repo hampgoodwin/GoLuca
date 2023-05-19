@@ -16,3 +16,8 @@ jobs:
         uses: bufbuild/buf-lint-action@v1.0.1
         with:
           input: 'proto'
+      - name: buf-breaking
+        uses: bufbuild/buf-breaking-action@v1.1.0
+        with:
+          input: 'proto'
+          against: 'https://github.com/hampgoodwin/GoLuca.git#branch=main,ref=HEAD,subdir=proto'
