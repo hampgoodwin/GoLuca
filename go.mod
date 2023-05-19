@@ -1,6 +1,6 @@
 module github.com/hampgoodwin/GoLuca
 
-go 1.19
+go 1.20
 
 require (
 	github.com/brianvoe/gofakeit v3.18.0+incompatible
@@ -14,6 +14,7 @@ require (
 	github.com/jackc/pgerrcode v0.0.0-20220416144525-469b46aa5efa
 	github.com/jackc/pgx/v5 v5.1.1
 	github.com/matryer/is v1.4.0
+	github.com/nats-io/nats.go v1.24.0
 	github.com/pelletier/go-toml v1.9.5
 	github.com/segmentio/ksuid v1.0.4
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.11.1
@@ -28,8 +29,8 @@ require (
 	github.com/cenkalti/backoff/v4 v4.1.3 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.0 // indirect
 	github.com/jackc/puddle/v2 v2.1.2 // indirect
-	github.com/nats-io/nats.go v1.20.0 // indirect
-	github.com/nats-io/nkeys v0.3.0 // indirect
+	github.com/nats-io/nats-server/v2 v2.9.17 // indirect
+	github.com/nats-io/nkeys v0.4.4 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/internal/retry v1.11.1 // indirect
 	go.opentelemetry.io/proto/otlp v0.19.0 // indirect
@@ -60,10 +61,10 @@ require (
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.11.1
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
-	golang.org/x/crypto v0.3.0 // indirect
-	golang.org/x/net v0.2.0 // indirect
-	golang.org/x/sys v0.2.0 // indirect
-	golang.org/x/text v0.4.0 // indirect
+	golang.org/x/crypto v0.8.0 // indirect
+	golang.org/x/net v0.9.0 // indirect
+	golang.org/x/sys v0.7.0 // indirect
+	golang.org/x/text v0.9.0 // indirect
 	google.golang.org/genproto v0.0.0-20220314164441-57ef72a4c106
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 )
