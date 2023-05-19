@@ -25,21 +25,18 @@ A Simple Accounting Ledger
 ---
 
 TODO
-- [ ] improve startup configurations
-    - [x] update env config to include configurations for nats
-    - [ ] add configuration for starting nats wire tap in main-app
-- [ ] make a frontend with some dashboard functionality, (vue3 plz) OOOOH!!!
 - [ ] o11y
     - [X] Add tracing
-      - [x] Add tracing to respond.go files
+      - [x] Add tracing to response.go files
     - [ ] Add metrics
         - [ ] OpenTelemetry metrics ready?
     - [ ] Log Collector?
     - [ ] move off Jaeger, and all in on Grafana stack
-- [ ] retry startup dependecies
+- [ ] make a frontend with some dashboard functionality, (vue3 plz) OOOOH!!!
 - [ ] health checks
     - [ ] add a health reporter
     - [ ] add health checks
+- [ ] improve pagination by displaying page number of result.
 - [ ] Testing
     - [x] Add more unit tests, solitary and sociable
     - [x] Add Integration testing
@@ -56,12 +53,16 @@ TODO
 - [ ] set up dev appvault and set secrets
     - [ ] add default limit size as a configurable somewhere
     - [ ] set up configuration loader or a new secrets loader to load values from appvault
-- [ ] improve pagination by displaying page number of result.
+- [ ] redis datastore? Maybe later.
+- [x] retry startup dependecies
+    - [x] wont do; i would prefer to rely on some container/pod scheduler like k8s
 - [x] Events
     - [x] NATS
         - [ ] Run NATS locally in a cluster
     - [x] Instrument account.created, transaction.created events
-- [ ] redis datastore? Maybe later.
+- [x] improve startup configurations
+    - [x] update env config to include configurations for nats
+    - [s] add configuration for starting nats wire tap in main-app
 - [x] add gRPC methods, matching http spec
     - [x] add gRPC server start to main?
     - [x] add gRPC method tests..? idk
