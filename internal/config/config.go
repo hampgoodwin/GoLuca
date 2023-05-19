@@ -68,8 +68,9 @@ const (
 	WiretapDisabled = "disabled"
 )
 
+// NATS Wiretap is by default enabled and host+port are expected
 type NATSWiretap struct {
-	Enable string
+	Enable bool
 	Host   string
 	Port   string
 }

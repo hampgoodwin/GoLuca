@@ -2,6 +2,7 @@ package configloader
 
 import (
 	"os"
+	"strconv"
 
 	"github.com/hampgoodwin/GoLuca/internal/config"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
@@ -14,7 +15,13 @@ import (
 // Second, load environmental variables to the local configuration store, overwriting pre-existing values, if any.
 // Lastly, set configuration values with cli flags, overwriting pre-existing values, if any.
 func Load(c config.Config, fp string) (config.Config, error) {
-	cfg := config.Config{}
+	cfg := config.Config{
+		NATS: config.NATS{
+			Wiretap: config.NATSWiretap{
+				Enable: true,
+			},
+		},
+	}
 	if c != (config.Config{}) {
 		cfg = c
 	}
@@ -135,11 +142,10 @@ func loadEnvironmentVariables() (cfg config.Config) {
 	if val := os.Getenv(NATSPort); val != "" {
 		cfg.NATS.Port = val
 	}
+	cfg.NATS.Wiretap.Enable = true
 	if val := os.Getenv(WiretapEnable); val != "" {
-		switch val {
-		case config.WiretapEnabled, config.WiretapDisabled:
-			cfg.NATS.Wiretap.Enable = val
-		}
+		enabled, _ := strconv.ParseBool(val)
+		cfg.NATS.Wiretap.Enable = enabled
 	}
 	if val := os.Getenv(WiretapHost); val != "" {
 		cfg.NATS.Wiretap.Host = val
@@ -190,12 +196,7 @@ func merge(a, b config.Config) config.Config {
 	if b.NATS.Port != "" {
 		a.NATS.Port = b.NATS.Port
 	}
-	if b.NATS.Wiretap.Enable != "" {
-		switch b.NATS.Wiretap.Enable {
-		case config.WiretapEnabled, config.WiretapDisabled:
-			a.NATS.Wiretap.Enable = b.NATS.Wiretap.Enable
-		}
-	}
+	a.NATS.Wiretap.Enable = b.NATS.Wiretap.Enable
 	if b.NATS.Wiretap.Host != "" {
 		a.NATS.Wiretap.Host = b.NATS.Wiretap.Host
 	}

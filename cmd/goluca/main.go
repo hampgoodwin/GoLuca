@@ -17,7 +17,6 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 
-	"github.com/hampgoodwin/GoLuca/internal/config"
 	"github.com/hampgoodwin/GoLuca/internal/database"
 	"github.com/hampgoodwin/GoLuca/internal/environment"
 	inats "github.com/hampgoodwin/GoLuca/internal/event/nats"
@@ -78,7 +77,7 @@ func main() {
 		log.Fatal("failed to create jetstream")
 	}
 	var nencWiretap *nats.EncodedConn
-	if env.Config.NATS.Wiretap.Enable == config.WiretapEnabled {
+	if env.Config.NATS.Wiretap.Enable {
 		env.Log.Info("starting wiretap", zap.Any("service_info", env.Config.NATS.Wiretap.URL()))
 		nencWiretap, err = inats.WireTap(env.Config.NATS.Wiretap.URL())
 		if err != nil {
