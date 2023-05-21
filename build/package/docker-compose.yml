@@ -1,4 +1,8 @@
+networks:
+  o11y:
+
 services:
+# Core Dependencies
   db:
     image: postgres:latest
     volumes:
@@ -21,22 +25,43 @@ services:
     command:
       - --jetstream
 
-  jaeger:
-    image: jaegertracing/all-in-one:latest
-    environment:
-      COLLECTOR_ZIPKIN_HOST_PORT: 9411
-      COLLECTOR_OTLP_ENABLED: "true"
+# Observability
+  loki:
+    image: grafana/loki
     ports:
-      - "6831:6831"
-      - "6832:6832"
-      - "5778:5778"
-      - "16686:16686"
-      - "4317:4317"
-      - "4318:4318"
-      - "14250:14250"
-      - "14268:14268"
-      - "14269:14269"
-      - "9411:9411"
+      - "3100:3100"
+    volumes:
+      - ./config/o11y/loki-config.yaml:/etc/loki/local-config.yaml
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - o11y
+
+  promtail:
+    image: grafana/promtail
+    depends_on:
+      - loki
+    volumes:
+      - /var/log:/var/log
+      - ./config/o11y/promtail-config.yaml:/etc/promtail/config.yaml
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      - o11y
+
+  grafana:
+    image: grafana/grafana-oss
+    ports:
+      - "3000:3000"
+    depends_on:
+      - promtail
+      - loki
+    environment:
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    volumes:
+      - ./config/o11y/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/ds.yaml
+    networks:
+      - o11y
 
 secrets:
    db_password:
