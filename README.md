@@ -25,6 +25,19 @@ A Simple Accounting Ledger
 ---
 
 TODO
+- [ ] update various patterns/paradigms
+  - [ ] singleton logger
+  - [ ] where interfaces are defined
+  - [ ] update to proto (editions)[https://protobuf.dev/editions/overview/#migrating]...(lang guide)[https://protobuf.dev/programming-guides/editions]
+  - [ ] update pagination, make a separate hampgoodwin/go-paginate lib
+  - [ ] update testing paradigm
+- [ ] update all dependencies
+- [ ] make a nix dev environment configuration
+- [ ] after f/e deploy this thing somewhere
+- [ ] create tenant data structures
+  - [ ] create auth
+  - [ ] create management ui
+- [ ] grpc-gateway?
 - [ ] o11y
     - [X] Add tracing
       - [x] Add tracing to response.go files
