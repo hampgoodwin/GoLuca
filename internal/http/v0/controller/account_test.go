@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/brianvoe/gofakeit"
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/segmentio/ksuid"
 
 	"github.com/hampgoodwin/GoLuca/internal/test"
@@ -80,7 +80,6 @@ func TestCreateAccount_CannotDeserialize(t *testing.T) {
 	s.Is.NoErr(err)
 
 	s.Is.Equal("json: cannot unmarshal string into Go value of type controller.accountRequest", errRes.Description)
-
 }
 
 func TestGetAccount(t *testing.T) {
@@ -214,7 +213,7 @@ func createAccount(
 ) *http.Response {
 	t.Helper()
 
-	var body = new(bytes.Buffer)
+	body := new(bytes.Buffer)
 	err := json.NewEncoder(body).Encode(e)
 	s.Is.NoErr(err)
 

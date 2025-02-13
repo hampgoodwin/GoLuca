@@ -11,7 +11,7 @@ import (
 	"syscall"
 
 	"github.com/golang-migrate/migrate/v4"
-	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
+	grpclogging "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/nats-io/nats.go"
 	"go.uber.org/zap"
@@ -86,7 +86,6 @@ func main() {
 			log.Fatal("failed to create wiretap")
 		}
 	}
-
 	// Create the service layer
 	service := service.NewService(env.Log, repository, nenc)
 
@@ -112,7 +111,7 @@ func main() {
 	}
 	// Create the gRPC server with zap log grpc intercepter
 	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(
-		grpc_zap.UnaryServerInterceptor(env.Log),
+		grpclogging.UnaryServerInterceptor(env.Log),
 	))
 	// Register the controller with the server
 	grpcrouter.Register(grpcServer, grpcController)

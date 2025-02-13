@@ -31,12 +31,15 @@ TODO
   - [ ] update to proto (editions)[https://protobuf.dev/editions/overview/#migrating]...(lang guide)[https://protobuf.dev/programming-guides/editions]
   - [ ] update pagination, make a separate hampgoodwin/go-paginate lib
   - [ ] update testing paradigm
+  - [ ] remove http interface, grpc-gateway, proto validation?
+  - [ ] swap ksuid for uuidv7!!
 - [ ] update all dependencies
 - [ ] make a nix dev environment configuration
 - [ ] after f/e deploy this thing somewhere
 - [ ] create tenant data structures
   - [ ] create auth
   - [ ] create management ui
+- [ ] add govulnscan
 - [ ] grpc-gateway?
 - [ ] o11y
     - [X] Add tracing
