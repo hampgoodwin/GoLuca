@@ -15,7 +15,7 @@ require (
 	github.com/jackc/pgx/v5 v5.7.2
 	github.com/matryer/is v1.4.1
 	github.com/nats-io/nats.go v1.38.0
-	github.com/pelletier/go-toml/v2 v2.2.3
+	github.com/pelletier/go-toml/v2 v2.2.4
 	github.com/segmentio/ksuid v1.0.4
 	go.opentelemetry.io/otel v1.34.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.34.0
