@@ -9,7 +9,7 @@ import (
 
 type CreateTransaction struct {
 	Description string        `json:"description" validate:"required"`
-	Entries     []CreateEntry `json:"entries,omitempty" validate:"dive,gte=1"`
+	Entries     []CreateEntry `json:"entries,omitempty" validate:"required,gt=0,dive"`
 }
 
 func (t CreateTransaction) IsZero() bool {
