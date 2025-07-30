@@ -11,8 +11,8 @@ A Simple Accounting Ledger
 ## Tooling
 
 - [buf](https://buf.build/)
+    - Install buf with package manager of choice; brew is popular `brew install bufbuild/buf/buf`
     - ```
-      brew install bufbuild/buf/buf 
       go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
       go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
       ```
