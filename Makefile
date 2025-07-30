@@ -1,4 +1,3 @@
-
 GOLANGCI_LINT_VERSION = latest
 
 .PHONY: buf
@@ -32,23 +31,23 @@ runwiretap:
 	go run $$(pwd)/cmd/wiretap/main.go
 
 up:
-	docker-compose -f $$(pwd)/build/package/docker-compose.yml up -d
+	docker compose -f $$(pwd)/build/package/docker-compose.yml up -d
 	@ echo "view jaeger at http://localhost:16686"
 
 down:
-	docker-compose -f $$(pwd)/build/package/docker-compose.yml down
+	docker compose -f $$(pwd)/build/package/docker-compose.yml down
 
 downup: down up
 
 dbup:
-	docker-compose -f $$(pwd)/build/package/docker-compose.yml up -d db
+	docker compose -f $$(pwd)/build/package/docker-compose.yml up -d db
 
 jaegerup:
-	docker-compose -f $$(pwd)/build/package/docker-compose.yml up -d jaeger
+	docker compose -f $$(pwd)/build/package/docker-compose.yml up -d jaeger
 	@ echo "view jaeger at http://localhost:16686"
 
 natsup:
-	docker-compose -f $$(pwd)/build/package/docker-compose.yml up -d nats
+	docker compose -f $$(pwd)/build/package/docker-compose.yml up -d nats
 	
 # OPEN API COMMANDS
 apilint:
