@@ -25,6 +25,9 @@ A Simple Accounting Ledger
 ---
 
 TODO
+- [ ] use nix devlopment environment
+  - I was in the middle of updating all of my nvim configurations, lsp, lint, format etc.. in the midst of this I also updated my make targets for running my linter golangci-lint in a container. It then also occurred to me that I run linter in my ide, and I would need to manually manage a global golangci-lint version and ensure it's the same as my ci flow. That sounds like a bit of a pain and also inflexible between different repo's packages. For just linting it's probably not a big deal, but there are other tools where it could be more important/impactful. It occurred to me to use something like a multiple version manager, such as asdf. This would definitely work, but then there is another concern of managing the build tool versions separate from that.
+  - I remember hearing about devenv.sh, and briefly about nix develop/shell. I did a _little_ bit of research and it seems like nix development via defining a nix.flake will get me not only consist reproducible distinct projct builds but gains for my ci and build process. SO, I'm pretty interested in this as it is a place I could get lots of gains for developer productivity.
 - [ ] update various patterns/paradigms
   - [ ] singleton logger
   - [ ] where interfaces are defined
