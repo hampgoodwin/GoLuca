@@ -21,6 +21,7 @@ import (
 	"github.com/hampgoodwin/GoLuca/internal/environment"
 	inats "github.com/hampgoodwin/GoLuca/internal/event/nats"
 	grpccontroller "github.com/hampgoodwin/GoLuca/internal/grpc/v1/controller"
+	igrpclogging "github.com/hampgoodwin/GoLuca/internal/grpc/v1/logging"
 	grpcrouter "github.com/hampgoodwin/GoLuca/internal/grpc/v1/router"
 	httpcontroller "github.com/hampgoodwin/GoLuca/internal/http/v0/controller"
 	httprouter "github.com/hampgoodwin/GoLuca/internal/http/v0/router"
@@ -110,8 +111,9 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	// Create the gRPC server with zap log grpc intercepter
+	interceptorLogger := igrpclogging.InterceptorLogger(env.Log)
 	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(
-		grpclogging.UnaryServerInterceptor(env.Log),
+		grpclogging.UnaryServerInterceptor(interceptorLogger),
 	))
 	// Register the controller with the server
 	grpcrouter.Register(grpcServer, grpcController)
