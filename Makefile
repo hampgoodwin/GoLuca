@@ -21,7 +21,12 @@ testcovhttp:
 	go test ./... -v --coverprofile=cover.out && go tool cover -html=cover.out
 
 lint:
-	docker run --rm -v $$(pwd):/app -w /app golangci/golangci-lint:${GOLANGCI_LINT_VERSION} golangci-lint run -v
+	@docker run --rm -t -v $(shell pwd):/app -w /app \
+	--user $(shell id -u):$(shell id -g) \
+	-v $(shell go env GOCACHE):/.cache/go-build -e GOCACHE=/.cache/go-build \
+	-v $(shell go env GOMODCACHE):/.cache/mod -e GOMODCACHE=/.cache/mod \
+	-v $(HOME)/.cache/golangci-lint:/.cache/golangci-lint -e GOLANGCI_LINT_CACHE=/.cache/golangci-lint \
+	golangci/golangci-lint:$(GOLANGCI_LINT_VERSION) golangci-lint run -v
 
 check: lint test
 
