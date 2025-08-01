@@ -32,7 +32,7 @@ func TestCreateAccount(t *testing.T) {
 	defer func() {
 		if err := res.Body.Close(); err != nil {
 			// TODO: use global logger
-			log.Printf("creating account: %v", err)
+			log.Printf("creating account: %v\n", err)
 		}
 	}()
 
@@ -65,7 +65,7 @@ func TestCreateAccount_InvalidRequestBody(t *testing.T) {
 	defer func() {
 		if err := res.Body.Close(); err != nil {
 			// TODO: use global logger
-			log.Printf("creating account: %v", err)
+			log.Printf("creating account: %v\n", err)
 		}
 	}()
 
@@ -87,7 +87,7 @@ func TestCreateAccount_CannotDeserialize(t *testing.T) {
 	defer func() {
 		if err := res.Body.Close(); err != nil {
 			// TODO: use global logger
-			log.Printf("creating account: %v", err)
+			log.Printf("creating account: %v\n", err)
 		}
 	}()
 
