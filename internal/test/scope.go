@@ -129,7 +129,7 @@ func (s *Scope) SetGRPC(t *testing.T, controller servicev1.GoLucaServiceServer) 
 		}
 	}()
 
-	conn, err := grpc.NewClient("",
+	conn, err := grpc.NewClient("passthrough://dummy",
 		grpc.WithContextDialer(func(context.Context, string) (net.Conn, error) {
 			return listener.Dial()
 		}), grpc.WithTransportCredentials(insecure.NewCredentials()))
