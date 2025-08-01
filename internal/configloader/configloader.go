@@ -1,6 +1,7 @@
 package configloader
 
 import (
+	"log"
 	"os"
 	"strconv"
 
@@ -46,7 +47,10 @@ func loadConfigurationFile(fp string) (config.Config, error) {
 	if err != nil {
 		return config.Config{}, err
 	}
-	defer f.Close()
+	defer func() {
+		// TODO: replace with global logger
+		log.Printf("closing configuration file: %v", err)
+	}()
 
 	err = toml.NewDecoder(f).Decode(&cfg)
 	if err != nil {

@@ -65,30 +65,30 @@ func main() {
 
 	// Create NATS event bus, using proto encoded connection and JetStream
 	env.Log.Info("starting nats", zap.Any("service_info", env.Config.NATS.URL()))
-	nenc, err := inats.NewNATSEncodedConn(env.Config.NATS.URL())
+	nc, err := inats.NewNATSConn(env.Config.NATS.URL())
 	if err != nil {
 		env.Log.Error("nats error, shutting down", zap.Error(err))
-		close(ctx, env.Log, db, nenc, nil, nil, nil, tpShutdownFn)
+		close(ctx, env.Log, db, nc, nil, nil, nil, tpShutdownFn)
 		log.Fatal("failed to create nats connection")
 	}
 	env.Log.Info("creating jetstream")
-	if _, err := inats.NewNATSJetStream(nenc); err != nil {
+	if _, err := inats.NewNATSJetStream(nc); err != nil {
 		env.Log.Error("jetstream error, shutting down", zap.Error(err))
-		close(ctx, env.Log, db, nenc, nil, nil, nil, tpShutdownFn)
+		close(ctx, env.Log, db, nc, nil, nil, nil, tpShutdownFn)
 		log.Fatal("failed to create jetstream")
 	}
-	var nencWiretap *nats.EncodedConn
+	var ncWiretap *nats.Conn
 	if env.Config.NATS.Wiretap.Enable {
 		env.Log.Info("starting wiretap", zap.Any("service_info", env.Config.NATS.Wiretap.URL()))
-		nencWiretap, err = inats.WireTap(env.Config.NATS.Wiretap.URL())
+		ncWiretap, err = inats.WireTap(env.Config.NATS.Wiretap.URL())
 		if err != nil {
 			env.Log.Error("nats wiretap error, shutting down", zap.Error(err))
-			close(ctx, env.Log, db, nenc, nencWiretap, nil, nil, tpShutdownFn)
+			close(ctx, env.Log, db, nc, ncWiretap, nil, nil, tpShutdownFn)
 			log.Fatal("failed to create wiretap")
 		}
 	}
 	// Create the service layer
-	service := service.NewService(env.Log, repository, nenc)
+	service := service.NewService(env.Log, repository, nc)
 
 	// Create the HTTP interface
 	httpController := httpcontroller.NewController(env.Log, service)
@@ -136,16 +136,16 @@ func main() {
 		select {
 		case err := <-grpcErr:
 			env.Log.Error("grpc server error, shutting down", zap.Error(err))
-			close(ctx, env.Log, db, nenc, nencWiretap, grpcServer, httpServer, tpShutdownFn)
+			close(ctx, env.Log, db, nc, ncWiretap, grpcServer, httpServer, tpShutdownFn)
 			return
 		case err := <-httpErr:
 			env.Log.Error("http server error, shutting down", zap.Error(err))
-			close(ctx, env.Log, db, nenc, nencWiretap, grpcServer, httpServer, tpShutdownFn)
+			close(ctx, env.Log, db, nc, ncWiretap, grpcServer, httpServer, tpShutdownFn)
 			return
 		case <-ctx.Done():
 			fmt.Printf("received shutdown signal: %s\n", ctx.Err())
 			cancel()
-			close(ctx, env.Log, db, nenc, nencWiretap, grpcServer, httpServer, tpShutdownFn)
+			close(ctx, env.Log, db, nc, ncWiretap, grpcServer, httpServer, tpShutdownFn)
 			return
 		}
 	}
@@ -156,8 +156,8 @@ func close(
 	ctx context.Context,
 	log *zap.Logger,
 	db *pgxpool.Pool,
-	nenc *nats.EncodedConn,
-	nencWiretap *nats.EncodedConn,
+	nc *nats.Conn,
+	ncWiretap *nats.Conn,
 	grpcServer *grpc.Server,
 	httpServer *http.Server,
 	tpShutdownFunc func(context.Context) error,
@@ -181,16 +181,16 @@ func close(
 		db.Close()
 	}
 	// drain nats encoded connection
-	if nenc != nil {
+	if nc != nil {
 		log.Info("draining and closing nats connection")
-		if err := nenc.Drain(); err != nil {
+		if err := nc.Drain(); err != nil {
 			log.Error("draining and closing nats connection", zap.Error(err))
 		}
 	}
 	// drain nats wire tap encoded connection
-	if nencWiretap != nil {
+	if ncWiretap != nil {
 		log.Info("draining and closing wiretap connection")
-		if err := nencWiretap.Drain(); err != nil {
+		if err := ncWiretap.Drain(); err != nil {
 			log.Error("draining and closing wiretap connection", zap.Error(err))
 		}
 	}
