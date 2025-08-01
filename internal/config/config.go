@@ -4,11 +4,11 @@ import "fmt"
 
 // Config holds the values for environment loaded configuration values
 type Config struct {
-	Environment
-	Database
-	HTTPServer
-	GRPCServer
-	NATS
+	Environment Environment
+	Database    Database
+	HTTPServer  HTTPServer
+	GRPCServer  GRPCServer
+	NATS        NATS
 }
 
 type Environment struct {

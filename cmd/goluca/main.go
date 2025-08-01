@@ -11,7 +11,7 @@ import (
 	"syscall"
 
 	"github.com/golang-migrate/migrate/v4"
-	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
+	grpclogging "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/nats-io/nats.go"
 	"go.uber.org/zap"
@@ -21,6 +21,7 @@ import (
 	"github.com/hampgoodwin/GoLuca/internal/environment"
 	inats "github.com/hampgoodwin/GoLuca/internal/event/nats"
 	grpccontroller "github.com/hampgoodwin/GoLuca/internal/grpc/v1/controller"
+	igrpclogging "github.com/hampgoodwin/GoLuca/internal/grpc/v1/logging"
 	grpcrouter "github.com/hampgoodwin/GoLuca/internal/grpc/v1/router"
 	httpcontroller "github.com/hampgoodwin/GoLuca/internal/http/v0/controller"
 	httprouter "github.com/hampgoodwin/GoLuca/internal/http/v0/router"
@@ -86,7 +87,6 @@ func main() {
 			log.Fatal("failed to create wiretap")
 		}
 	}
-
 	// Create the service layer
 	service := service.NewService(env.Log, repository, nenc)
 
@@ -111,8 +111,9 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	// Create the gRPC server with zap log grpc intercepter
+	interceptorLogger := igrpclogging.InterceptorLogger(env.Log)
 	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(
-		grpc_zap.UnaryServerInterceptor(env.Log),
+		grpclogging.UnaryServerInterceptor(interceptorLogger),
 	))
 	// Register the controller with the server
 	grpcrouter.Register(grpcServer, grpcController)

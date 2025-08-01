@@ -24,12 +24,12 @@ var (
 	transaction = map[string]string{
 		"Id":          "required,KSUID",
 		"Description": "required",
-		"Entries":     "dive,gte=1",
+		"Entries":     "required,gt=0,dive",
 		"CreatedAt":   "required",
 	}
 	createTransactionRequest = map[string]string{
 		"Description": "required",
-		"Entries":     "required,dive,gte=1",
+		"Entries":     "required,gt=0,dive",
 	}
 	createEntry = map[string]string{
 		"Description":   "required",

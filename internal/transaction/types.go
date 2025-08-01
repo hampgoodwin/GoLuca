@@ -10,7 +10,7 @@ import (
 type Transaction struct {
 	ID          string    `validate:"required,KSUID"`
 	Description string    `validate:"required"`
-	Entries     []Entry   `validate:"dive,gte=1"`
+	Entries     []Entry   `validate:"required,gt=0,dive"`
 	CreatedAt   time.Time `validate:"required"`
 }
 

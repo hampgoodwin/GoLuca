@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brianvoe/gofakeit"
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/matryer/is"
 	"go.uber.org/zap"
