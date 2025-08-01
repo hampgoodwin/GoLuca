@@ -76,8 +76,8 @@ func NewScope(t *testing.T) (Scope, error) {
 func (s *Scope) NewDatabase(t *testing.T) error {
 	t.Helper()
 	// Get a random name for a database
-	gofakeit.Seed(0)
-	s.dbDatabase = strings.ToLower(strings.Replace(gofakeit.Name(), " ", "", -1))
+	_ = gofakeit.Seed(0)
+	s.dbDatabase = strings.ToLower(strings.ReplaceAll(gofakeit.Name(), " ", ""))
 	var err error
 	// Create a connection pool on the default database
 	s.DB, err = database.NewDatabasePool(s.Ctx, s.Env.Config.Database.ConnectionString())
@@ -129,7 +129,7 @@ func (s *Scope) SetGRPC(t *testing.T, controller servicev1.GoLucaServiceServer) 
 		}
 	}()
 
-	conn, err := grpc.DialContext(s.Ctx, "",
+	conn, err := grpc.NewClient("passthrough://dummy",
 		grpc.WithContextDialer(func(context.Context, string) (net.Conn, error) {
 			return listener.Dial()
 		}), grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -150,10 +150,10 @@ func (s *Scope) CleanupScope(t *testing.T) {
 	}
 
 	if s.GRPCTestClientConn != nil {
-		s.GRPCTestClientConn.Close()
+		_ = s.GRPCTestClientConn.Close()
 	}
 	if s.GRPCBufConn != nil {
-		s.GRPCBufConn.Close()
+		_ = s.GRPCBufConn.Close()
 	}
 	if s.GRPCTestServer != nil {
 		s.GRPCTestServer.GracefulStop()

@@ -8,7 +8,6 @@ import (
 	"github.com/hampgoodwin/GoLuca/internal/service"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/nats-io/nats.go"
-	"github.com/nats-io/nats.go/encoders/protobuf"
 	"go.uber.org/zap"
 )
 
@@ -18,8 +17,7 @@ func newTestHTTPHandler(
 ) http.Handler {
 	r := repository.NewRepository(db)
 	nc, _ := nats.Connect(nats.DefaultURL)
-	nec, _ := nats.NewEncodedConn(nc, protobuf.PROTOBUF_ENCODER)
-	s := service.NewService(log, r, nec)
+	s := service.NewService(log, r, nc)
 	c := NewController(log, s)
 	return router.Register(
 		log,

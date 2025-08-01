@@ -233,7 +233,7 @@ func TestLoad(t *testing.T) {
 			defer resetApplicationEnvironmentVariables()
 
 			for k, v := range tc.envVars {
-				os.Setenv(k, v)
+				_ = os.Setenv(k, v)
 			}
 
 			actual, err := Load(tc.cfg, tc.filepath)
@@ -424,18 +424,17 @@ func TestLoadEnvironmentVariables(t *testing.T) {
 			defer resetApplicationEnvironmentVariables()
 
 			for k, v := range tc.envVars {
-				os.Setenv(k, v)
+				_ = os.Setenv(k, v)
 			}
 
 			actual := loadAndMergeEnvironmentVariables(config.Config{})
 			a.Equal(tc.expected, actual)
 		})
-
 	}
 }
 
 func resetApplicationEnvironmentVariables() {
 	for _, k := range EnvironmentVariableKeys {
-		os.Unsetenv(k)
+		_ = os.Unsetenv(k)
 	}
 }

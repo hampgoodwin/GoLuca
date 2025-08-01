@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 	"testing"
@@ -28,7 +29,12 @@ func TestCreateAccount(t *testing.T) {
 	}
 
 	res := createAccount(t, &s, aReq)
-	defer res.Body.Close()
+	defer func() {
+		if err := res.Body.Close(); err != nil {
+			// TODO: use global logger
+			log.Printf("creating account: %v\n", err)
+		}
+	}()
 
 	var aRes accountResponse
 	err := json.NewDecoder(res.Body).Decode(&aRes)
@@ -36,11 +42,11 @@ func TestCreateAccount(t *testing.T) {
 
 	s.Is.True(aRes != (accountResponse{}))
 
-	s.Is.Equal(aReq.Account.Name, aRes.Account.Name)
-	s.Is.Equal(aReq.Account.Type, aRes.Account.Type)
-	s.Is.Equal(aReq.Account.Basis, aRes.Account.Basis)
-	s.Is.True(aRes.Account.ID != "")
-	s.Is.True(aRes.Account.ParentID == "")
+	s.Is.Equal(aReq.Account.Name, aRes.Name)
+	s.Is.Equal(aReq.Account.Type, aRes.Type)
+	s.Is.Equal(aReq.Account.Basis, aRes.Basis)
+	s.Is.True(aRes.ID != "")
+	s.Is.True(aRes.ParentID == "")
 }
 
 func TestCreateAccount_InvalidRequestBody(t *testing.T) {
@@ -56,7 +62,12 @@ func TestCreateAccount_InvalidRequestBody(t *testing.T) {
 	}
 
 	res := createAccount(t, &s, aReq)
-	defer res.Body.Close()
+	defer func() {
+		if err := res.Body.Close(); err != nil {
+			// TODO: use global logger
+			log.Printf("creating account: %v\n", err)
+		}
+	}()
 
 	var errRes ErrorResponse
 	err := json.NewDecoder(res.Body).Decode(&errRes)
@@ -73,7 +84,12 @@ func TestCreateAccount_CannotDeserialize(t *testing.T) {
 	bad := []byte{}
 
 	res := createAccount(t, &s, bad)
-	defer res.Body.Close()
+	defer func() {
+		if err := res.Body.Close(); err != nil {
+			// TODO: use global logger
+			log.Printf("creating account: %v\n", err)
+		}
+	}()
 
 	var errRes ErrorResponse
 	err := json.NewDecoder(res.Body).Decode(&errRes)
@@ -96,7 +112,12 @@ func TestGetAccount(t *testing.T) {
 	}
 
 	res := createAccount(t, &s, aReq)
-	defer res.Body.Close()
+	defer func() {
+		if err := res.Body.Close(); err != nil {
+			// TODO: use global logger
+			log.Printf("creating account: %v\n", err)
+		}
+	}()
 
 	var aRes accountResponse
 	err := json.NewDecoder(res.Body).Decode(&aRes)
@@ -104,7 +125,7 @@ func TestGetAccount(t *testing.T) {
 
 	// Get the created account
 	getRes := getAccount(t, &s, aRes.ID)
-	res.Body.Close()
+	_ = res.Body.Close()
 
 	var getARes accountResponse
 	err = json.NewDecoder(getRes.Body).Decode(&getARes)
@@ -134,7 +155,7 @@ func TestGetAccount_InvalidPersistedAccount(t *testing.T) {
 	parentID := gofakeit.Sentence(1)
 	name := gofakeit.Name()
 	typ := gofakeit.Sentence(1)
-	basis := strings.Replace(gofakeit.Sentence(5), " ", "", -1)[0:5]
+	basis := strings.ReplaceAll(gofakeit.Sentence(5), " ", "")[0:5]
 
 	_, err := s.DB.Exec(s.Ctx, `
 	INSERT INTO account (id, parent_id, name, type, basis)
@@ -143,7 +164,12 @@ func TestGetAccount_InvalidPersistedAccount(t *testing.T) {
 	s.Is.NoErr(err)
 
 	res := getAccount(t, &s, id)
-	defer res.Body.Close()
+	defer func() {
+		if err := res.Body.Close(); err != nil {
+			// TODO: use global logger
+			log.Printf("getting account: %v\n", err)
+		}
+	}()
 
 	s.Is.Equal(http.StatusNotFound, res.StatusCode)
 }
@@ -161,7 +187,12 @@ func TestListAccounts(t *testing.T) {
 		},
 	}
 	res := createAccount(t, &s, aReq)
-	defer res.Body.Close()
+	defer func() {
+		if err := res.Body.Close(); err != nil {
+			// TODO: use global logger
+			log.Printf("creating account: %v\n", err)
+		}
+	}()
 
 	var a1 accountResponse
 	err := json.NewDecoder(res.Body).Decode(&a1)
@@ -169,7 +200,12 @@ func TestListAccounts(t *testing.T) {
 
 	aReq.Account.Name = "accounts receivable"
 	res2 := createAccount(t, &s, aReq)
-	defer res2.Body.Close()
+	defer func() {
+		if err := res2.Body.Close(); err != nil {
+			// TODO: replace with global logger
+			log.Printf("creating test account: %v\n", err)
+		}
+	}()
 
 	var a2 accountResponse
 	err = json.NewDecoder(res2.Body).Decode(&a2)
@@ -209,7 +245,7 @@ func TestListAccounts_InvalidRequestBody(t *testing.T) {
 func createAccount(
 	t *testing.T,
 	s *test.Scope,
-	e interface{},
+	e any,
 ) *http.Response {
 	t.Helper()
 
@@ -231,7 +267,7 @@ func createAccount(
 }
 
 func getAccount(
-	t *testing.T,
+	_ *testing.T,
 	s *test.Scope,
 	id string,
 ) *http.Response {
@@ -250,7 +286,7 @@ func getAccount(
 }
 
 func listAccounts(
-	t *testing.T,
+	_ *testing.T,
 	s *test.Scope,
 	cursor string,
 	limit string,

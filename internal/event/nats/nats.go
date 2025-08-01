@@ -5,23 +5,18 @@ import (
 
 	"github.com/hampgoodwin/GoLuca/internal/event"
 	"github.com/nats-io/nats.go"
-	"github.com/nats-io/nats.go/encoders/protobuf"
 )
 
-func NewNATSEncodedConn(url string) (*nats.EncodedConn, error) {
+func NewNATSConn(url string) (*nats.Conn, error) {
 	nc, err := nats.Connect(url)
 	if err != nil {
 		return nil, fmt.Errorf("connecting to nats: %w", err)
 	}
-	nec, err := nats.NewEncodedConn(nc, protobuf.PROTOBUF_ENCODER)
-	if err != nil {
-		return nil, fmt.Errorf("creating new encoded connection for protobuf: %w", err)
-	}
-	return nec, nil
+	return nc, nil
 }
 
-func NewNATSJetStream(nec *nats.EncodedConn) (nats.JetStreamContext, error) {
-	jsc, err := nec.Conn.JetStream()
+func NewNATSJetStream(nc *nats.Conn) (nats.JetStreamContext, error) {
+	jsc, err := nc.JetStream()
 	if err != nil {
 		return nil, fmt.Errorf("getting jetstream context: %w", err)
 	}

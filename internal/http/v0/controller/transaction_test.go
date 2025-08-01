@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 	"testing"
@@ -26,7 +27,12 @@ func TestCreateTransaction(t *testing.T) {
 		},
 	}
 	res := createAccount(t, &s, aReq)
-	defer res.Body.Close()
+	defer func() {
+		if err := res.Body.Close(); err != nil {
+			// TODO: use global logger
+			log.Printf("creating account: %v\n", err)
+		}
+	}()
 	var aRes accountResponse
 	err := json.NewDecoder(res.Body).Decode(&aRes)
 	s.Is.NoErr(err)
@@ -40,7 +46,12 @@ func TestCreateTransaction(t *testing.T) {
 		},
 	}
 	res2 := createAccount(t, &s, aReq)
-	defer res2.Body.Close()
+	defer func() {
+		if err := res2.Body.Close(); err != nil {
+			// TODO: use global logger
+			log.Printf("creating account: %v\n", err)
+		}
+	}()
 	err = json.NewDecoder(res2.Body).Decode(&aRes)
 	s.Is.NoErr(err)
 	revenueAccount := aRes.Account
@@ -63,7 +74,12 @@ func TestCreateTransaction(t *testing.T) {
 	}
 
 	res3 := createTransaction(t, &s, tReq)
-	defer res3.Body.Close()
+	defer func() {
+		if err := res3.Body.Close(); err != nil {
+			// TODO: use global logger
+			log.Printf("creating account: %v\n", err)
+		}
+	}()
 
 	var tRes transactionResponse
 	err = json.NewDecoder(res3.Body).Decode(&tRes)
@@ -78,7 +94,12 @@ func TestCreateTransaction(t *testing.T) {
 	tReq.Transaction.Entries[0].Amount.Value = "9223372036854775807"
 
 	res4 := createTransaction(t, &s, tReq)
-	defer res4.Body.Close()
+	defer func() {
+		if err := res4.Body.Close(); err != nil {
+			// TODO: use global logger
+			log.Printf("creating account: %v\n", err)
+		}
+	}()
 
 	err = json.NewDecoder(res4.Body).Decode(&tRes)
 	s.Is.NoErr(err)
@@ -98,7 +119,12 @@ func TestCreateTransaction_int64_overflow(t *testing.T) {
 		},
 	}
 	res := createAccount(t, &s, aReq)
-	defer res.Body.Close()
+	defer func() {
+		if err := res.Body.Close(); err != nil {
+			// TODO: use global logger
+			log.Printf("creating account: %v\n", err)
+		}
+	}()
 	var aRes accountResponse
 	err := json.NewDecoder(res.Body).Decode(&aRes)
 	s.Is.NoErr(err)
@@ -112,7 +138,12 @@ func TestCreateTransaction_int64_overflow(t *testing.T) {
 		},
 	}
 	res2 := createAccount(t, &s, aReq)
-	defer res2.Body.Close()
+	defer func() {
+		if err := res2.Body.Close(); err != nil {
+			// TODO: use global logger
+			log.Printf("creating account: %v\n", err)
+		}
+	}()
 	err = json.NewDecoder(res2.Body).Decode(&aRes)
 	s.Is.NoErr(err)
 	revenueAccount := aRes.Account
@@ -135,7 +166,12 @@ func TestCreateTransaction_int64_overflow(t *testing.T) {
 	}
 
 	res3 := createTransaction(t, &s, tReq)
-	defer res3.Body.Close()
+	defer func() {
+		if err := res3.Body.Close(); err != nil {
+			// TODO: use global logger
+			log.Printf("creating account: %v\n", err)
+		}
+	}()
 
 	var errRes ErrorResponse
 	err = json.NewDecoder(res3.Body).Decode(&errRes)
@@ -158,7 +194,12 @@ func TestGetTransaction(t *testing.T) {
 		},
 	}
 	res := createAccount(t, &s, aReq)
-	defer res.Body.Close()
+	defer func() {
+		if err := res.Body.Close(); err != nil {
+			// TODO: use global logger
+			log.Printf("creating account: %v\n", err)
+		}
+	}()
 	var aRes accountResponse
 	err := json.NewDecoder(res.Body).Decode(&aRes)
 	s.Is.NoErr(err)
@@ -172,7 +213,12 @@ func TestGetTransaction(t *testing.T) {
 		},
 	}
 	res2 := createAccount(t, &s, aReq)
-	defer res2.Body.Close()
+	defer func() {
+		if err := res2.Body.Close(); err != nil {
+			// TODO: use global logger
+			log.Printf("creating account: %v\n", err)
+		}
+	}()
 	err = json.NewDecoder(res2.Body).Decode(&aRes)
 	s.Is.NoErr(err)
 	revenueAccount := aRes.Account
@@ -195,7 +241,12 @@ func TestGetTransaction(t *testing.T) {
 	}
 
 	res3 := createTransaction(t, &s, tReq)
-	defer res3.Body.Close()
+	defer func() {
+		if err := res3.Body.Close(); err != nil {
+			// TODO: use global logger
+			log.Printf("creating account: %v\n", err)
+		}
+	}()
 
 	var tRes transactionResponse
 	err = json.NewDecoder(res3.Body).Decode(&tRes)
@@ -211,7 +262,12 @@ func TestGetTransaction(t *testing.T) {
 	tReq.Transaction.Entries[0].Amount.Currency = "usd"
 
 	res4 := getTransaction(t, &s, tRes.ID)
-	defer res4.Body.Close()
+	defer func() {
+		if err := res4.Body.Close(); err != nil {
+			// TODO: use global logger
+			log.Printf("creating account: %v\n", err)
+		}
+	}()
 	s.Is.True(res4.StatusCode == http.StatusOK)
 
 	var getTRes transactionResponse
@@ -237,7 +293,12 @@ func TestListTransactions(t *testing.T) {
 		},
 	}
 	res := createAccount(t, &s, aReq)
-	defer res.Body.Close()
+	defer func() {
+		if err := res.Body.Close(); err != nil {
+			// TODO: use global logger
+			log.Printf("creating account: %v\n", err)
+		}
+	}()
 	var aRes accountResponse
 	err := json.NewDecoder(res.Body).Decode(&aRes)
 	s.Is.NoErr(err)
@@ -251,7 +312,12 @@ func TestListTransactions(t *testing.T) {
 		},
 	}
 	res2 := createAccount(t, &s, aReq)
-	defer res2.Body.Close()
+	defer func() {
+		if err := res2.Body.Close(); err != nil {
+			// TODO: use global logger
+			log.Printf("creating account: %v\n", err)
+		}
+	}()
 	err = json.NewDecoder(res2.Body).Decode(&aRes)
 	s.Is.NoErr(err)
 	revenueAccount := aRes.Account
@@ -274,7 +340,12 @@ func TestListTransactions(t *testing.T) {
 	}
 
 	res3 := createTransaction(t, &s, tReq)
-	defer res3.Body.Close()
+	defer func() {
+		if err := res3.Body.Close(); err != nil {
+			// TODO: use global logger
+			log.Printf("creating account: %v\n", err)
+		}
+	}()
 
 	var tRes transactionResponse
 	err = json.NewDecoder(res3.Body).Decode(&tRes)
@@ -291,7 +362,12 @@ func TestListTransactions(t *testing.T) {
 	tReq.Transaction.Entries[0].Amount.Currency = "usd"
 
 	res4 := listTransactions(t, &s)
-	defer res4.Body.Close()
+	defer func() {
+		if err := res4.Body.Close(); err != nil {
+			// TODO: use global logger
+			log.Printf("creating account: %v\n", err)
+		}
+	}()
 	s.Is.True(res4.StatusCode == http.StatusOK)
 
 	var getTsRes transactionsResponse
@@ -308,7 +384,7 @@ func createTransaction(
 ) *http.Response {
 	t.Helper()
 
-	var body = new(bytes.Buffer)
+	body := new(bytes.Buffer)
 	err := json.NewEncoder(body).Encode(e)
 	s.Is.NoErr(err)
 

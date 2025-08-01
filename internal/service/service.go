@@ -9,9 +9,9 @@ import (
 type Service struct {
 	log        *zap.Logger
 	repository *repository.Repository
-	publisher  *nats.EncodedConn
+	publisher  *nats.Conn
 }
 
-func NewService(log *zap.Logger, repository *repository.Repository, nec *nats.EncodedConn) *Service {
+func NewService(log *zap.Logger, repository *repository.Repository, nec *nats.Conn) *Service {
 	return &Service{log, repository, nec}
 }
