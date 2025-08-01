@@ -172,7 +172,7 @@ func close(
 	if httpServer != nil {
 		if err := httpServer.Shutdown(ctx); err != nil {
 			log.Info("closing httpserver")
-			httpServer.Close()
+			_ = httpServer.Close()
 		}
 	}
 	// disconnect from db

@@ -10,7 +10,6 @@ import (
 	"github.com/hampgoodwin/GoLuca/internal/service"
 	"github.com/hampgoodwin/GoLuca/internal/test"
 	"github.com/nats-io/nats.go"
-	"github.com/nats-io/nats.go/encoders/protobuf"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -20,8 +19,7 @@ func TestCreateTransaction(t *testing.T) {
 	s := test.GetScope(t)
 	repository := repository.NewRepository(s.DB)
 	nc, _ := nats.Connect(nats.DefaultURL)
-	nec, _ := nats.NewEncodedConn(nc, protobuf.PROTOBUF_ENCODER)
-	service := service.NewService(s.Env.Log, repository, nec)
+	service := service.NewService(s.Env.Log, repository, nc)
 	controller := NewController(s.Env.Log, service)
 	s.SetGRPC(t, controller)
 
@@ -71,8 +69,7 @@ func TestCreateTransaction_InvalidRequestBody(t *testing.T) {
 	s := test.GetScope(t)
 	repository := repository.NewRepository(s.DB)
 	nc, _ := nats.Connect(nats.DefaultURL)
-	nec, _ := nats.NewEncodedConn(nc, protobuf.PROTOBUF_ENCODER)
-	service := service.NewService(s.Env.Log, repository, nec)
+	service := service.NewService(s.Env.Log, repository, nc)
 	controller := NewController(s.Env.Log, service)
 	s.SetGRPC(t, controller)
 
@@ -117,8 +114,7 @@ func TestGetTransaction(t *testing.T) {
 	s := test.GetScope(t)
 	repository := repository.NewRepository(s.DB)
 	nc, _ := nats.Connect(nats.DefaultURL)
-	nec, _ := nats.NewEncodedConn(nc, protobuf.PROTOBUF_ENCODER)
-	service := service.NewService(s.Env.Log, repository, nec)
+	service := service.NewService(s.Env.Log, repository, nc)
 	controller := NewController(s.Env.Log, service)
 	s.SetGRPC(t, controller)
 
@@ -170,8 +166,7 @@ func TestListTransactions(t *testing.T) {
 	s := test.GetScope(t)
 	repository := repository.NewRepository(s.DB)
 	nc, _ := nats.Connect(nats.DefaultURL)
-	nec, _ := nats.NewEncodedConn(nc, protobuf.PROTOBUF_ENCODER)
-	service := service.NewService(s.Env.Log, repository, nec)
+	service := service.NewService(s.Env.Log, repository, nc)
 	controller := NewController(s.Env.Log, service)
 	s.SetGRPC(t, controller)
 
