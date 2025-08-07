@@ -19,13 +19,45 @@
       in
       {
         devShells.goluca = pkgs.mkShell {
-          buildInput = [
+          buildInputs = [
+            # languages+toolings
+            ## go
             pkgs.go_1_24
             pkgs.gopls
             pkgs.delve
             pkgs.gofumpt
             pkgs.golangci-lint
+            ## bash
+            pkgs.shellcheck
+            pkgs.bash-language-server
+            ## nix
+            pkgs.nix
+            pkgs.nixfmt-rfc-style
+            pkgs.nixd
+
+            # tooling
+            ## protoencoding
+            pkgs.buf
+            ## openapi
+            pkgs.redocly
+
+            # containerization
+            pkgs.colima
+            pkgs.docker_28 # used for docker tools, not the runtime/engine
           ];
+
+          shellHook = ''
+            if ! colima status | grep -q "Running"; then
+              echo "Starting Colima..."
+              colima start
+            else
+              echo "Colima already running."
+            fi
+
+            export DOCKER_HOST="unix://$HOME/.colima/default/docker.sock"
+
+            echo "You can now run: docker-compose up -d"
+          '';
         };
       }
     );
