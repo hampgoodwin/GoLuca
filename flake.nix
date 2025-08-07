@@ -47,11 +47,12 @@
           ];
 
           shellHook = ''
+            echo "Starting Colima..."
             if ! colima status | grep -q "Running"; then
-              echo "Starting Colima..."
               colima start
+              echo "...Colima started"
             else
-              echo "Colima already running."
+              echo "...Colima already running."
             fi
 
             export DOCKER_HOST="unix://$HOME/.colima/default/docker.sock"
