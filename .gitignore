@@ -1,3 +1,4 @@
 .env.toml
 cover.out
 .vscode/
+.direnv/

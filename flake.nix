@@ -49,8 +49,8 @@
           shellHook = ''
             echo "Starting Colima..."
             if ! colima status | grep -q "Running"; then
-              colima start
-              echo "...Colima started"
+              colima start >/dev/null 2>&1 &
+              echo "...Colima starting in background"
             else
               echo "...Colima already running."
             fi
