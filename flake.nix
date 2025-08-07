@@ -55,8 +55,6 @@
               echo "...Colima already running."
             fi
 
-            export DOCKER_HOST="unix://$HOME/.colima/default/docker.sock"
-
             echo "You can now run: docker-compose up -d"
           '';
         };
