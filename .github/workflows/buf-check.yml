@@ -1,7 +1,7 @@
-name: lint
-on: [push]
+name: buf check
+on: [pull_request]
 jobs:
-  golangci:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -11,9 +11,11 @@ jobs:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Warm nix develop environment
         run: nix develop .#goluca -c echo "nix develop environment warmed"
-      - name: lint
+      - name: buf lint, format, and breaking
         shell: nix develop .#goluca --command bash {0}
         run: |
-          go version
-          golangci-lint version
-          make lint
+          buf --version
+          buf lint proto
+          buf format proto -w
+          buf breaking proto --against 'https://github.com/hampgoodwin/GoLuca.git#branch=main,ref=HEAD,subdir=proto'
+          

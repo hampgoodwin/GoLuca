@@ -10,22 +10,32 @@ A Simple Accounting Ledger
 
 ## Tooling
 
+Core dependencies are nix and nix-direnv. Everything else required for this repository is managed by these two!
+
+We use [direnv](https://direnv.net/) to manage all toolings and dependencies. You can reference the ./flake.nix file for their declarations and ./flake.lock for versions. Currently we are not pinning versions in flake.nix via import, but we should do that soon. Below are some tools we use, and a description of how we use them.
+
+- [nix-direnv](https://github.com/nix-community/nix-direnv)
+    - we use direnv, as started above, but we use a specific nix-direnv that allows us to use nix, specifically nix develop via flake.nix, to manage our toolings such that we're all using the same thing.
 - [buf](https://buf.build/)
-    - Install buf with package manager of choice; brew is popular `brew install bufbuild/buf/buf`
-    - ```
-      go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-      go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
-      ```
+    - we use buf for proto toolchain. Linting, formatting, and generation. Also in CI allows for backwards-breaking change detection.
 - [gofumpt](https://github.com/mvdan/gofumpt) for formatting.
+    - gofumpy for formatting go code.
 - [golangci-lint](https://github.com/golangci/golangci-lint) for linting.
+    - golangci-lint for linting go code. I like to update golangci-lint versions and use it's default opinions; hence we have no .golangci-lint configuration file.
 - [colima](https://github.com/abiosoft/colima) for container runtimes.
 - [jaeger](https://www.jaegertracing.io/) for local trace collector and ui.
 - [nats](https://nats.io/) for eventing.
 
+## How to develop
+
+Read the [Tooling](##tooling) section.
+
+Navigate in your shell to this repos directory and a developer environment will be configured for you. Either have a global container runtime available, or use this environments colima, by running `colima start`. Review the [Makefile](./Makefile) to see available commands. Otherwise, everything is what you'd expect. Best of luck!
+
 ---
 
 TODO
-- [ ] use nix devlopment environment
+- [x] use nix devlopment environment
   - I was in the middle of updating all of my nvim configurations, lsp, lint, format etc.. in the midst of this I also updated my make targets for running my linter golangci-lint in a container. It then also occurred to me that I run linter in my ide, and I would need to manually manage a global golangci-lint version and ensure it's the same as my ci flow. That sounds like a bit of a pain and also inflexible between different repo's packages. For just linting it's probably not a big deal, but there are other tools where it could be more important/impactful. It occurred to me to use something like a multiple version manager, such as asdf. This would definitely work, but then there is another concern of managing the build tool versions separate from that.
   - I remember hearing about devenv.sh, and briefly about nix develop/shell. I did a _little_ bit of research and it seems like nix development via defining a nix.flake will get me not only consist reproducible distinct projct builds but gains for my ci and build process. SO, I'm pretty interested in this as it is a place I could get lots of gains for developer productivity.
 - [ ] update various patterns/paradigms
@@ -36,8 +46,8 @@ TODO
   - [ ] update testing paradigm
   - [ ] remove http interface, grpc-gateway, proto validation?
   - [ ] swap ksuid for uuidv7!!
-- [ ] update all dependencies
-- [ ] make a nix dev environment configuration
+- [x] update all dependencies
+- [x] make a nix dev environment configuration
 - [ ] after f/e deploy this thing somewhere
 - [ ] create tenant data structures
   - [ ] create auth
