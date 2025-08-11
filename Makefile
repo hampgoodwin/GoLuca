@@ -26,7 +26,10 @@ testcovhttp:
 lint:
 	@golangci-lint run -v
 
-check: lint test
+check: lint test bufcheck vulnerabilitycheck
+
+vulnerabilitycheck:
+	@go tool govulncheck
 
 run:
 	@go run $$(pwd)/cmd/goluca/main.go
