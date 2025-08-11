@@ -1,7 +1,7 @@
 name: vulnerability check
 on: [push]
 jobs:
-  golangci:
+  vulnerability:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
