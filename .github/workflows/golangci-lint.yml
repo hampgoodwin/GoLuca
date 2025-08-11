@@ -9,7 +9,11 @@ jobs:
         with:
           nix_path: nixpkgs=channel:nixos-25.05
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
-      - run: nix flake check
-      - run: nix develop .#goluca -c go version
-      - run: nix develop .#goluca -c make lint
+      - name: 'nix flake check'
+        run: nix flake check
+      - name: 'go version'
+        run: nix develop .#goluca -c go version
+      - name: 'lint'
+        run: nix develop .#goluca -c golangci-lint version
+        run: nix develop .#goluca -c make lint
   
