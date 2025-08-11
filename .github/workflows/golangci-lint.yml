@@ -11,8 +11,9 @@ jobs:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
       - name: nix flake check
         run: nix flake check
-      - name: go version
-        run: nix develop .#goluca -c go version
-      - name: lint
-        run: nix develop .#goluca -c golangci-lint version && nix develop .#goluca -c make lint
-  
+      - name: nix develop & lint
+        shell: nix develop .#goluca --command bash {0}
+        run: |
+          go version
+          golangci-lint version
+          make lint
