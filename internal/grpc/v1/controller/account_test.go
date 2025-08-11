@@ -34,7 +34,7 @@ func TestCreateAccount(t *testing.T) {
 
 	s.Is.True(res != nil)
 
-	s.Is.True(res.GetAccount().GetId() == "")
+	s.Is.True(res.GetAccount().GetId() != "")
 	s.Is.True(res.GetAccount().GetParentId() == "")
 	s.Is.Equal(res.GetAccount().GetName(), req.Name)
 	s.Is.Equal(res.GetAccount().GetType(), req.Type)
