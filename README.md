@@ -52,7 +52,7 @@ TODO
 - [ ] create tenant data structures
   - [ ] create auth
   - [ ] create management ui
-- [ ] add govulnscan
+- [x] add govulnscan
 - [ ] grpc-gateway?
 - [ ] o11y
     - [X] Add tracing
