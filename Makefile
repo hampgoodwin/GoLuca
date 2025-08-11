@@ -29,7 +29,7 @@ lint:
 check: lint test bufcheck vulnerabilitycheck
 
 vulnerabilitycheck:
-	@go tool govulncheck
+	@go tool govulncheck ./...
 
 run:
 	@go run $$(pwd)/cmd/goluca/main.go
