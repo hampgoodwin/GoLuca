@@ -1,23 +1,22 @@
-name: buf
 
-on: pull_request
-  
+name: buf check
+on: [pull_request]
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: buf-setup-action
-        uses: bufbuild/buf-setup-action@v1.50.0
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v31
         with:
-          github_token: ${{ github.token }}
-      - name: buf-lint-action
-        uses: bufbuild/buf-lint-action@v1.1.1
-        with:
-          input: 'proto'
-      - name: buf-breaking
-        uses: bufbuild/buf-breaking-action@v1.1.4
-        with:
-          input: 'proto'
-          against: 'https://github.com/hampgoodwin/GoLuca.git#branch=main,ref=HEAD,subdir=proto'
+          nix_path: nixpkgs=channel:nixos-25.05
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Warm nix develop environment
+        run: nix develop .#goluca -c echo "nix develop environment warmed"
+      - name: buf lint, format, and breaking
+        shell: nix develop .#goluca --command bash {0}
+        run: |
+          buf --version
+          buf lint proto
+          buf format proto -w
+          buf breaking proto --against 'https://github.com/hampgoodwin/GoLuca.git#branch=main,ref=HEAD,subdir=proto'
+          

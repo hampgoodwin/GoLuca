@@ -1,11 +1,12 @@
 GOLANGCI_LINT_VERSION = latest
 
 .PHONY: buf
-buf:
-	@ sh ./scripts/buf.sh
+buf: buf-check
+	@buf generate proto
+
+bufcheck:
 	@buf lint proto
 	@buf format proto -w
-	@buf generate proto
 
 .PHONY: test
 test:
