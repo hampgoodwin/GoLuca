@@ -10,6 +10,8 @@ A Simple Accounting Ledger
 
 ## Tooling
 
+Core dependencies are nix and nix-direnv. Everything else required for this repository is managed by these two!
+
 We use [direnv](https://direnv.net/) to manage all toolings and dependencies. You can reference the ./flake.nix file for their declarations and ./flake.lock for versions. Currently we are not pinning versions in flake.nix via import, but we should do that soon. Below are some tools we use, and a description of how we use them.
 
 - [nix-direnv](https://github.com/nix-community/nix-direnv)
@@ -23,6 +25,12 @@ We use [direnv](https://direnv.net/) to manage all toolings and dependencies. Yo
 - [colima](https://github.com/abiosoft/colima) for container runtimes.
 - [jaeger](https://www.jaegertracing.io/) for local trace collector and ui.
 - [nats](https://nats.io/) for eventing.
+
+## How to develop
+
+Read the [Tooling](##tooling) section.
+
+Navigate in your shell to this repos directory and a developer environment will be configured for you. Either have a global container runtime available, or use this environments colima, by running `colima start`. Review the [Makefile](./Makefile) to see available commands. Otherwise, everything is what you'd expect. Best of luck!
 
 ---
 
@@ -38,8 +46,8 @@ TODO
   - [ ] update testing paradigm
   - [ ] remove http interface, grpc-gateway, proto validation?
   - [ ] swap ksuid for uuidv7!!
-- [ ] update all dependencies
-- [ ] make a nix dev environment configuration
+- [x] update all dependencies
+- [x] make a nix dev environment configuration
 - [ ] after f/e deploy this thing somewhere
 - [ ] create tenant data structures
   - [ ] create auth
