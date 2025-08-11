@@ -19,6 +19,7 @@
       in
       {
         devShells.goluca = pkgs.mkShell {
+          name = "goluca";
           buildInputs = [
             # languages+toolings
             ## go
@@ -47,15 +48,7 @@
           ];
 
           shellHook = ''
-            echo "Starting Colima..."
-            if ! colima status | grep -q "Running"; then
-              colima start >/dev/null 2>&1 &
-              echo "...Colima starting in background"
-            else
-              echo "...Colima already running."
-            fi
-
-            echo "You can now run: docker-compose up -d"
+            echo "📚 goluca"
           '';
         };
       }

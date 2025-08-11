@@ -1,3 +1,4 @@
+.env
 .env.toml
 cover.out
 .vscode/
