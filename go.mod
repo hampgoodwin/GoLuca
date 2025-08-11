@@ -7,7 +7,7 @@ require (
 	github.com/go-chi/chi/v5 v5.2.2
 	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/go-playground/validator/v10 v10.27.0
-	github.com/golang-migrate/migrate/v4 v4.18.1
+	github.com/golang-migrate/migrate/v4 v4.18.3
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.2.0
 	github.com/hampgoodwin/errors v0.0.1
 	github.com/jackc/pgconn v1.14.3
