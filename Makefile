@@ -7,6 +7,8 @@ buf: buf-check
 bufcheck:
 	@buf lint proto
 	@buf format proto -w
+	@buf breaking proto --against 'https://github.com/hampgoodwin/GoLuca.git#branch=main,ref=HEAD,subdir=proto'
+
 
 .PHONY: test
 test:
