@@ -1,4 +1,4 @@
-name: golangci-lint
+name: lint
 on: [push]
 jobs:
   golangci:
@@ -11,7 +11,9 @@ jobs:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
       - name: nix flake check
         run: nix flake check
-      - name: nix develop & lint
+      - name: Warm nix develop environment
+        run: nix develop .#goluca -c echo "nix develop environment warmed"
+      - name: lint
         shell: nix develop .#goluca --command bash {0}
         run: |
           go version
