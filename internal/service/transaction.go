@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	event "github.com/hampgoodwin/GoLuca/internal/event"
@@ -140,7 +141,7 @@ func (s *Service) CreateTransaction(ctx context.Context, create transaction.Tran
 		return transaction, errors.Wrap(err, "proto encoding created transaction")
 	}
 	if err := s.publisher.Publish(event.SubjectTransactionCreated, data); err != nil {
-		// TODO global logger
+		log.Printf("publishing %q: %v", event.SubjectTransactionCreated, err)
 	}
 
 	return transaction, nil

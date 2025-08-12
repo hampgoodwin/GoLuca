@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/segmentio/ksuid"
@@ -131,7 +132,7 @@ func (s *Service) CreateAccount(ctx context.Context, create account.Account) (ac
 		return account, errors.Wrap(err, "proto encoding created account")
 	}
 	if err := s.publisher.Publish(event.SubjectAccountCreated, data); err != nil {
-		// TODO global logger
+		log.Printf("publishing %q: %v", event.SubjectAccountCreated, err)
 	}
 
 	return account, nil
