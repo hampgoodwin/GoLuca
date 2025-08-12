@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/hampgoodwin/errors"
-	"github.com/segmentio/ksuid"
 )
 
 func ParseCursor(encodedCursor string) (Cursor, error) {
@@ -33,7 +33,7 @@ func ParseCursor(encodedCursor string) (Cursor, error) {
 	c.Time = t
 
 	id := arrStr[1]
-	_, err = ksuid.Parse(id)
+	_, err = uuid.Parse(id)
 	if err != nil {
 		return c, err
 	}

@@ -9,7 +9,7 @@ TODO
   - [ ] update pagination, make a separate hampgoodwin/go-paginate lib
   - [ ] update testing paradigm
   - [ ] remove http interface, grpc-gateway, proto validation?
-  - [ ] swap ksuid for uuidv7!!
+  - [x] swap ksuid for uuidv7!!
 - [x] update all dependencies
 - [x] make a nix dev environment configuration
 - [ ] after f/e deploy this thing somewhere

@@ -73,9 +73,9 @@ components:
         type: object
         properties:
           id:
-            $ref: 'shared.yml#/components/schemas/ksuid'
+            $ref: 'shared.yml#/components/schemas/uuidv7'
           parentId:
-            $ref: 'shared.yml#/components/schemas/ksuid'
+            $ref: 'shared.yml#/components/schemas/uuidv7'
           name:
             type: string
           type:
@@ -91,7 +91,7 @@ components:
             type: object
             properties:
               parentId:
-                $ref: 'shared.yml#/components/schemas/ksuid'
+                $ref: 'shared.yml#/components/schemas/uuidv7'
               name:
                 type: string
               type:
@@ -143,5 +143,5 @@ components:
       required: true
       description: 'required uuid url parameter to get a specific account resource.'
       schema:
-        $ref: 'shared.yml#/components/schemas/ksuid'
+        $ref: 'shared.yml#/components/schemas/uuidv7'
   

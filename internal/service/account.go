@@ -6,12 +6,12 @@ import (
 	"log"
 	"time"
 
-	"github.com/segmentio/ksuid"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/protobuf/proto"
 
+	"github.com/google/uuid"
 	"github.com/hampgoodwin/errors"
 
 	"github.com/hampgoodwin/GoLuca/internal/account"
@@ -106,8 +106,12 @@ func (s *Service) CreateAccount(ctx context.Context, create account.Account) (ac
 	))
 	defer span.End()
 
-	create.ID = ksuid.New().String()
-	create.CreatedAt = time.Now()
+	uuidv7, err := uuid.NewV7()
+	if err != nil {
+		return account.Account{}, errors.Wrap(err, "creating uuid7")
+	}
+	create.ID = uuidv7.String()
+	create.CreatedAt = time.Unix(uuidv7.Time().UnixTime())
 	span.SetAttributes(attribute.String("id", create.ID))
 
 	if err := validate.Validate(create); err != nil {

@@ -43,15 +43,15 @@ components:
       type: object
       properties:
         id:
-          $ref: 'shared.yml#/components/schemas/ksuid'
+          $ref: 'shared.yml#/components/schemas/uuidv7'
         transactionID:
-          $ref: 'shared.yml#/components/schemas/ksuid'
+          $ref: 'shared.yml#/components/schemas/uuidv7'
         description:
           type: string
         debitAccount:
-          $ref: 'shared.yml#/components/schemas/ksuid'
+          $ref: 'shared.yml#/components/schemas/uuidv7'
         creditAccount:
-          $ref: 'shared.yml#/components/schemas/ksuid'
+          $ref: 'shared.yml#/components/schemas/uuidv7'
         amount:
           $ref: '#/components/schemas/amount'
         createdAt:

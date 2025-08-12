@@ -10,8 +10,8 @@ var ErrParseType = errors.New("error parsing string as type")
 
 // Account represents a collection of entries into a logical grouping
 type Account struct {
-	ID        string    `validate:"required,KSUID"`
-	ParentID  string    `validate:"omitempty,KSUID"`
+	ID        string    `validate:"required,uuid7"`
+	ParentID  string    `validate:"omitempty,uuid7"`
 	Name      string    `validate:"required"`
 	Type      Type      `validate:"required"`
 	Basis     Basis     `validate:"required"`

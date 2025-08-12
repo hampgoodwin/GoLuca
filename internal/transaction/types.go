@@ -8,7 +8,7 @@ import (
 
 // Transaction ...
 type Transaction struct {
-	ID          string    `validate:"required,KSUID"`
+	ID          string    `validate:"required,uuid7"`
 	Description string    `validate:"required"`
 	Entries     []Entry   `validate:"required,gt=0,dive"`
 	CreatedAt   time.Time `validate:"required"`
@@ -32,11 +32,11 @@ func (t Transaction) IsZero() bool {
 
 // Entry ...
 type Entry struct {
-	ID            string `validate:"required,KSUID"`
-	TransactionID string `validate:"required,KSUID"`
+	ID            string `validate:"required,uuid7"`
+	TransactionID string `validate:"required,uuid7"`
 	Description   string
-	DebitAccount  string        `validate:"required,KSUID"`
-	CreditAccount string        `validate:"required,KSUID"`
+	DebitAccount  string        `validate:"required,uuid7"`
+	CreditAccount string        `validate:"required,uuid7"`
 	Amount        amount.Amount `validate:"required"`
 	CreatedAt     time.Time     `validate:"required"`
 }

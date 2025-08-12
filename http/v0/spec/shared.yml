@@ -21,8 +21,8 @@ components:
     time:
       type: string
       format: 'rfc3339/iso8601'
-    ksuid:
+    uuidv7:
       type: string
-      format: 'ksuid'
-      maxLength: 27
-      pattern: '^[a-zA-Z0-9]{27}$'
+      format: 'uuid7'
+      maxLength: 36
+      pattern: '^[0-9a-fa-f]{8}-[0-9a-fa-f]{4}-[7][0-9a-fa-f]{3}-[89aabb][0-9a-fa-f]{3}-[0-9a-fa-f]{12}$'

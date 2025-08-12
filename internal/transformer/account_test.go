@@ -4,15 +4,16 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/hampgoodwin/GoLuca/internal/account"
 	"github.com/hampgoodwin/GoLuca/internal/repository"
 	httpaccount "github.com/hampgoodwin/GoLuca/pkg/http/v0/account"
 	"github.com/matryer/is"
-	"github.com/segmentio/ksuid"
 )
 
 func TestNewAccountFromHTTPCreateAccount(t *testing.T) {
-	parentID := ksuid.New().String()
+	uuidv7, _ := uuid.NewV7()
+	parentID := uuidv7.String()
 	testCases := []struct {
 		description       string
 		httpCreateAccount httpaccount.CreateAccount
