@@ -12,11 +12,11 @@ import (
 	"github.com/hampgoodwin/GoLuca/internal/validate"
 	"github.com/hampgoodwin/GoLuca/pkg/pagination"
 	"github.com/hampgoodwin/errors"
+
 	"github.com/segmentio/ksuid"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
-	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -137,12 +137,10 @@ func (s *Service) CreateTransaction(ctx context.Context, create transaction.Tran
 	protoCreated := transformer.NewProtoTransactionFromTransaction(transaction)
 	data, err := proto.Marshal(protoCreated)
 	if err != nil {
-		s.log.Error("proto encoding created transaction", zap.Any("proto_transaction", protoCreated))
 		return transaction, errors.Wrap(err, "proto encoding created transaction")
 	}
 	if err := s.publisher.Publish(event.SubjectTransactionCreated, data); err != nil {
-		// should we return/fail on a failed production of a msg..?
-		s.log.Error("publishing transaction created message", zap.Error(err))
+		// TODO global logger
 	}
 
 	return transaction, nil

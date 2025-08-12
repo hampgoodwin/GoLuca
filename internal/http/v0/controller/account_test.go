@@ -31,7 +31,6 @@ func TestCreateAccount(t *testing.T) {
 	res := createAccount(t, &s, aReq)
 	defer func() {
 		if err := res.Body.Close(); err != nil {
-			// TODO: use global logger
 			log.Printf("creating account: %v\n", err)
 		}
 	}()
@@ -64,7 +63,6 @@ func TestCreateAccount_InvalidRequestBody(t *testing.T) {
 	res := createAccount(t, &s, aReq)
 	defer func() {
 		if err := res.Body.Close(); err != nil {
-			// TODO: use global logger
 			log.Printf("creating account: %v\n", err)
 		}
 	}()
@@ -86,7 +84,6 @@ func TestCreateAccount_CannotDeserialize(t *testing.T) {
 	res := createAccount(t, &s, bad)
 	defer func() {
 		if err := res.Body.Close(); err != nil {
-			// TODO: use global logger
 			log.Printf("creating account: %v\n", err)
 		}
 	}()
@@ -114,7 +111,6 @@ func TestGetAccount(t *testing.T) {
 	res := createAccount(t, &s, aReq)
 	defer func() {
 		if err := res.Body.Close(); err != nil {
-			// TODO: use global logger
 			log.Printf("creating account: %v\n", err)
 		}
 	}()
@@ -166,7 +162,6 @@ func TestGetAccount_InvalidPersistedAccount(t *testing.T) {
 	res := getAccount(t, &s, id)
 	defer func() {
 		if err := res.Body.Close(); err != nil {
-			// TODO: use global logger
 			log.Printf("getting account: %v\n", err)
 		}
 	}()
@@ -189,7 +184,6 @@ func TestListAccounts(t *testing.T) {
 	res := createAccount(t, &s, aReq)
 	defer func() {
 		if err := res.Body.Close(); err != nil {
-			// TODO: use global logger
 			log.Printf("creating account: %v\n", err)
 		}
 	}()
@@ -202,7 +196,6 @@ func TestListAccounts(t *testing.T) {
 	res2 := createAccount(t, &s, aReq)
 	defer func() {
 		if err := res2.Body.Close(); err != nil {
-			// TODO: replace with global logger
 			log.Printf("creating test account: %v\n", err)
 		}
 	}()

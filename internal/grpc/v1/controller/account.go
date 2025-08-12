@@ -20,17 +20,17 @@ func (c *Controller) GetAccount(ctx context.Context, req *servicev1.GetAccountRe
 	defer span.End()
 
 	if err := validate.Validate(req); err != nil {
-		return nil, c.respondError(ctx, c.log, errors.WithErrorMessage(err, errors.NotValidRequestData, "validating get account request"))
+		return nil, c.respondError(ctx, errors.WithErrorMessage(err, errors.NotValidRequestData, "validating get account request"))
 	}
 
 	serviceAccount, err := c.service.GetAccount(ctx, req.AccountId)
 	if err != nil {
-		return nil, c.respondError(ctx, c.log, err)
+		return nil, c.respondError(ctx, err)
 	}
 
 	account := transformer.NewProtoAccountFromAccount(serviceAccount)
 	if err := validate.Validate(account); err != nil {
-		return nil, c.respondError(ctx, c.log, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating get account from account"))
+		return nil, c.respondError(ctx, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating get account from account"))
 	}
 
 	return &servicev1.GetAccountResponse{Account: account}, nil
@@ -48,12 +48,12 @@ func (c *Controller) ListAccounts(ctx context.Context, req *servicev1.ListAccoun
 		limit = 10
 	}
 	if err := validate.Var(cursor, "omitempty,base64"); err != nil {
-		return nil, c.respondError(ctx, c.log, errors.WithErrorMessage(err, errors.NotValidRequest, "invalid cursor or token"))
+		return nil, c.respondError(ctx, errors.WithErrorMessage(err, errors.NotValidRequest, "invalid cursor or token"))
 	}
 
 	accounts, nextCursor, err := c.service.ListAccounts(ctx, cursor, limit)
 	if err != nil {
-		return nil, c.respondError(ctx, c.log, err)
+		return nil, c.respondError(ctx, err)
 	}
 
 	listAccountsResponse := &servicev1.ListAccountsResponse{
@@ -63,7 +63,7 @@ func (c *Controller) ListAccounts(ctx context.Context, req *servicev1.ListAccoun
 		listAccountsResponse.Accounts = append(listAccountsResponse.Accounts, transformer.NewProtoAccountFromAccount(account))
 	}
 	if err := validate.Validate(listAccountsResponse); err != nil {
-		return nil, c.respondError(ctx, c.log, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating list accounts response from accounts"))
+		return nil, c.respondError(ctx, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating list accounts response from accounts"))
 	}
 
 	return listAccountsResponse, nil
@@ -79,7 +79,7 @@ func (c *Controller) CreateAccount(ctx context.Context, create *servicev1.Create
 	defer span.End()
 
 	if err := validate.Validate(create); err != nil {
-		return nil, c.respondError(ctx, c.log, errors.WithErrorMessage(err, errors.NotValidRequestData, "validating create account request"))
+		return nil, c.respondError(ctx, errors.WithErrorMessage(err, errors.NotValidRequestData, "validating create account request"))
 	}
 
 	serviceAccount := transformer.NewAccountFromProtoCreateAccount(create)
@@ -91,7 +91,7 @@ func (c *Controller) CreateAccount(ctx context.Context, create *servicev1.Create
 
 	account := transformer.NewProtoAccountFromAccount(serviceAccount)
 	if err := validate.Validate(account); err != nil {
-		return nil, c.respondError(ctx, c.log, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating account from created account"))
+		return nil, c.respondError(ctx, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating account from created account"))
 	}
 	return &servicev1.CreateAccountResponse{Account: account}, nil
 }

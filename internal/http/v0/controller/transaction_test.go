@@ -29,7 +29,6 @@ func TestCreateTransaction(t *testing.T) {
 	res := createAccount(t, &s, aReq)
 	defer func() {
 		if err := res.Body.Close(); err != nil {
-			// TODO: use global logger
 			log.Printf("creating account: %v\n", err)
 		}
 	}()
@@ -48,7 +47,6 @@ func TestCreateTransaction(t *testing.T) {
 	res2 := createAccount(t, &s, aReq)
 	defer func() {
 		if err := res2.Body.Close(); err != nil {
-			// TODO: use global logger
 			log.Printf("creating account: %v\n", err)
 		}
 	}()
@@ -76,7 +74,6 @@ func TestCreateTransaction(t *testing.T) {
 	res3 := createTransaction(t, &s, tReq)
 	defer func() {
 		if err := res3.Body.Close(); err != nil {
-			// TODO: use global logger
 			log.Printf("creating account: %v\n", err)
 		}
 	}()
@@ -96,7 +93,6 @@ func TestCreateTransaction(t *testing.T) {
 	res4 := createTransaction(t, &s, tReq)
 	defer func() {
 		if err := res4.Body.Close(); err != nil {
-			// TODO: use global logger
 			log.Printf("creating account: %v\n", err)
 		}
 	}()
@@ -121,7 +117,6 @@ func TestCreateTransaction_int64_overflow(t *testing.T) {
 	res := createAccount(t, &s, aReq)
 	defer func() {
 		if err := res.Body.Close(); err != nil {
-			// TODO: use global logger
 			log.Printf("creating account: %v\n", err)
 		}
 	}()
@@ -140,7 +135,6 @@ func TestCreateTransaction_int64_overflow(t *testing.T) {
 	res2 := createAccount(t, &s, aReq)
 	defer func() {
 		if err := res2.Body.Close(); err != nil {
-			// TODO: use global logger
 			log.Printf("creating account: %v\n", err)
 		}
 	}()
@@ -168,7 +162,6 @@ func TestCreateTransaction_int64_overflow(t *testing.T) {
 	res3 := createTransaction(t, &s, tReq)
 	defer func() {
 		if err := res3.Body.Close(); err != nil {
-			// TODO: use global logger
 			log.Printf("creating account: %v\n", err)
 		}
 	}()
@@ -196,7 +189,6 @@ func TestGetTransaction(t *testing.T) {
 	res := createAccount(t, &s, aReq)
 	defer func() {
 		if err := res.Body.Close(); err != nil {
-			// TODO: use global logger
 			log.Printf("creating account: %v\n", err)
 		}
 	}()
@@ -215,7 +207,6 @@ func TestGetTransaction(t *testing.T) {
 	res2 := createAccount(t, &s, aReq)
 	defer func() {
 		if err := res2.Body.Close(); err != nil {
-			// TODO: use global logger
 			log.Printf("creating account: %v\n", err)
 		}
 	}()
@@ -243,7 +234,6 @@ func TestGetTransaction(t *testing.T) {
 	res3 := createTransaction(t, &s, tReq)
 	defer func() {
 		if err := res3.Body.Close(); err != nil {
-			// TODO: use global logger
 			log.Printf("creating account: %v\n", err)
 		}
 	}()
@@ -264,7 +254,6 @@ func TestGetTransaction(t *testing.T) {
 	res4 := getTransaction(t, &s, tRes.ID)
 	defer func() {
 		if err := res4.Body.Close(); err != nil {
-			// TODO: use global logger
 			log.Printf("creating account: %v\n", err)
 		}
 	}()
@@ -295,7 +284,6 @@ func TestListTransactions(t *testing.T) {
 	res := createAccount(t, &s, aReq)
 	defer func() {
 		if err := res.Body.Close(); err != nil {
-			// TODO: use global logger
 			log.Printf("creating account: %v\n", err)
 		}
 	}()
@@ -314,7 +302,6 @@ func TestListTransactions(t *testing.T) {
 	res2 := createAccount(t, &s, aReq)
 	defer func() {
 		if err := res2.Body.Close(); err != nil {
-			// TODO: use global logger
 			log.Printf("creating account: %v\n", err)
 		}
 	}()
@@ -342,7 +329,6 @@ func TestListTransactions(t *testing.T) {
 	res3 := createTransaction(t, &s, tReq)
 	defer func() {
 		if err := res3.Body.Close(); err != nil {
-			// TODO: use global logger
 			log.Printf("creating account: %v\n", err)
 		}
 	}()
@@ -364,7 +350,6 @@ func TestListTransactions(t *testing.T) {
 	res4 := listTransactions(t, &s)
 	defer func() {
 		if err := res4.Body.Close(); err != nil {
-			// TODO: use global logger
 			log.Printf("creating account: %v\n", err)
 		}
 	}()
@@ -380,7 +365,7 @@ func TestListTransactions(t *testing.T) {
 func createTransaction(
 	t *testing.T,
 	s *test.Scope,
-	e interface{},
+	e any,
 ) *http.Response {
 	t.Helper()
 
