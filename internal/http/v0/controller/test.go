@@ -17,8 +17,8 @@ func newTestHTTPHandler(
 ) http.Handler {
 	r := repository.NewRepository(db)
 	nc, _ := nats.Connect(nats.DefaultURL)
-	s := service.NewService(log, r, nc)
-	c := NewController(log, s)
+	s := service.NewService(r, nc)
+	c := NewController(s)
 	return router.Register(
 		log,
 		c.RegisterAccountRoutes,

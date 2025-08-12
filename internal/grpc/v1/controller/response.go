@@ -2,24 +2,21 @@ package controller
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/hampgoodwin/GoLuca/internal/meta"
 	"github.com/hampgoodwin/errors"
 	"go.opentelemetry.io/otel"
 	otelcodes "go.opentelemetry.io/otel/codes"
-	"go.uber.org/zap"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-func (c *Controller) respondError(ctx context.Context, log *zap.Logger, err error) error {
+func (c *Controller) respondError(ctx context.Context, err error) error {
 	_, span := otel.Tracer(meta.ServiceName).Start(ctx, "internal.grpc.v1.controller.respondError")
 	defer span.End()
 	span.RecordError(err)
-	log.Error("responding", zap.Error(err))
 
 	var statuscode codes.Code
 	var message string
@@ -43,10 +40,6 @@ func (c *Controller) respondError(ctx context.Context, log *zap.Logger, err erro
 		if err := c.respondOnValidationErrors(err, message); err != nil {
 			return err
 		}
-		c.log.Error(
-			"incorrect error flag used for case",
-			zap.Error(err), zap.String("error_flag", fmt.Sprint(errors.NotValidRequestData)),
-		)
 	case errors.Is(err, errors.NotFound):
 		statuscode = codes.NotFound
 	case errors.Is(err, errors.NotValidInternalData):

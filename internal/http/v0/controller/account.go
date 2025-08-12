@@ -15,7 +15,6 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 
 	"github.com/hampgoodwin/errors"
-	"go.uber.org/zap"
 )
 
 type accountRequest struct {
@@ -47,17 +46,16 @@ func (c *Controller) getAccount(w http.ResponseWriter, r *http.Request) {
 
 	accountID := chi.URLParam(r, "accountId")
 	span.SetAttributes(attribute.String("account_id", accountID))
-	c.log.Info("getting account", zap.String("account_id", accountID))
 
 	account, err := c.service.GetAccount(ctx, accountID)
 	if err != nil {
-		c.respondError(ctx, w, c.log, err)
+		c.respondError(ctx, w, err)
 		return
 	}
 
 	responseAccount := transformer.NewHTTPAccountFromAccount(account)
 	if err := validate.Validate(responseAccount); err != nil {
-		c.respondError(ctx, w, c.log, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating http account from account"))
+		c.respondError(ctx, w, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating http account from account"))
 		return
 	}
 
@@ -77,7 +75,7 @@ func (c *Controller) listAccounts(w http.ResponseWriter, r *http.Request) {
 	}
 	limitUInt64, err := strconv.ParseUint(limit, 10, 64)
 	if err != nil {
-		c.respondError(ctx, w, c.log, errors.Wrap(err, "converting page size"))
+		c.respondError(ctx, w, errors.Wrap(err, "converting page size"))
 	}
 	if cursor == "\"\"" {
 		cursor = ""
@@ -87,13 +85,13 @@ func (c *Controller) listAccounts(w http.ResponseWriter, r *http.Request) {
 		attribute.Int64("limit", int64(limitUInt64)),
 	)
 	if err := validate.Var(cursor, "omitempty,base64"); err != nil {
-		c.respondError(ctx, w, c.log, errors.WithErrorMessage(err, errors.NotValidRequest, "invalid cursor or token"))
+		c.respondError(ctx, w, errors.WithErrorMessage(err, errors.NotValidRequest, "invalid cursor or token"))
 		return
 	}
 
 	accounts, nextCursor, err := c.service.ListAccounts(ctx, cursor, limitUInt64)
 	if err != nil {
-		c.respondError(ctx, w, c.log, errors.Wrap(err, "getting accounts from service"))
+		c.respondError(ctx, w, errors.Wrap(err, "getting accounts from service"))
 		return
 	}
 
@@ -102,7 +100,7 @@ func (c *Controller) listAccounts(w http.ResponseWriter, r *http.Request) {
 		responseAccounts = append(responseAccounts, transformer.NewHTTPAccountFromAccount(account))
 	}
 	if err := validate.Validate(responseAccounts); err != nil {
-		c.respondError(ctx, w, c.log, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating http accounts from accounts"))
+		c.respondError(ctx, w, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating http accounts from accounts"))
 		return
 	}
 
@@ -116,11 +114,11 @@ func (c *Controller) createAccount(w http.ResponseWriter, r *http.Request) {
 	defer span.End()
 	req := &accountRequest{}
 	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
-		c.respondError(ctx, w, c.log, errors.WrapWithErrorMessage(err, errors.NotDeserializable, err.Error(), "deserializing request body"))
+		c.respondError(ctx, w, errors.WrapWithErrorMessage(err, errors.NotDeserializable, err.Error(), "deserializing request body"))
 		return
 	}
 	if err := validate.Validate(req); err != nil {
-		c.respondError(ctx, w, c.log, errors.WithErrorMessage(err, errors.NotValidRequestData, "validating http api create account request"))
+		c.respondError(ctx, w, errors.WithErrorMessage(err, errors.NotValidRequestData, "validating http api create account request"))
 		return
 	}
 
@@ -128,13 +126,13 @@ func (c *Controller) createAccount(w http.ResponseWriter, r *http.Request) {
 
 	created, err := c.service.CreateAccount(ctx, create)
 	if err != nil {
-		c.respondError(ctx, w, c.log, errors.Wrap(err, "creating account in service"))
+		c.respondError(ctx, w, errors.Wrap(err, "creating account in service"))
 		return
 	}
 
 	responseCreated := transformer.NewHTTPAccountFromAccount(created)
 	if err := validate.Validate(responseCreated); err != nil {
-		c.respondError(ctx, w, c.log, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating http account from account"))
+		c.respondError(ctx, w, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating http account from account"))
 	}
 
 	res := accountResponse{Account: responseCreated}

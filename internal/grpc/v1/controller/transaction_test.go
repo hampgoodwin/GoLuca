@@ -19,8 +19,8 @@ func TestCreateTransaction(t *testing.T) {
 	s := test.GetScope(t)
 	repository := repository.NewRepository(s.DB)
 	nc, _ := nats.Connect(nats.DefaultURL)
-	service := service.NewService(s.Env.Log, repository, nc)
-	controller := NewController(s.Env.Log, service)
+	service := service.NewService(repository, nc)
+	controller := NewController(service)
 	s.SetGRPC(t, controller)
 
 	createDebitAccountRequest := &servicev1.CreateAccountRequest{
@@ -69,8 +69,8 @@ func TestCreateTransaction_InvalidRequestBody(t *testing.T) {
 	s := test.GetScope(t)
 	repository := repository.NewRepository(s.DB)
 	nc, _ := nats.Connect(nats.DefaultURL)
-	service := service.NewService(s.Env.Log, repository, nc)
-	controller := NewController(s.Env.Log, service)
+	service := service.NewService(repository, nc)
+	controller := NewController(service)
 	s.SetGRPC(t, controller)
 
 	createTransactionRequest := &servicev1.CreateTransactionRequest{
@@ -114,8 +114,8 @@ func TestGetTransaction(t *testing.T) {
 	s := test.GetScope(t)
 	repository := repository.NewRepository(s.DB)
 	nc, _ := nats.Connect(nats.DefaultURL)
-	service := service.NewService(s.Env.Log, repository, nc)
-	controller := NewController(s.Env.Log, service)
+	service := service.NewService(repository, nc)
+	controller := NewController(service)
 	s.SetGRPC(t, controller)
 
 	createDebitAccountRequest := &servicev1.CreateAccountRequest{
@@ -166,8 +166,8 @@ func TestListTransactions(t *testing.T) {
 	s := test.GetScope(t)
 	repository := repository.NewRepository(s.DB)
 	nc, _ := nats.Connect(nats.DefaultURL)
-	service := service.NewService(s.Env.Log, repository, nc)
-	controller := NewController(s.Env.Log, service)
+	service := service.NewService(repository, nc)
+	controller := NewController(service)
 	s.SetGRPC(t, controller)
 
 	createDebitAccountRequest := &servicev1.CreateAccountRequest{

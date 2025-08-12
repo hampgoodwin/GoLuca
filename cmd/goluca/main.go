@@ -88,10 +88,10 @@ func main() {
 		}
 	}
 	// Create the service layer
-	service := service.NewService(env.Log, repository, nc)
+	service := service.NewService(repository, nc)
 
 	// Create the HTTP interface
-	httpController := httpcontroller.NewController(env.Log, service)
+	httpController := httpcontroller.NewController(service)
 	httpServer := &http.Server{
 		Addr:     env.Config.HTTPServer.AddressString(),
 		ErrorLog: zap.NewStdLog(env.Log),
@@ -104,7 +104,7 @@ func main() {
 
 	// Create the gRPC server
 	// Create the controller for the to-be-created gRPC Server
-	grpcController := grpccontroller.NewController(env.Log, service)
+	grpcController := grpccontroller.NewController(service)
 	// Create listener for gRPC Server
 	lis, err := net.Listen("tcp", env.Config.GRPCServer.URL())
 	if err != nil {

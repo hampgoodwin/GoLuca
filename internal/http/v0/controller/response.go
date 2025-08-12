@@ -3,7 +3,6 @@ package controller
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -11,8 +10,6 @@ import (
 	"github.com/hampgoodwin/errors"
 	"go.opentelemetry.io/otel"
 	otelcodes "go.opentelemetry.io/otel/codes"
-
-	"go.uber.org/zap"
 )
 
 type ErrorResponse struct {
@@ -28,11 +25,10 @@ func (c *Controller) respond(w http.ResponseWriter, i interface{}, statuseCode i
 	}
 }
 
-func (c *Controller) respondError(ctx context.Context, w http.ResponseWriter, log *zap.Logger, err error) {
+func (c *Controller) respondError(ctx context.Context, w http.ResponseWriter, err error) {
 	_, span := otel.Tracer(meta.ServiceName).Start(ctx, "internal.http.v0.controller.respondError")
 	defer span.End()
 	span.RecordError(err)
-	log.Error("responding", zap.Error(err))
 
 	var statuscode int
 	var message string
@@ -56,10 +52,6 @@ func (c *Controller) respondError(ctx context.Context, w http.ResponseWriter, lo
 			return
 		}
 		c.respond(w, ErrorResponse{Description: message}, http.StatusBadRequest)
-		log.Error(
-			"incorrect error flag used for case",
-			zap.Error(err), zap.String("error_flag", fmt.Sprint(errors.NotValidRequestData)),
-		)
 		return
 	case errors.Is(err, errors.NotFound):
 		statuscode = http.StatusNotFound
@@ -76,7 +68,6 @@ func (c *Controller) respondError(ctx context.Context, w http.ResponseWriter, lo
 		statuscode = http.StatusBadRequest
 		message = "process which assumed existence of a relationship between data found no relationship. If you are creating data with related data id, those id's do not exist."
 	default:
-		log.Error("respondError", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte("unhandled error response."))
 	}

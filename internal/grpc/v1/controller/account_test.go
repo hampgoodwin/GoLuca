@@ -19,8 +19,8 @@ func TestCreateAccount(t *testing.T) {
 	s := test.GetScope(t)
 	repository := repository.NewRepository(s.DB)
 	nc, _ := nats.Connect(nats.DefaultURL)
-	service := service.NewService(s.Env.Log, repository, nc)
-	controller := NewController(s.Env.Log, service)
+	service := service.NewService(repository, nc)
+	controller := NewController(service)
 	s.SetGRPC(t, controller)
 
 	req := &servicev1.CreateAccountRequest{
@@ -46,8 +46,8 @@ func TestCreateAccount_InvalidRequestBody(t *testing.T) {
 	s := test.GetScope(t)
 	repository := repository.NewRepository(s.DB)
 	nc, _ := nats.Connect(nats.DefaultURL)
-	service := service.NewService(s.Env.Log, repository, nc)
-	controller := NewController(s.Env.Log, service)
+	service := service.NewService(repository, nc)
+	controller := NewController(service)
 	s.SetGRPC(t, controller)
 
 	req := &servicev1.CreateAccountRequest{}
@@ -86,8 +86,8 @@ func TestGetAccount(t *testing.T) {
 	s := test.GetScope(t)
 	repository := repository.NewRepository(s.DB)
 	nc, _ := nats.Connect(nats.DefaultURL)
-	service := service.NewService(s.Env.Log, repository, nc)
-	controller := NewController(s.Env.Log, service)
+	service := service.NewService(repository, nc)
+	controller := NewController(service)
 	s.SetGRPC(t, controller)
 
 	createAccountRequest := &servicev1.CreateAccountRequest{
@@ -118,8 +118,8 @@ func TestGetAccount_InvalidRequestBody(t *testing.T) {
 	s := test.GetScope(t)
 	repository := repository.NewRepository(s.DB)
 	nc, _ := nats.Connect(nats.DefaultURL)
-	service := service.NewService(s.Env.Log, repository, nc)
-	controller := NewController(s.Env.Log, service)
+	service := service.NewService(repository, nc)
+	controller := NewController(service)
 	s.SetGRPC(t, controller)
 
 	getAccountRequest := &servicev1.GetAccountRequest{
@@ -157,8 +157,8 @@ func TestListAccount(t *testing.T) {
 	s := test.GetScope(t)
 	repository := repository.NewRepository(s.DB)
 	nc, _ := nats.Connect(nats.DefaultURL)
-	service := service.NewService(s.Env.Log, repository, nc)
-	controller := NewController(s.Env.Log, service)
+	service := service.NewService(repository, nc)
+	controller := NewController(service)
 	s.SetGRPC(t, controller)
 
 	createAccountRequest := &servicev1.CreateAccountRequest{
@@ -191,8 +191,8 @@ func TestListAccount_InvalidRequestBody(t *testing.T) {
 	s := test.GetScope(t)
 	repository := repository.NewRepository(s.DB)
 	nc, _ := nats.Connect(nats.DefaultURL)
-	service := service.NewService(s.Env.Log, repository, nc)
-	controller := NewController(s.Env.Log, service)
+	service := service.NewService(repository, nc)
+	controller := NewController(service)
 	s.SetGRPC(t, controller)
 
 	listAccountsRequest := &servicev1.ListAccountsRequest{

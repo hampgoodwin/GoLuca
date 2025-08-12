@@ -3,13 +3,13 @@ package service
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/segmentio/ksuid"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
-	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/hampgoodwin/errors"
@@ -129,12 +129,10 @@ func (s *Service) CreateAccount(ctx context.Context, create account.Account) (ac
 	protoCreated := transformer.NewProtoAccountFromAccount(account)
 	data, err := proto.Marshal(protoCreated)
 	if err != nil {
-		s.log.Error("proto encoding created account", zap.Any("account", protoCreated))
 		return account, errors.Wrap(err, "proto encoding created account")
 	}
 	if err := s.publisher.Publish(event.SubjectAccountCreated, data); err != nil {
-		// should we return/fail on a failed production of a msg..?
-		s.log.Error("publishing account created message", zap.Error(err))
+		log.Printf("publishing %q: %v", event.SubjectAccountCreated, err)
 	}
 
 	return account, nil
