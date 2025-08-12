@@ -4,7 +4,7 @@ import (
 	"github.com/hampgoodwin/GoLuca/internal/service"
 )
 
-const ksuidRegexp = "^[a-zA-Z0-9]{27}$"
+const uuid7Regexp = `^[0-9a-f]{8}(?:\-[0-9a-f]{4}){3}-[0-9a-f]{12}$`
 
 type Controller struct {
 	service *service.Service

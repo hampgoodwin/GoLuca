@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/hampgoodwin/GoLuca/internal/amount"
 	"github.com/hampgoodwin/GoLuca/internal/repository"
 	"github.com/hampgoodwin/GoLuca/internal/transaction"
@@ -11,12 +12,13 @@ import (
 	httptransaction "github.com/hampgoodwin/GoLuca/pkg/http/v0/transaction"
 	"github.com/hampgoodwin/errors"
 	"github.com/matryer/is"
-	"github.com/segmentio/ksuid"
 )
 
 func TestNewTransactionFromHTTPCreateTransaction(t *testing.T) {
-	debitAccount := ksuid.New().String()
-	creditAccount := ksuid.New().String()
+	debitUUIDV7, _ := uuid.NewV7()
+	debitAccount := debitUUIDV7.String()
+	creditUUIDV7, _ := uuid.NewV7()
+	creditAccount := creditUUIDV7.String()
 	testCases := []struct {
 		description     string
 		httpTransaction httptransaction.CreateTransaction
@@ -77,10 +79,16 @@ func TestNewTransactionFromHTTPCreateTransaction(t *testing.T) {
 }
 
 func TestNewHTTPTransactionFromTransaction(t *testing.T) {
-	transactionID := ksuid.New().String()
-	entryID := ksuid.New().String()
-	debitAccount := ksuid.New().String()
-	creditAccount := ksuid.New().String()
+	transactionUUIDV7, _ := uuid.NewV7()
+	transactionID := transactionUUIDV7.String()
+
+	entryUUIDV7, _ := uuid.NewV7()
+	entryID := entryUUIDV7.String()
+
+	debitUUIDV7, _ := uuid.NewV7()
+	debitAccount := debitUUIDV7.String()
+	creditUUIDV7, _ := uuid.NewV7()
+	creditAccount := creditUUIDV7.String()
 	testCases := []struct {
 		description string
 		transaction transaction.Transaction
@@ -141,10 +149,16 @@ func TestNewHTTPTransactionFromTransaction(t *testing.T) {
 }
 
 func TestNewTransactionFromRepoTransaction(t *testing.T) {
-	transactionID := ksuid.New().String()
-	entryID := ksuid.New().String()
-	debitAccount := ksuid.New().String()
-	creditAccount := ksuid.New().String()
+	transactionUUIDV7, _ := uuid.NewV7()
+	transactionID := transactionUUIDV7.String()
+
+	entryUUIDV7, _ := uuid.NewV7()
+	entryID := entryUUIDV7.String()
+
+	debitUUIDV7, _ := uuid.NewV7()
+	debitAccount := debitUUIDV7.String()
+	creditUUIDV7, _ := uuid.NewV7()
+	creditAccount := creditUUIDV7.String()
 	testCases := []struct {
 		description string
 		transaction repository.Transaction
@@ -205,10 +219,16 @@ func TestNewTransactionFromRepoTransaction(t *testing.T) {
 }
 
 func TestNewRepoTransactionFromTransaction(t *testing.T) {
-	transactionID := ksuid.New().String()
-	entryID := ksuid.New().String()
-	debitAccount := ksuid.New().String()
-	creditAccount := ksuid.New().String()
+	transactionUUIDV7, _ := uuid.NewV7()
+	transactionID := transactionUUIDV7.String()
+
+	entryUUIDV7, _ := uuid.NewV7()
+	entryID := entryUUIDV7.String()
+
+	debitUUIDV7, _ := uuid.NewV7()
+	debitAccount := debitUUIDV7.String()
+	creditUUIDV7, _ := uuid.NewV7()
+	creditAccount := creditUUIDV7.String()
 	testCases := []struct {
 		description string
 		transaction transaction.Transaction

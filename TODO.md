@@ -5,11 +5,11 @@ TODO
 - [ ] update various patterns/paradigms
   - [x] singleton logger; changed to reduce logging out of service/db, and rely only on interceptor logger for network interface layers (http/grpc)
   - [ ] where interfaces are defined
-  - [ ] update to proto (editions)[https://protobuf.dev/editions/overview/#migrating]...(lang guide)[https://protobuf.dev/programming-guides/editions]
+  - [x] ~~update to proto (editions)[https://protobuf.dev/editions/overview/#migrating]...(lang guide)[https://protobuf.dev/programming-guides/editions]~~ not ready _quite yet_.
   - [ ] update pagination, make a separate hampgoodwin/go-paginate lib
   - [ ] update testing paradigm
   - [ ] remove http interface, grpc-gateway, proto validation?
-  - [ ] swap ksuid for uuidv7!!
+  - [x] swap ksuid for uuidv7!!
 - [x] update all dependencies
 - [x] make a nix dev environment configuration
 - [ ] after f/e deploy this thing somewhere

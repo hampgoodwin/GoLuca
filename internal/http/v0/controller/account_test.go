@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v7"
-	"github.com/segmentio/ksuid"
+	"github.com/google/uuid"
 
 	"github.com/hampgoodwin/GoLuca/internal/test"
 	httpaccount "github.com/hampgoodwin/GoLuca/pkg/http/v0/account"
@@ -134,7 +134,8 @@ func TestGetAccount_ErrorNotFound(t *testing.T) {
 	s := test.GetScope(t)
 	s.SetHTTP(t, newTestHTTPHandler(s.Env.Log, s.DB))
 
-	id := ksuid.New().String()
+	uuidv7, _ := uuid.NewV7()
+	id := uuidv7.String()
 	res := getAccount(t, &s, id)
 
 	var errRes ErrorResponse

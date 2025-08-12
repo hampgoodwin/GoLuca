@@ -2,27 +2,27 @@ package validate
 
 var (
 	account = map[string]string{
-		"Id":        "required,KSUID",
-		"parentId":  "omitempty,KSUID",
+		"Id":        "required,uuid7",
+		"parentId":  "omitempty,uuid7",
 		"Name":      "required",
 		"Type":      "required",
 		"Basis":     "required",
 		"CreatedAt": "required",
 	}
 	getAccountRequest = map[string]string{
-		"AccountId": "required,KSUID",
+		"AccountId": "required,uuid7",
 	}
 	createAccountRequest = map[string]string{
-		"ParentId": "omitempty,KSUID",
+		"ParentId": "omitempty,uuid7",
 		"Name":     "required",
 		"Type":     "required",
 		"Basis":    "required",
 	}
 	getTransactionRequest = map[string]string{
-		"TransactionId": "required,KSUID",
+		"TransactionId": "required,uuid7",
 	}
 	transaction = map[string]string{
-		"Id":          "required,KSUID",
+		"Id":          "required,uuid7",
 		"Description": "required",
 		"Entries":     "required,gt=0,dive",
 		"CreatedAt":   "required",
@@ -33,8 +33,8 @@ var (
 	}
 	createEntry = map[string]string{
 		"Description":   "required",
-		"DebitAccount":  "required,KSUID",
-		"CreditAccount": "required,KSUID",
+		"DebitAccount":  "required,uuid7",
+		"CreditAccount": "required,uuid7",
 		"Amount":        "required",
 	}
 	amount = map[string]string{

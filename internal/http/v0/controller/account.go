@@ -33,7 +33,7 @@ type accountsResponse struct {
 func (c *Controller) RegisterAccountRoutes(r *chi.Mux) {
 	r.Route("/accounts", func(r chi.Router) {
 		r.Get("/", c.listAccounts)
-		r.Get(fmt.Sprintf("/{accountId:%s}", ksuidRegexp), c.getAccount)
+		r.Get(fmt.Sprintf("/{accountId:%s}", uuid7Regexp), c.getAccount)
 		r.Post("/", c.createAccount)
 	})
 }

@@ -123,7 +123,7 @@ func TestGetAccount_InvalidRequestBody(t *testing.T) {
 	s.SetGRPC(t, controller)
 
 	getAccountRequest := &servicev1.GetAccountRequest{
-		AccountId: "not a valid ksuid",
+		AccountId: "not a valid uuidv7",
 	}
 	getAccountResponse, err := s.GRPCTestClient.GetAccount(s.Ctx, getAccountRequest)
 	s.Is.True(getAccountResponse == nil)

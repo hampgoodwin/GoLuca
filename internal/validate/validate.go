@@ -8,7 +8,7 @@ import (
 )
 
 // Validate wraps the logic for using go-playground/validator.
-func Validate(i interface{}) error {
+func Validate(i any) error {
 	v := validator.New()
 	registerCustomValidations(v)
 	if err := v.Struct(i); err != nil {
@@ -23,7 +23,7 @@ func Validate(i interface{}) error {
 	return nil
 }
 
-func Var(i interface{}, tag string) error {
+func Var(i any, tag string) error {
 	v := validator.New()
 	registerCustomValidations(v)
 	if err := v.Var(i, tag); err != nil {
@@ -41,7 +41,7 @@ func Var(i interface{}, tag string) error {
 func registerCustomValidations(v *validator.Validate) {
 	// custom validations
 	_ = v.RegisterValidation("stringAsInt64", stringAsInt64)
-	_ = v.RegisterValidation("KSUID", KSUID)
+	_ = v.RegisterValidation("uuid7", uuid7)
 
 	// custom structs
 	v.RegisterStructValidationMapRules(account, &modelv1.Account{})
@@ -53,5 +53,4 @@ func registerCustomValidations(v *validator.Validate) {
 	v.RegisterStructValidationMapRules(createTransactionRequest, &servicev1.CreateTransactionRequest{})
 	v.RegisterStructValidationMapRules(createEntry, &servicev1.CreateEntry{})
 	v.RegisterStructValidationMapRules(amount, &modelv1.Amount{})
-
 }

@@ -23,8 +23,8 @@ func (t CreateTransaction) IsZero() bool {
 
 type CreateEntry struct {
 	Description   string            `json:"description"`
-	DebitAccount  string            `json:"debitAccount" validate:"required,KSUID"`
-	CreditAccount string            `json:"creditAccount" validate:"required,KSUID"`
+	DebitAccount  string            `json:"debitAccount" validate:"required,uuid7"`
+	CreditAccount string            `json:"creditAccount" validate:"required,uuid7"`
 	Amount        httpamount.Amount `json:"amount" validate:"required"`
 }
 
