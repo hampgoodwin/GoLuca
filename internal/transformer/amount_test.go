@@ -1,15 +1,16 @@
 package transformer
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"testing"
 
-	"github.com/go-playground/validator"
 	"github.com/hampgoodwin/GoLuca/internal/amount"
 	"github.com/hampgoodwin/GoLuca/internal/repository"
 	httpamount "github.com/hampgoodwin/GoLuca/pkg/http/v0/amount"
-	"github.com/hampgoodwin/errors"
+
+	"github.com/go-playground/validator"
 	"github.com/matryer/is"
 )
 

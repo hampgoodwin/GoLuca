@@ -1,13 +1,16 @@
 package configloader
 
 import (
+	"errors"
+	"fmt"
 	"log"
 	"os"
 	"strconv"
 
 	"github.com/hampgoodwin/GoLuca/internal/config"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
-	"github.com/hampgoodwin/errors"
+	ierrors "github.com/hampgoodwin/GoLuca/pkg/errors"
+
 	"github.com/pelletier/go-toml/v2"
 )
 
@@ -23,7 +26,7 @@ func Load(c config.Config, fp string) (config.Config, error) {
 
 	fileCfg, err := loadConfigurationFile(fp)
 	if err != nil {
-		return cfg, errors.Wrap(err, "failed to load configuration from file")
+		return cfg, fmt.Errorf("failed to load configuration from file: %w", err)
 	}
 	cfg = merge(cfg, fileCfg)
 
@@ -32,7 +35,7 @@ func Load(c config.Config, fp string) (config.Config, error) {
 	// TODO: Load command line flags
 
 	if err := validate.Validate(cfg); err != nil {
-		return cfg, errors.WithErrorMessage(err, errors.NotValid, "validating configuration")
+		return cfg, errors.Join(fmt.Errorf("validating configuration: %w", err), ierrors.ErrNotValid)
 	}
 	return cfg, nil
 }

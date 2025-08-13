@@ -2,19 +2,20 @@ package controller
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/hampgoodwin/GoLuca/internal/meta"
 	"github.com/hampgoodwin/GoLuca/internal/transformer"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
+	ierrors "github.com/hampgoodwin/GoLuca/pkg/errors"
 	httpaccount "github.com/hampgoodwin/GoLuca/pkg/http/v0/account"
+
+	"github.com/go-chi/chi/v5"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
-
-	"github.com/hampgoodwin/errors"
 )
 
 type accountRequest struct {
@@ -55,7 +56,7 @@ func (c *Controller) getAccount(w http.ResponseWriter, r *http.Request) {
 
 	responseAccount := transformer.NewHTTPAccountFromAccount(account)
 	if err := validate.Validate(responseAccount); err != nil {
-		c.respondError(ctx, w, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating http account from account"))
+		c.respondError(ctx, w, errors.Join(fmt.Errorf("validating http account from account: %w", err), ierrors.ErrNotValidInternalData))
 		return
 	}
 
@@ -75,7 +76,7 @@ func (c *Controller) listAccounts(w http.ResponseWriter, r *http.Request) {
 	}
 	limitUInt64, err := strconv.ParseUint(limit, 10, 64)
 	if err != nil {
-		c.respondError(ctx, w, errors.Wrap(err, "converting page size"))
+		c.respondError(ctx, w, fmt.Errorf("converting page size: %w", err))
 	}
 	if cursor == "\"\"" {
 		cursor = ""
@@ -85,13 +86,13 @@ func (c *Controller) listAccounts(w http.ResponseWriter, r *http.Request) {
 		attribute.Int64("limit", int64(limitUInt64)),
 	)
 	if err := validate.Var(cursor, "omitempty,base64"); err != nil {
-		c.respondError(ctx, w, errors.WithErrorMessage(err, errors.NotValidRequest, "invalid cursor or token"))
+		c.respondError(ctx, w, errors.Join(fmt.Errorf("invalid cursor or token: %w", err), ierrors.ErrNotValidRequest))
 		return
 	}
 
 	accounts, nextCursor, err := c.service.ListAccounts(ctx, cursor, limitUInt64)
 	if err != nil {
-		c.respondError(ctx, w, errors.Wrap(err, "getting accounts from service"))
+		c.respondError(ctx, w, fmt.Errorf("getting accounts from service: %w", err))
 		return
 	}
 
@@ -100,7 +101,7 @@ func (c *Controller) listAccounts(w http.ResponseWriter, r *http.Request) {
 		responseAccounts = append(responseAccounts, transformer.NewHTTPAccountFromAccount(account))
 	}
 	if err := validate.Validate(responseAccounts); err != nil {
-		c.respondError(ctx, w, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating http accounts from accounts"))
+		c.respondError(ctx, w, errors.Join(fmt.Errorf("validating http accounts from accounts: %w", err), ierrors.ErrNotValidInternalData))
 		return
 	}
 
@@ -114,11 +115,11 @@ func (c *Controller) createAccount(w http.ResponseWriter, r *http.Request) {
 	defer span.End()
 	req := &accountRequest{}
 	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
-		c.respondError(ctx, w, errors.WrapWithErrorMessage(err, errors.NotDeserializable, err.Error(), "deserializing request body"))
+		c.respondError(ctx, w, errors.Join(fmt.Errorf("deserializing request body: %w", err), ierrors.ErrNotDeserializable))
 		return
 	}
 	if err := validate.Validate(req); err != nil {
-		c.respondError(ctx, w, errors.WithErrorMessage(err, errors.NotValidRequestData, "validating http api create account request"))
+		c.respondError(ctx, w, errors.Join(fmt.Errorf("validating http api create account request: %w", err), ierrors.ErrNotValidRequestData))
 		return
 	}
 
@@ -126,13 +127,13 @@ func (c *Controller) createAccount(w http.ResponseWriter, r *http.Request) {
 
 	created, err := c.service.CreateAccount(ctx, create)
 	if err != nil {
-		c.respondError(ctx, w, errors.Wrap(err, "creating account in service"))
+		c.respondError(ctx, w, fmt.Errorf("creating account in service: %w", err))
 		return
 	}
 
 	responseCreated := transformer.NewHTTPAccountFromAccount(created)
 	if err := validate.Validate(responseCreated); err != nil {
-		c.respondError(ctx, w, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating http account from account"))
+		c.respondError(ctx, w, errors.Join(fmt.Errorf("validating http account from account: %w", err), ierrors.ErrNotValidInternalData))
 	}
 
 	res := accountResponse{Account: responseCreated}

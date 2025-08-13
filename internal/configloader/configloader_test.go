@@ -1,14 +1,15 @@
 package configloader
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"testing"
 
 	"github.com/go-playground/validator"
-	"github.com/hampgoodwin/GoLuca/internal/config"
-	"github.com/hampgoodwin/errors"
 	"github.com/matryer/is"
+
+	"github.com/hampgoodwin/GoLuca/internal/config"
 )
 
 func TestLoad(t *testing.T) {

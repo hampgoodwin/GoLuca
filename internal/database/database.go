@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"github.com/golang-migrate/migrate/v4"
-	"github.com/hampgoodwin/errors"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
@@ -30,12 +29,12 @@ func NewDatabasePool(ctx context.Context, connString string) (*pgxpool.Pool, err
 	var err error
 	config, err := pgxpool.ParseConfig(connString)
 	if err != nil {
-		return nil, errors.Wrap(err, "")
+		return nil, fmt.Errorf("parsing config: %w", err)
 	}
 	config.ConnConfig.Tracer = &pgxtrace.Tracer{}
 	DBPool, err := pgxpool.NewWithConfig(ctx, config)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to create pgx connection pool")
+		return nil, fmt.Errorf("failed to create pgx connection pool: %w", err)
 	}
 	return DBPool, nil
 }
@@ -43,7 +42,7 @@ func NewDatabasePool(ctx context.Context, connString string) (*pgxpool.Pool, err
 func CreateDatabase(conn *pgxpool.Pool, database string) error {
 	_, err := conn.Exec(context.Background(), fmt.Sprintf("CREATE DATABASE %s;", database))
 	if err != nil {
-		return errors.Wrap(err, fmt.Sprintf("creating database %q", database))
+		return fmt.Errorf("creating database %q: %w", database, err)
 	}
 	return nil
 }
@@ -51,7 +50,7 @@ func CreateDatabase(conn *pgxpool.Pool, database string) error {
 func DropDatabase(conn *pgxpool.Pool, database string) error {
 	_, err := conn.Exec(context.Background(), fmt.Sprintf("DROP DATABASE %s;", database))
 	if err != nil {
-		return errors.Wrap(err, fmt.Sprintf("executing drop database %q", database))
+		return fmt.Errorf("executing drop database %q: %w", database, err)
 	}
 	return nil
 }
@@ -60,23 +59,23 @@ func DropDatabase(conn *pgxpool.Pool, database string) error {
 func Migrate(conn *pgxpool.Pool) error {
 	d, err := iofs.New(migrations, "migrations")
 	if err != nil {
-		return errors.Wrap(err, "opening fs for migrations")
+		return fmt.Errorf("opening fs for migrations: %w", err)
 	}
 
 	m, err := migrate.NewWithSourceInstance("iofs", d, conn.Config().ConnString())
 	if err != nil {
-		return errors.Wrap(err, "migrating database")
+		return fmt.Errorf("migrating database: %w", err)
 	}
 	if err := m.Up(); err != nil {
-		return errors.Wrap(err, "running migrations")
+		return fmt.Errorf("running migrations, %w", err)
 	}
 
 	sErr, dbErr := m.Close()
 	if sErr != nil {
-		err = errors.Wrap(sErr, "closing migrator connection")
+		err = fmt.Errorf("closing migrator connection, %w", err)
 	}
 	if dbErr != nil {
-		err = errors.Wrap(err, "closing migrator connection")
+		err = fmt.Errorf("closing migrator connection, %w", err)
 	}
 	if err != nil {
 		return err

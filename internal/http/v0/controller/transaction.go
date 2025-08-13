@@ -2,16 +2,18 @@ package controller
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/hampgoodwin/GoLuca/internal/meta"
 	"github.com/hampgoodwin/GoLuca/internal/transformer"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
+	ierrors "github.com/hampgoodwin/GoLuca/pkg/errors"
 	httptransaction "github.com/hampgoodwin/GoLuca/pkg/http/v0/transaction"
-	"github.com/hampgoodwin/errors"
+
+	"github.com/go-chi/chi/v5"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 )
@@ -47,12 +49,12 @@ func (c *Controller) listTransactions(w http.ResponseWriter, r *http.Request) {
 	}
 	limitUInt64, err := strconv.ParseUint(limit, 10, 64)
 	if err != nil {
-		c.respondError(ctx, w, errors.Wrap(err, "converting page size"))
+		c.respondError(ctx, w, fmt.Errorf("converting page size: %w", err))
 	}
 
 	transactions, nextCursor, err := c.service.ListTransactions(ctx, cursor, limitUInt64)
 	if err != nil {
-		c.respondError(ctx, w, errors.Wrap(err, "getting transactions from service"))
+		c.respondError(ctx, w, fmt.Errorf("getting transactions from service: %w", err))
 		return
 	}
 
@@ -61,7 +63,7 @@ func (c *Controller) listTransactions(w http.ResponseWriter, r *http.Request) {
 		responseTransactions = append(responseTransactions, transformer.NewHTTPTransactionFromTransaction(transaction))
 	}
 	if err := validate.Validate(responseTransactions); err != nil {
-		c.respondError(ctx, w, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating http transactions from transaction"))
+		c.respondError(ctx, w, errors.Join(fmt.Errorf("validating http transactions from transaction: %w", err), ierrors.ErrNotValidInternalData))
 		return
 	}
 
@@ -78,13 +80,13 @@ func (c *Controller) getTransaction(w http.ResponseWriter, r *http.Request) {
 
 	transaction, err := c.service.GetTransaction(ctx, transactionID)
 	if err != nil {
-		c.respondError(ctx, w, errors.Wrap(err, "getting transaction from service"))
+		c.respondError(ctx, w, fmt.Errorf("getting transaction from service: %w", err))
 		return
 	}
 
 	responseTransaction := transformer.NewHTTPTransactionFromTransaction(transaction)
 	if err := validate.Validate(responseTransaction); err != nil {
-		c.respondError(ctx, w, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating http transaction from transaction"))
+		c.respondError(ctx, w, errors.Join(fmt.Errorf("validating http transaction from transaction: %w", err), ierrors.ErrNotValidInternalData))
 		return
 	}
 
@@ -99,29 +101,29 @@ func (c *Controller) createTransaction(w http.ResponseWriter, r *http.Request) {
 	req := &transactionRequest{}
 
 	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
-		c.respondError(ctx, w, errors.WrapWithErrorMessage(err, errors.NotDeserializable, err.Error(), "deserializing request body"))
+		c.respondError(ctx, w, errors.Join(fmt.Errorf("deserializing request body: %w", err), ierrors.ErrNotDeserializable))
 		return
 	}
 	if err := validate.Validate(req); err != nil {
-		c.respondError(ctx, w, errors.WithErrorMessage(err, errors.NotValidRequestData, "validating http api transaction request"))
+		c.respondError(ctx, w, errors.Join(fmt.Errorf("validating http api transaction request: %w", err), ierrors.ErrNotValidRequestData))
 		return
 	}
 
 	create, err := transformer.NewTransactionFromHTTPCreateTransaction(req.Transaction)
 	if err != nil {
-		c.respondError(ctx, w, errors.Wrap(errors.WithError(err, errors.NotValidRequest), "transforming transaction from http transaction"))
+		c.respondError(ctx, w, fmt.Errorf("transforming transaction from http transaction: %w", errors.Join(err, ierrors.ErrNotValidRequest)))
 		return
 	}
 
 	created, err := c.service.CreateTransaction(ctx, create)
 	if err != nil {
-		c.respondError(ctx, w, errors.Wrap(err, "creating transaction in service"))
+		c.respondError(ctx, w, fmt.Errorf("creating transaction in service: %w", err))
 		return
 	}
 
 	returning := transformer.NewHTTPTransactionFromTransaction(created)
 	if err := validate.Validate(returning); err != nil {
-		c.respondError(ctx, w, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating http transaction from transaction"))
+		c.respondError(ctx, w, errors.Join(fmt.Errorf("validating http transaction from transaction: %w", err), ierrors.ErrNotValidInternalData))
 		return
 	}
 

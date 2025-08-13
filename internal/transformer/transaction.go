@@ -1,13 +1,14 @@
 package transformer
 
 import (
+	"fmt"
+
 	modelv1 "github.com/hampgoodwin/GoLuca/gen/proto/go/goluca/model/v1"
 	servicev1 "github.com/hampgoodwin/GoLuca/gen/proto/go/goluca/service/v1"
 	"github.com/hampgoodwin/GoLuca/internal/amount"
 	"github.com/hampgoodwin/GoLuca/internal/repository"
 	"github.com/hampgoodwin/GoLuca/internal/transaction"
 	httptransaction "github.com/hampgoodwin/GoLuca/pkg/http/v0/transaction"
-	"github.com/hampgoodwin/errors"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -23,7 +24,7 @@ func NewTransactionFromHTTPCreateTransaction(in httptransaction.CreateTransactio
 	for _, entry := range in.Entries {
 		inEntry, err := NewEntryFromHTTPCreateEntry(entry)
 		if err != nil {
-			return out, errors.Wrap(err, "transforming entry from http create transaction")
+			return out, fmt.Errorf("transforming entry from http create transaction: %w", err)
 		}
 		out.Entries = append(out.Entries, inEntry)
 	}
@@ -44,7 +45,7 @@ func NewEntryFromHTTPCreateEntry(in httptransaction.CreateEntry) (transaction.En
 
 	inAmount, err := NewAmountFromHTTPAmount(in.Amount)
 	if err != nil {
-		return out, errors.Wrap(err, "transforming amount from http create entry")
+		return out, fmt.Errorf("transforming amount from http create entry: %w", err)
 	}
 	out.Amount = inAmount
 

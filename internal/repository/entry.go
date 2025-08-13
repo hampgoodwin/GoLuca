@@ -2,11 +2,13 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/hampgoodwin/GoLuca/internal/meta"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
-	"github.com/hampgoodwin/errors"
+	ierrors "github.com/hampgoodwin/GoLuca/pkg/errors"
+
 	"github.com/jackc/pgx/v5"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -28,8 +30,7 @@ func getEntriesByTransactionID(ctx context.Context, tx pgx.Tx, transactionID str
 		;`,
 		transactionID)
 	if err != nil {
-		return nil, errors.WithErrorMessage(err, errors.NotKnown,
-			fmt.Sprintf("fetching entries by transaction id %q from datastore", transactionID))
+		return nil, errors.Join(fmt.Errorf("fetching entries by transaction id %q from datastore: %w", transactionID, err), ierrors.ErrNotKnown)
 	}
 	defer rows.Close()
 	var entries []Entry
@@ -46,7 +47,7 @@ func getEntriesByTransactionID(ctx context.Context, tx pgx.Tx, transactionID str
 			&entry.Amount.Currency,
 			&entry.CreatedAt,
 		); err != nil {
-			return nil, errors.WithErrorMessage(err, errors.NotKnown, "scanning entry result row")
+			return nil, errors.Join(fmt.Errorf("scanning entry result row: %w", err), ierrors.ErrNotKnown)
 		}
 		entries = append(entries, entry)
 		entryIDs = append(entryIDs, entry.ID)
@@ -54,7 +55,7 @@ func getEntriesByTransactionID(ctx context.Context, tx pgx.Tx, transactionID str
 	span.SetAttributes(attribute.StringSlice("entry_ids", entryIDs))
 
 	if err := validate.Validate(entries); err != nil {
-		return nil, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating entries fetched from database")
+		return nil, errors.Join(fmt.Errorf("validating entries fetched from database: %w", err), ierrors.ErrNotValidInternalData)
 	}
 
 	return entries, nil

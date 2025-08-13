@@ -2,12 +2,15 @@ package controller
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	servicev1 "github.com/hampgoodwin/GoLuca/gen/proto/go/goluca/service/v1"
 	"github.com/hampgoodwin/GoLuca/internal/meta"
 	"github.com/hampgoodwin/GoLuca/internal/transformer"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
-	"github.com/hampgoodwin/errors"
+	ierrors "github.com/hampgoodwin/GoLuca/pkg/errors"
+
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
@@ -20,17 +23,17 @@ func (c *Controller) GetTransaction(ctx context.Context, req *servicev1.GetTrans
 	defer span.End()
 
 	if err := validate.Validate(req); err != nil {
-		return nil, errors.WithErrorMessage(err, errors.NotValidRequestData, "validating request")
+		return nil, errors.Join(fmt.Errorf("validating request: %w", err), ierrors.ErrNotValidRequestData)
 	}
 
 	serviceTransaction, err := c.service.GetTransaction(ctx, req.TransactionId)
 	if err != nil {
-		return nil, errors.WithMessage(err, "getting account")
+		return nil, fmt.Errorf("getting account: %w", err)
 	}
 
 	transaction := transformer.NewProtoTransactionFromTransaction(serviceTransaction)
 	if err := validate.Validate(transaction); err != nil {
-		return nil, errors.WithErrorMessage(err, errors.NotValidRequestData, "validating transaction from service transaction")
+		return nil, errors.Join(fmt.Errorf("validating transaction from service transaction: %w", err), ierrors.ErrNotValidRequestData)
 	}
 
 	return &servicev1.GetTransactionResponse{Transaction: transaction}, nil
@@ -48,7 +51,7 @@ func (c *Controller) ListTransactions(ctx context.Context, req *servicev1.ListTr
 		limit = 10
 	}
 	if err := validate.Var(cursor, "omitempty,base64"); err != nil {
-		return nil, c.respondError(ctx, errors.WithErrorMessage(err, errors.NotValidRequest, "invalid cursor or token"))
+		return nil, c.respondError(ctx, errors.Join(fmt.Errorf("invalid cursor or token: %w", err), ierrors.ErrNotValidRequest))
 	}
 
 	transactions, nextCursor, err := c.service.ListTransactions(ctx, cursor, limit)
@@ -63,7 +66,7 @@ func (c *Controller) ListTransactions(ctx context.Context, req *servicev1.ListTr
 		listTransactionsResponse.Transactions = append(listTransactionsResponse.Transactions, transformer.NewProtoTransactionFromTransaction(transaction))
 	}
 	if err := validate.Validate(listTransactionsResponse); err != nil {
-		return nil, c.respondError(ctx, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating list transactions response from transactions"))
+		return nil, c.respondError(ctx, errors.Join(fmt.Errorf("validating list transactions response from transactions: %w", err), ierrors.ErrNotValidInternalData))
 	}
 
 	return listTransactionsResponse, nil
@@ -77,19 +80,19 @@ func (c *Controller) CreateTransaction(ctx context.Context, create *servicev1.Cr
 	defer span.End()
 
 	if err := validate.Validate(create); err != nil {
-		return nil, c.respondError(ctx, errors.WithErrorMessage(err, errors.NotValidRequestData, "validating create transaction request"))
+		return nil, c.respondError(ctx, errors.Join(fmt.Errorf("validating create transaction request: %w", err), ierrors.ErrNotValidRequestData))
 	}
 
 	serviceTransaction := transformer.NewTransactionFromProtoCreateTransaction(create)
 
 	createdTransaction, err := c.service.CreateTransaction(ctx, serviceTransaction)
 	if err != nil {
-		return nil, errors.WithMessage(err, "creating account")
+		return nil, fmt.Errorf("creating account: %w", err)
 	}
 
 	transaction := transformer.NewProtoTransactionFromTransaction(createdTransaction)
 	if err := validate.Validate(transaction); err != nil {
-		return nil, c.respondError(ctx, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating transaction from created transaction"))
+		return nil, c.respondError(ctx, errors.Join(fmt.Errorf("validating transaction from created transaction: %w", err), ierrors.ErrNotValidInternalData))
 	}
 	return &servicev1.CreateTransactionResponse{Transaction: transaction}, nil
 }
