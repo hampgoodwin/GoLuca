@@ -22,10 +22,6 @@ func (c *Controller) respondError(ctx context.Context, err error) error {
 
 	var statuscode codes.Code
 	var message string
-	var msg errors.Message
-	if errors.As(err, &msg) {
-		message = msg.Value
-	}
 	span.SetStatus(otelcodes.Error, message)
 
 	switch {
@@ -59,11 +55,6 @@ func (c *Controller) respondError(ctx context.Context, err error) error {
 	default:
 		statuscode = codes.Internal
 		message = "internal error"
-	}
-	if errors.As(err, &msg) {
-		if msg.Value != "" {
-			message = msg.Value
-		}
 	}
 
 	return status.Error(statuscode, message)

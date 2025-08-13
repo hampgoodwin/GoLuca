@@ -69,7 +69,7 @@ func (s *Service) ListAccounts(ctx context.Context, cursor string, limit uint64)
 
 	repoAccounts, err := s.repository.ListAccounts(ctx, id, createdAt, limit)
 	if err != nil {
-		return nil, "", fmt.Errorf("fetching accounts from database with cursor %q", cursor, err)
+		return nil, "", fmt.Errorf("fetching accounts from database with cursor %q: %w", cursor, err)
 	}
 
 	accounts := []account.Account{}

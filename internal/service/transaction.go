@@ -66,7 +66,7 @@ func (s *Service) ListTransactions(ctx context.Context, cursor string, limit uin
 
 	repoTransactions, err := s.repository.ListTransactions(ctx, id, createdAt, limit)
 	if err != nil {
-		return nil, "", fmt.Errorf("fetching transactions from database with cursor %q", cursor, err)
+		return nil, "", fmt.Errorf("fetching transactions from database with cursor %q: %w", cursor, err)
 	}
 
 	transactions := []transaction.Transaction{}

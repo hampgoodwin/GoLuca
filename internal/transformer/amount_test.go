@@ -47,7 +47,6 @@ func TestNewAmountFromHTTPAmount(t *testing.T) {
 	a := is.New(t)
 
 	for i, tc := range testCases {
-		tc := tc
 		t.Run(fmt.Sprintf("%d:%s", i, tc.description), func(t *testing.T) {
 			t.Parallel()
 			actual, err := NewAmountFromHTTPAmount(tc.httpamount)
@@ -79,7 +78,6 @@ func TestNewHTTPAmountFromAmount(t *testing.T) {
 	a := is.New(t)
 
 	for i, tc := range testCases {
-		tc := tc
 		t.Run(fmt.Sprintf("%d:%s", i, tc.description), func(t *testing.T) {
 			t.Parallel()
 			actual := NewHTTPAmountFromAmount(tc.amount)
@@ -106,7 +104,6 @@ func TestNewAmountFromRepoAmount(t *testing.T) {
 	a := is.New(t)
 
 	for i, tc := range testCases {
-		tc := tc
 		t.Run(fmt.Sprintf("%d:%s", i, tc.description), func(t *testing.T) {
 			t.Parallel()
 			actual := NewAmountFromRepoAmount(tc.amount)

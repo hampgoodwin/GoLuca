@@ -27,7 +27,7 @@ func (r *Repository) GetTransaction(ctx context.Context, transactionID string) (
 
 	tx, err := r.database.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
-		errors.Join(ierrors.ErrNotKnown, fmt.Errorf("beginning get transaction db transaction: %w", err))
+		return Transaction{}, errors.Join(ierrors.ErrNotKnown, fmt.Errorf("beginning get transaction db transaction: %w", err))
 	}
 	returning := Transaction{}
 	if err = tx.QueryRow(ctx,
@@ -58,7 +58,7 @@ func (r *Repository) GetTransaction(ctx context.Context, transactionID string) (
 	}
 
 	if err := tx.Commit(ctx); err != nil {
-		return returning, errors.Join(fmt.Errorf("committing get transaction query: %w"), ierrors.ErrNotKnown)
+		return returning, errors.Join(fmt.Errorf("committing get transaction query: %w", err), ierrors.ErrNotKnown)
 	}
 
 	return returning, nil

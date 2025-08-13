@@ -34,10 +34,6 @@ func (c *Controller) respondError(ctx context.Context, w http.ResponseWriter, er
 
 	var statuscode int
 	var message string
-	var msg errors.Message
-	if errors.As(err, &msg) {
-		message = msg.Value
-	}
 	span.SetStatus(otelcodes.Error, message)
 
 	switch {
@@ -72,11 +68,6 @@ func (c *Controller) respondError(ctx context.Context, w http.ResponseWriter, er
 	default:
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte("unhandled error response."))
-	}
-	if errors.As(err, &msg) {
-		if msg.Value != "" {
-			message = msg.Value
-		}
 	}
 	c.respond(w, ErrorResponse{Description: message}, statuscode)
 }
