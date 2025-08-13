@@ -64,7 +64,6 @@ func TestNewTransactionFromHTTPCreateTransaction(t *testing.T) {
 
 	a := is.New(t)
 	for i, tc := range testCases {
-		tc := tc
 		t.Run(fmt.Sprintf("%d:%s", i, tc.description), func(t *testing.T) {
 			t.Parallel()
 			actual, err := NewTransactionFromHTTPCreateTransaction(tc.httpTransaction)
@@ -140,7 +139,6 @@ func TestNewHTTPTransactionFromTransaction(t *testing.T) {
 
 	a := is.New(t)
 	for i, tc := range testCases {
-		tc := tc
 		t.Run(fmt.Sprintf("%d:%s", i, tc.description), func(t *testing.T) {
 			t.Parallel()
 			actual := NewHTTPTransactionFromTransaction(tc.transaction)
@@ -210,7 +208,6 @@ func TestNewTransactionFromRepoTransaction(t *testing.T) {
 
 	a := is.New(t)
 	for i, tc := range testCases {
-		tc := tc
 		t.Run(fmt.Sprintf("%d:%s", i, tc.description), func(t *testing.T) {
 			t.Parallel()
 			actual := NewTransactionFromRepoTransaction(tc.transaction)
@@ -280,7 +277,6 @@ func TestNewRepoTransactionFromTransaction(t *testing.T) {
 
 	a := is.New(t)
 	for i, tc := range testCases {
-		tc := tc
 		t.Run(fmt.Sprintf("%d:%s", i, tc.description), func(t *testing.T) {
 			t.Parallel()
 			actual := NewRepoTransactionFromTransaction(tc.transaction)

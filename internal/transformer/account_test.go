@@ -40,7 +40,6 @@ func TestNewAccountFromHTTPCreateAccount(t *testing.T) {
 	a := is.New(t)
 
 	for i, tc := range testCases {
-		tc := tc
 		t.Run(fmt.Sprintf("%d:%s", i, tc.description), func(t *testing.T) {
 			t.Parallel()
 			actual := NewAccountFromHTTPCreateAccount(tc.httpCreateAccount)
@@ -79,7 +78,6 @@ func TestNewHTTPAccountFromAccount(t *testing.T) {
 	a := is.New(t)
 
 	for i, tc := range testCases {
-		tc := tc
 		t.Run(fmt.Sprintf("%d:%s", i, tc.description), func(t *testing.T) {
 			t.Parallel()
 			actual := NewHTTPAccountFromAccount(tc.account)
@@ -118,7 +116,6 @@ func TestNewAccountFromRepoAccount(t *testing.T) {
 	a := is.New(t)
 
 	for i, tc := range testCases {
-		tc := tc
 		t.Run(fmt.Sprintf("%d:%s", i, tc.description), func(t *testing.T) {
 			t.Parallel()
 			actual := NewAccountFromRepoAccount(tc.account)
@@ -157,7 +154,6 @@ func TestNewRepoAccountFromAccount(t *testing.T) {
 	a := is.New(t)
 
 	for i, tc := range testCases {
-		tc := tc
 		t.Run(fmt.Sprintf("%d:%s", i, tc.description), func(t *testing.T) {
 			t.Parallel()
 			actual := NewRepoAccountFromAccount(tc.account)

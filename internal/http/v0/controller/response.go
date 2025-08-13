@@ -34,7 +34,13 @@ func (c *Controller) respondError(ctx context.Context, w http.ResponseWriter, er
 
 	var statuscode int
 	var message string
-	span.SetStatus(otelcodes.Error, message)
+	defer span.SetStatus(otelcodes.Error, message)
+
+	var notFoundErr ierrors.NotFoundErr
+	if errors.As(err, &notFoundErr) {
+		c.respond(w, ErrorResponse{Description: notFoundErr.Error()}, http.StatusNotFound)
+		return
+	}
 
 	switch {
 	case errors.Is(err, ierrors.ErrNotKnown):
@@ -53,6 +59,7 @@ func (c *Controller) respondError(ctx context.Context, w http.ResponseWriter, er
 		return
 	case errors.Is(err, ierrors.ErrNotFound):
 		statuscode = http.StatusNotFound
+		message = "not found"
 	case errors.Is(err, ierrors.ErrNotValidInternalData):
 		statuscode = http.StatusInternalServerError
 		message = "internal data is invalid and failed validation."

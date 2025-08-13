@@ -33,7 +33,7 @@ func (r *Repository) GetAccount(ctx context.Context, accountID string) (Account,
 		&acct.ID, &acct.ParentID, &acct.Name, &acct.Type, &acct.Basis, &acct.CreatedAt,
 	); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return acct, errors.Join(fmt.Errorf("account %q not found: %w", accountID, err), ierrors.ErrNotFound)
+			return acct, errors.Join(fmt.Errorf("account %q not found: %w", accountID, err), ierrors.NotFoundErr{Type: "account", ID: accountID})
 		}
 		return acct, errors.Join(fmt.Errorf("scanning account result row: %w", err), ierrors.ErrNotKnown)
 	}

@@ -130,7 +130,6 @@ func TestNewRepoAmountFromAmount(t *testing.T) {
 	a := is.New(t)
 
 	for i, tc := range testCases {
-		tc := tc
 		t.Run(fmt.Sprintf("%d:%s", i, tc.description), func(t *testing.T) {
 			t.Parallel()
 			actual := NewRepoAmountFromAmount(tc.amount)
