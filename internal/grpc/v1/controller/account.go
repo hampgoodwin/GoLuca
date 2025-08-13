@@ -51,7 +51,7 @@ func (c *Controller) ListAccounts(ctx context.Context, req *servicev1.ListAccoun
 		limit = 10
 	}
 	if err := validate.Var(cursor, "omitempty,base64"); err != nil {
-		return nil, c.respondError(ctx, errors.Join(fmt.Errorf("invalid cursor or token: %w", err), ierrors.ErrNotValidRequest))
+		return nil, c.respondError(ctx, ierrors.NotValidTokenErr{Token: cursor})
 	}
 
 	accounts, nextCursor, err := c.service.ListAccounts(ctx, cursor, limit)

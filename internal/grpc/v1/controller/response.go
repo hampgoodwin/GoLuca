@@ -22,7 +22,20 @@ func (c *Controller) respondError(ctx context.Context, err error) error {
 
 	var statuscode codes.Code
 	var message string
-	span.SetStatus(otelcodes.Error, message)
+	defer span.SetStatus(otelcodes.Error, message)
+
+	var notFoundErr ierrors.NotFoundErr
+	if errors.As(err, &notFoundErr) {
+		statuscode = codes.NotFound
+		message = notFoundErr.Error()
+		return status.Error(statuscode, message)
+	}
+	var notValidTokenErr ierrors.NotValidTokenErr
+	if errors.As(err, &notValidTokenErr) {
+		statuscode = codes.InvalidArgument
+		message = notValidTokenErr.Error()
+		return status.Error(statuscode, message)
+	}
 
 	switch {
 	case errors.Is(err, ierrors.ErrNotKnown):
