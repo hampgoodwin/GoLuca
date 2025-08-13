@@ -41,6 +41,11 @@ func (c *Controller) respondError(ctx context.Context, w http.ResponseWriter, er
 		c.respond(w, ErrorResponse{Description: notFoundErr.Error()}, http.StatusNotFound)
 		return
 	}
+	var notValidCursorErr ierrors.NotValidCursorErr
+	if errors.As(err, &notValidCursorErr) {
+		c.respond(w, ErrorResponse{Description: notValidCursorErr.Error()}, http.StatusBadRequest)
+		return
+	}
 
 	switch {
 	case errors.Is(err, ierrors.ErrNotKnown):

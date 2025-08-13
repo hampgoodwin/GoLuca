@@ -86,7 +86,7 @@ func (c *Controller) listAccounts(w http.ResponseWriter, r *http.Request) {
 		attribute.Int64("limit", int64(limitUInt64)),
 	)
 	if err := validate.Var(cursor, "omitempty,base64"); err != nil {
-		c.respondError(ctx, w, errors.Join(fmt.Errorf("invalid cursor or token: %w", err), ierrors.ErrNotValidRequest))
+		c.respondError(ctx, w, ierrors.NotValidCursorErr{Cursor: cursor})
 		return
 	}
 

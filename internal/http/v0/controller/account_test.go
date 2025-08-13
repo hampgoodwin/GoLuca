@@ -232,7 +232,7 @@ func TestListAccounts_InvalidRequestBody(t *testing.T) {
 	err := json.NewDecoder(httpResponse.Body).Decode(&errorResponse)
 	s.Is.NoErr(err)
 
-	s.Is.True(errorResponse.Description == "invalid cursor or token")
+	s.Is.True(errorResponse.Description == fmt.Sprintf("invalid cursor %q", "invalid_cursor"))
 	s.Is.True(httpResponse.StatusCode == http.StatusBadRequest)
 }
 
