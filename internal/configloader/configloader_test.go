@@ -6,8 +6,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/go-playground/validator"
+	"github.com/go-playground/validator/v10"
 	"github.com/matryer/is"
+	"github.com/pelletier/go-toml/v2"
 
 	"github.com/hampgoodwin/GoLuca/internal/config"
 )
@@ -19,17 +20,23 @@ func TestLoad(t *testing.T) {
 		filepath    string
 		envVars     map[string]string
 		expected    config.Config
-		err         error // TODO add specific err case catches
+		assertErr   func(err error) bool
 	}{
 		{
 			description: "json-file-empty-vars-empty-config-error-decoding",
 			filepath:    "../../test/data/configloader/json.env.toml",
-			err:         errors.New("(1, 1): parsing error: keys cannot contain { character"),
+			assertErr: func(err error) bool {
+				var decodeError *toml.DecodeError
+				return errors.As(err, &decodeError)
+			},
 		},
 		{
 			description: "empty-file-empty-vars-empty-config-err-validation",
 			filepath:    "../../test/data/configloader/empty.env.toml",
-			err:         validator.ValidationErrors{},
+			assertErr: func(err error) bool {
+				validationErrors := validator.ValidationErrors{}
+				return errors.As(err, &validationErrors)
+			},
 		},
 		{
 			description: "full-file-empty-vars-empty-config",
@@ -238,10 +245,9 @@ func TestLoad(t *testing.T) {
 			}
 
 			actual, err := Load(tc.cfg, tc.filepath)
-			if tc.err != nil {
+			if tc.assertErr != nil {
 				a.True(err != nil)
-				// Using errors.As because it detects validator.ValidationErrors
-				a.True(errors.As(err, &tc.err))
+				a.True(tc.assertErr(err))
 				return
 			}
 			a.NoErr(err)
@@ -255,12 +261,15 @@ func TestLoadConfigurationFile(t *testing.T) {
 		description string
 		filepath    string
 		expected    config.Config
-		err         error
+		assertErr   func(err error) bool
 	}{
 		{
 			description: "not-toml-file",
 			filepath:    "../../test/data/configloader/json.env.toml",
-			err:         errors.New(""),
+			assertErr: func(err error) bool {
+				var decoderError *toml.DecodeError
+				return errors.As(err, &decoderError)
+			},
 		},
 		{
 			description: "empty-file-empty-config",
@@ -316,9 +325,9 @@ func TestLoadConfigurationFile(t *testing.T) {
 	for i, tc := range testCases {
 		t.Run(fmt.Sprintf("%d:%s", i, tc.description), func(t *testing.T) {
 			actual, err := loadConfigurationFile(tc.filepath)
-			if tc.err != nil {
+			if tc.assertErr != nil {
 				a.True(err != nil)
-				a.True(errors.As(err, &tc.err))
+				a.True(tc.assertErr(err))
 				return
 			}
 			a.NoErr(err)
