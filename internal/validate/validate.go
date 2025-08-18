@@ -1,8 +1,6 @@
 package validate
 
 import (
-	"fmt"
-
 	"github.com/go-playground/validator/v10"
 
 	modelv1 "github.com/hampgoodwin/GoLuca/gen/proto/go/goluca/model/v1"
@@ -15,7 +13,7 @@ func Validate(i any) error {
 	registerCustomValidations(v)
 	if err := v.Struct(i); err != nil {
 		if _, ok := err.(*validator.InvalidValidationError); ok {
-			return fmt.Errorf("invalid validation configuration: %w", err)
+			return nil
 		}
 		validationErrors := err.(validator.ValidationErrors)
 		if len(validationErrors) > 0 {
