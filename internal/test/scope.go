@@ -19,8 +19,6 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/test/bufconn"
 
-	"github.com/hampgoodwin/errors"
-
 	servicev1 "github.com/hampgoodwin/GoLuca/gen/proto/go/goluca/service/v1"
 	"github.com/hampgoodwin/GoLuca/internal/config"
 	"github.com/hampgoodwin/GoLuca/internal/database"
@@ -66,7 +64,7 @@ func NewScope(t *testing.T) (Scope, error) {
 	s.HTTPClient = &http.Client{Timeout: time.Second * 30} // TODO: Is this needed?
 
 	if err := s.NewDatabase(t); err != nil {
-		return s, errors.Wrap(err, "creating new test db")
+		return s, fmt.Errorf("creating new test db: %w", err)
 	}
 
 	t.Cleanup(func() { s.CleanupScope(t) })
@@ -82,12 +80,12 @@ func (s *Scope) NewDatabase(t *testing.T) error {
 	// Create a connection pool on the default database
 	s.DB, err = database.NewDatabasePool(s.Ctx, s.Env.Config.Database.ConnectionString())
 	if err != nil {
-		return errors.Wrap(err, "opening new database connection")
+		return fmt.Errorf("opening new database connection: %w", err)
 	}
 
 	// Create the new database with the existing database connection pool
 	if err := database.CreateDatabase(s.DB, s.dbDatabase); err != nil {
-		return errors.Wrap(err, "creating test database")
+		return fmt.Errorf("creating test database: %w", err)
 	}
 	// Close the old connection
 	s.DB.Close()
@@ -97,12 +95,12 @@ func (s *Scope) NewDatabase(t *testing.T) error {
 	dbCFG.Database = s.dbDatabase
 	s.DB, err = database.NewDatabasePool(s.Ctx, dbCFG.ConnectionString())
 	if err != nil {
-		return errors.Wrap(err, "opening new database connection")
+		return fmt.Errorf("opening new database connection: %w", err)
 	}
 
 	// run migration on the new database
 	if err := database.Migrate(s.DB); err != nil {
-		return errors.Wrap(err, fmt.Sprintf("migrating test database %q", s.dbDatabase))
+		return fmt.Errorf("migrating test database %q: %w", s.dbDatabase, err)
 	}
 
 	return nil

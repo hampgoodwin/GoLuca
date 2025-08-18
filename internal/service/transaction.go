@@ -2,19 +2,20 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"time"
 
-	"github.com/google/uuid"
 	event "github.com/hampgoodwin/GoLuca/internal/event"
 	"github.com/hampgoodwin/GoLuca/internal/meta"
 	"github.com/hampgoodwin/GoLuca/internal/transaction"
 	"github.com/hampgoodwin/GoLuca/internal/transformer"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
+	ierrors "github.com/hampgoodwin/GoLuca/pkg/errors"
 	"github.com/hampgoodwin/GoLuca/pkg/pagination"
-	"github.com/hampgoodwin/errors"
 
+	"github.com/google/uuid"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
@@ -29,12 +30,12 @@ func (s *Service) GetTransaction(ctx context.Context, transactionID string) (tra
 
 	repoTransaction, err := s.repository.GetTransaction(ctx, transactionID)
 	if err != nil {
-		return transaction.Transaction{}, errors.Wrap(err, fmt.Sprintf("getting transaction %q", transactionID))
+		return transaction.Transaction{}, fmt.Errorf("getting transaction %q: %w", transactionID, err)
 	}
 
 	transaction := transformer.NewTransactionFromRepoTransaction(repoTransaction)
 	if err := validate.Validate(transaction); err != nil {
-		return transaction, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating transfer from repository transfer")
+		return transaction, errors.Join(fmt.Errorf("validating transfer from repository transfer: %w", err), ierrors.ErrNotValidInternalData)
 	}
 	return transaction, nil
 }
@@ -53,7 +54,7 @@ func (s *Service) ListTransactions(ctx context.Context, cursor string, limit uin
 	if cursor != "" {
 		cursor, err := pagination.ParseCursor(cursor)
 		if err != nil {
-			return nil, "", errors.WithErrorMessage(err, errors.NotValidRequest, "parsing cursor object")
+			return nil, "", errors.Join(fmt.Errorf("parsing cursor object: %w", err), ierrors.ErrNotValidRequest)
 		}
 		id = cursor.ID
 		createdAt = cursor.Time
@@ -65,7 +66,7 @@ func (s *Service) ListTransactions(ctx context.Context, cursor string, limit uin
 
 	repoTransactions, err := s.repository.ListTransactions(ctx, id, createdAt, limit)
 	if err != nil {
-		return nil, "", errors.Wrap(err, fmt.Sprintf("fetching transactions from database with cursor %q", cursor))
+		return nil, "", fmt.Errorf("fetching transactions from database with cursor %q: %w", cursor, err)
 	}
 
 	transactions := []transaction.Transaction{}
@@ -73,7 +74,7 @@ func (s *Service) ListTransactions(ctx context.Context, cursor string, limit uin
 		transactions = append(transactions, transformer.NewTransactionFromRepoTransaction(repoTransaction))
 	}
 	if err := validate.Validate(transactions); err != nil {
-		return transactions, "", errors.WithErrorMessage(err, errors.NotValidInternalData, "validating transfers from repository transfers")
+		return transactions, "", errors.Join(fmt.Errorf("validating transfers from repository transfers: %w", err), ierrors.ErrNotValidInternalData)
 	}
 
 	nextCursor := ""
@@ -86,7 +87,7 @@ func (s *Service) ListTransactions(ctx context.Context, cursor string, limit uin
 			Parameters: nil, // once I add query paramters/filters, include this
 		}.EncodeCursor()
 		if err != nil {
-			return nil, "", errors.WithErrorMessage(err, errors.NotValidInternalData, "encoding cursor for next cursor")
+			return nil, "", errors.Join(fmt.Errorf("encoding cursor for next cursor: %w", err), ierrors.ErrNotValidInternalData)
 		}
 		transactions = transactions[:len(transactions)-1]
 	}
@@ -103,7 +104,7 @@ func (s *Service) CreateTransaction(ctx context.Context, create transaction.Tran
 
 	uuidv7, err := uuid.NewV7()
 	if err != nil {
-		return transaction.Transaction{}, errors.Wrap(err, "creating uuid7")
+		return transaction.Transaction{}, fmt.Errorf("creating uuid7: %w", err)
 	}
 	create.ID = uuidv7.String()
 	create.CreatedAt = time.Unix(uuidv7.Time().UnixTime())
@@ -113,7 +114,7 @@ func (s *Service) CreateTransaction(ctx context.Context, create transaction.Tran
 
 		entryUUIDV7, err := uuid.NewV7()
 		if err != nil {
-			return transaction.Transaction{}, errors.Wrap(err, "creating uuid7 for entry")
+			return transaction.Transaction{}, fmt.Errorf("creating uuid7 for entry: %w", err)
 		}
 		create.Entries[i].ID = entryUUIDV7.String()
 		create.Entries[i].TransactionID = create.ID
@@ -129,25 +130,25 @@ func (s *Service) CreateTransaction(ctx context.Context, create transaction.Tran
 		)
 	}
 	if err := validate.Validate(create); err != nil {
-		return transaction.Transaction{}, errors.WithErrorMessage(err, errors.NotValidRequestData, "validating transaction before persisting to database")
+		return transaction.Transaction{}, errors.Join(fmt.Errorf("validating transaction before persisting to database: %w", err), ierrors.ErrNotValidRequestData)
 	}
 
 	repoTransaction := transformer.NewRepoTransactionFromTransaction(create)
 
 	created, err := s.repository.CreateTransaction(ctx, repoTransaction)
 	if err != nil {
-		return transaction.Transaction{}, errors.Wrap(err, "storing transaction")
+		return transaction.Transaction{}, fmt.Errorf("storing transaction: %w", err)
 	}
 
 	transaction := transformer.NewTransactionFromRepoTransaction(created)
 	if err := validate.Validate(transaction); err != nil {
-		return transaction, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating transfer from repository transfer")
+		return transaction, errors.Join(fmt.Errorf("validating transfer from repository transfer: %w", err), ierrors.ErrNotValidInternalData)
 	}
 
 	protoCreated := transformer.NewProtoTransactionFromTransaction(transaction)
 	data, err := proto.Marshal(protoCreated)
 	if err != nil {
-		return transaction, errors.Wrap(err, "proto encoding created transaction")
+		return transaction, fmt.Errorf("proto encoding created transaction: %w", err)
 	}
 	if err := s.publisher.Publish(event.SubjectTransactionCreated, data); err != nil {
 		log.Printf("publishing %q: %v", event.SubjectTransactionCreated, err)

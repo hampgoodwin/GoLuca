@@ -3,11 +3,13 @@ package controller
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/hampgoodwin/GoLuca/internal/meta"
-	"github.com/hampgoodwin/errors"
+	ierrors "github.com/hampgoodwin/GoLuca/pkg/errors"
+
+	"github.com/go-playground/validator/v10"
 	"go.opentelemetry.io/otel"
 	otelcodes "go.opentelemetry.io/otel/codes"
 )
@@ -32,19 +34,26 @@ func (c *Controller) respondError(ctx context.Context, w http.ResponseWriter, er
 
 	var statuscode int
 	var message string
-	var msg errors.Message
-	if errors.As(err, &msg) {
-		message = msg.Value
+	defer span.SetStatus(otelcodes.Error, message)
+
+	var notFoundErr ierrors.NotFoundErr
+	if errors.As(err, &notFoundErr) {
+		c.respond(w, ErrorResponse{Description: notFoundErr.Error()}, http.StatusNotFound)
+		return
 	}
-	span.SetStatus(otelcodes.Error, message)
+	var notValidCursorErr ierrors.NotValidCursorErr
+	if errors.As(err, &notValidCursorErr) {
+		c.respond(w, ErrorResponse{Description: notValidCursorErr.Error()}, http.StatusBadRequest)
+		return
+	}
 
 	switch {
-	case errors.Is(err, errors.NotKnown):
+	case errors.Is(err, ierrors.ErrNotKnown):
 		statuscode = http.StatusInternalServerError
-	case errors.Is(err, errors.NotValidRequest):
+	case errors.Is(err, ierrors.ErrNotValidRequest):
 		statuscode = http.StatusBadRequest
 		message = "bad request data, check request meta data."
-	case errors.Is(err, errors.NotValidRequestData):
+	case errors.Is(err, ierrors.ErrNotValidRequestData):
 		if message == "" {
 			message = "bad request data"
 		}
@@ -53,28 +62,24 @@ func (c *Controller) respondError(ctx context.Context, w http.ResponseWriter, er
 		}
 		c.respond(w, ErrorResponse{Description: message}, http.StatusBadRequest)
 		return
-	case errors.Is(err, errors.NotFound):
+	case errors.Is(err, ierrors.ErrNotFound):
 		statuscode = http.StatusNotFound
-	case errors.Is(err, errors.NotValidInternalData):
+		message = "not found"
+	case errors.Is(err, ierrors.ErrNotValidInternalData):
 		statuscode = http.StatusInternalServerError
 		message = "internal data is invalid and failed validation."
-	case errors.Is(err, errors.NotDeserializable):
+	case errors.Is(err, ierrors.ErrNotDeserializable):
 		statuscode = http.StatusInternalServerError
 		message = "provided data passed failed deserialization. If creating a resource, check the request body types."
-	case errors.Is(err, errors.NotSerializable):
+	case errors.Is(err, ierrors.ErrNotSerializable):
 		statuscode = http.StatusInternalServerError
 		message = "either provided or internal data passed validation, but failed serialization."
-	case errors.Is(err, errors.NoRelationshipFound):
+	case errors.Is(err, ierrors.ErrNoRelationshipFound):
 		statuscode = http.StatusBadRequest
 		message = "process which assumed existence of a relationship between data found no relationship. If you are creating data with related data id, those id's do not exist."
 	default:
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte("unhandled error response."))
-	}
-	if errors.As(err, &msg) {
-		if msg.Value != "" {
-			message = msg.Value
-		}
 	}
 	c.respond(w, ErrorResponse{Description: message}, statuscode)
 }

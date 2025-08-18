@@ -2,12 +2,14 @@ package pagination
 
 import (
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
 
+	ierrors "github.com/hampgoodwin/GoLuca/pkg/errors"
+
 	"github.com/google/uuid"
-	"github.com/hampgoodwin/errors"
 )
 
 func ParseCursor(encodedCursor string) (Cursor, error) {
@@ -15,7 +17,7 @@ func ParseCursor(encodedCursor string) (Cursor, error) {
 
 	byt, err := base64.StdEncoding.DecodeString(encodedCursor)
 	if err != nil {
-		err = errors.WithErrorMessage(err, errors.NotValidRequestData, "cursor is not valid base64")
+		err = errors.Join(fmt.Errorf("cursor is not valid base64: %w", err), ierrors.ErrNotValidRequestData)
 		c.Parameters = map[string][]string{"current_cursor": {encodedCursor}}
 		return c, err
 	}

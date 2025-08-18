@@ -205,5 +205,5 @@ func TestListAccount_InvalidRequestBody(t *testing.T) {
 
 	st := status.Convert(err)
 	s.Is.True(st.Code() == codes.InvalidArgument)
-	s.Is.True(st.Message() == "invalid cursor or token")
+	s.Is.True(st.Message() == fmt.Sprintf("invalid token %q", "invalid token"))
 }

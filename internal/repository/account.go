@@ -2,12 +2,14 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/hampgoodwin/GoLuca/internal/meta"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
-	"github.com/hampgoodwin/errors"
+	ierrors "github.com/hampgoodwin/GoLuca/pkg/errors"
+
 	"github.com/jackc/pgx/v5"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -31,12 +33,12 @@ func (r *Repository) GetAccount(ctx context.Context, accountID string) (Account,
 		&acct.ID, &acct.ParentID, &acct.Name, &acct.Type, &acct.Basis, &acct.CreatedAt,
 	); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return acct, errors.WithErrorMessage(err, errors.NotFound, fmt.Sprintf("account %q not found", accountID))
+			return acct, errors.Join(fmt.Errorf("account %q not found: %w", accountID, err), ierrors.NotFoundErr{Type: "account", ID: accountID})
 		}
-		return acct, errors.WithErrorMessage(err, errors.NotKnown, "scanning account result row")
+		return acct, errors.Join(fmt.Errorf("scanning account result row: %w", err), ierrors.ErrNotKnown)
 	}
 	if err := validate.Validate(acct); err != nil {
-		return acct, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating account fetched from database")
+		return acct, errors.Join(fmt.Errorf("validating account fetched from database: %w", err), ierrors.ErrNotValidInternalData)
 	}
 	return acct, nil
 }
@@ -61,19 +63,19 @@ func (r *Repository) ListAccounts(ctx context.Context, accountID string, created
 	query += ";"
 	rows, err := r.database.Query(ctx, query, params...)
 	if err != nil {
-		return nil, errors.WithErrorMessage(err, errors.NotKnown, "fetching accounts from data store")
+		return nil, errors.Join(fmt.Errorf("fetching accounts from data store: %w", err), ierrors.ErrNotKnown)
 	}
 	defer rows.Close()
 	accounts := []Account{}
 	for rows.Next() {
 		acct := Account{}
 		if err := rows.Scan(&acct.ID, &acct.ParentID, &acct.Name, &acct.Type, &acct.Basis, &acct.CreatedAt); err != nil {
-			return nil, errors.WithErrorMessage(err, errors.NotKnown, "scanning account result row")
+			return nil, errors.Join(fmt.Errorf("scanning account result row: %w", err), ierrors.ErrNotKnown)
 		}
 		accounts = append(accounts, acct)
 	}
 	if err := validate.Validate(accounts); err != nil {
-		return nil, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating accounts fetched from data store")
+		return nil, errors.Join(fmt.Errorf("validating accounts fetched from data store: %w", err), ierrors.ErrNotValidInternalData)
 	}
 	return accounts, nil
 }
@@ -83,7 +85,7 @@ func (r *Repository) CreateAccount(ctx context.Context, create Account) (Account
 	// get a db-transaction
 	tx, err := r.database.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
-		return Account{}, errors.WithErrorMessage(err, errors.NotKnown, "beginning create account db transaction")
+		return Account{}, errors.Join(fmt.Errorf("beginning create account db transaction: %w", err), ierrors.ErrNotKnown)
 	}
 
 	returning := Account{}
@@ -100,16 +102,16 @@ func (r *Repository) CreateAccount(ctx context.Context, create Account) (Account
 		&returning.Basis,
 		&returning.CreatedAt,
 	); err != nil {
-		return returning, errors.WithErrorMessage(err, errors.NotKnown, "scanning account returned from insert")
+		return returning, errors.Join(fmt.Errorf("scanning account returned from insert: %w", err), ierrors.ErrNotKnown)
 	}
 	if err := validate.Validate(returning); err != nil {
 		if err := tx.Rollback(ctx); err != nil {
-			return returning, errors.WithErrorMessage(err, errors.NotValidInternalData, "rolling back transaction on failed validating account returned from insert")
+			return returning, errors.Join(fmt.Errorf("rolling back transaction on failed validating account returned from insert: %w", err), ierrors.ErrNotValidInternalData)
 		}
-		return returning, errors.WithErrorMessage(err, errors.NotValidInternalData, "validating account returned from insert")
+		return returning, errors.Join(fmt.Errorf("validating account returned from insert: %w", err), ierrors.ErrNotValidInternalData)
 	}
 	if err := tx.Commit(ctx); err != nil {
-		return returning, errors.WithErrorMessage(err, errors.NotKnown, "committing account insert transaction")
+		return returning, errors.Join(fmt.Errorf("committing account insert transaction: %w", err), ierrors.ErrNotKnown)
 	}
 	return returning, nil
 }

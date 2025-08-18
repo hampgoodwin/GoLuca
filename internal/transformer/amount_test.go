@@ -1,15 +1,16 @@
 package transformer
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"testing"
 
-	"github.com/go-playground/validator"
 	"github.com/hampgoodwin/GoLuca/internal/amount"
 	"github.com/hampgoodwin/GoLuca/internal/repository"
 	httpamount "github.com/hampgoodwin/GoLuca/pkg/http/v0/amount"
-	"github.com/hampgoodwin/errors"
+
+	"github.com/go-playground/validator/v10"
 	"github.com/matryer/is"
 )
 
@@ -18,23 +19,34 @@ func TestNewAmountFromHTTPAmount(t *testing.T) {
 		description string
 		httpamount  httpamount.Amount
 		expected    amount.Amount
+		assertErr   func(err error) bool
 		err         error
 	}{
 		{description: "empty"},
 		{
 			description: "value-overflows-int64",
 			httpamount:  httpamount.Amount{Value: "9223372036854775808"},
-			err:         &strconv.NumError{},
+			assertErr: func(err error) bool {
+				var numErr *strconv.NumError
+				return errors.As(err, &numErr)
+			},
 		},
 		{
 			description: "invalid-value",
 			httpamount:  httpamount.Amount{Value: "-10"},
-			err:         validator.ValidationErrors{},
+			assertErr: func(err error) bool {
+				var validationErrors validator.ValidationErrors
+				return errors.As(err, &validationErrors)
+			},
 		},
 		{
 			description: "invalid-currency",
-			httpamount:  httpamount.Amount{Currency: "KRKZ"},
-			err:         validator.ValidationErrors{},
+			httpamount:  httpamount.Amount{Value: "0", Currency: "KRKZ"},
+			assertErr: func(err error) bool {
+				var validationErrors validator.ValidationErrors
+				b := errors.As(err, &validationErrors)
+				return b
+			},
 		},
 		{
 			description: "success",
@@ -46,12 +58,11 @@ func TestNewAmountFromHTTPAmount(t *testing.T) {
 	a := is.New(t)
 
 	for i, tc := range testCases {
-		tc := tc
 		t.Run(fmt.Sprintf("%d:%s", i, tc.description), func(t *testing.T) {
 			t.Parallel()
 			actual, err := NewAmountFromHTTPAmount(tc.httpamount)
-			if err != nil {
-				a.True(errors.As(err, &tc.err))
+			if tc.assertErr != nil {
+				a.True(tc.assertErr(err))
 				return
 			}
 			a.NoErr(err)
@@ -78,7 +89,6 @@ func TestNewHTTPAmountFromAmount(t *testing.T) {
 	a := is.New(t)
 
 	for i, tc := range testCases {
-		tc := tc
 		t.Run(fmt.Sprintf("%d:%s", i, tc.description), func(t *testing.T) {
 			t.Parallel()
 			actual := NewHTTPAmountFromAmount(tc.amount)
@@ -105,7 +115,6 @@ func TestNewAmountFromRepoAmount(t *testing.T) {
 	a := is.New(t)
 
 	for i, tc := range testCases {
-		tc := tc
 		t.Run(fmt.Sprintf("%d:%s", i, tc.description), func(t *testing.T) {
 			t.Parallel()
 			actual := NewAmountFromRepoAmount(tc.amount)
@@ -132,7 +141,6 @@ func TestNewRepoAmountFromAmount(t *testing.T) {
 	a := is.New(t)
 
 	for i, tc := range testCases {
-		tc := tc
 		t.Run(fmt.Sprintf("%d:%s", i, tc.description), func(t *testing.T) {
 			t.Parallel()
 			actual := NewRepoAmountFromAmount(tc.amount)

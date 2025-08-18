@@ -1,6 +1,7 @@
 package transformer
 
 import (
+	"fmt"
 	"strconv"
 
 	modelv1 "github.com/hampgoodwin/GoLuca/gen/proto/go/goluca/model/v1"
@@ -8,7 +9,6 @@ import (
 	"github.com/hampgoodwin/GoLuca/internal/repository"
 	"github.com/hampgoodwin/GoLuca/internal/validate"
 	httpamount "github.com/hampgoodwin/GoLuca/pkg/http/v0/amount"
-	"github.com/hampgoodwin/errors"
 )
 
 func NewAmountFromHTTPAmount(in httpamount.Amount) (amount.Amount, error) {
@@ -18,7 +18,7 @@ func NewAmountFromHTTPAmount(in httpamount.Amount) (amount.Amount, error) {
 	}
 	value, err := strconv.ParseInt(in.Value, 10, 64)
 	if err != nil {
-		return out, errors.Wrap(err, "converting amount string value to integer64")
+		return out, fmt.Errorf("converting amount string value to integer64: %w", err)
 	}
 	out.Value = value
 	out.Currency = in.Currency

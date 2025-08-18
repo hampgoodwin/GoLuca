@@ -71,7 +71,7 @@ func TestCreateAccount_InvalidRequestBody(t *testing.T) {
 	err := json.NewDecoder(res.Body).Decode(&errRes)
 	s.Is.NoErr(err)
 
-	s.Is.Equal("validating account", errRes.Description)
+	s.Is.Equal("bad request data", errRes.Description)
 	s.Is.Equal("Key: 'Account.Name' Error:Field validation for 'Name' failed on the 'required' tag\nKey: 'Account.Type.Slug' Error:Field validation for 'Slug' failed on the 'oneof' tag\nKey: 'Account.Basis.Slug' Error:Field validation for 'Slug' failed on the 'oneof' tag", errRes.ValidationErrors)
 }
 
@@ -92,7 +92,7 @@ func TestCreateAccount_CannotDeserialize(t *testing.T) {
 	err := json.NewDecoder(res.Body).Decode(&errRes)
 	s.Is.NoErr(err)
 
-	s.Is.Equal("json: cannot unmarshal string into Go value of type controller.accountRequest", errRes.Description)
+	s.Is.Equal("provided data passed failed deserialization. If creating a resource, check the request body types.", errRes.Description)
 }
 
 func TestGetAccount(t *testing.T) {
@@ -141,7 +141,7 @@ func TestGetAccount_ErrorNotFound(t *testing.T) {
 	var errRes ErrorResponse
 	err := json.NewDecoder(res.Body).Decode(&errRes)
 	s.Is.NoErr(err)
-	s.Is.Equal(fmt.Sprintf("account %q not found", id), errRes.Description)
+	s.Is.Equal(fmt.Sprintf("\"account\" %q not found", id), errRes.Description)
 }
 
 func TestGetAccount_InvalidPersistedAccount(t *testing.T) {
@@ -232,7 +232,7 @@ func TestListAccounts_InvalidRequestBody(t *testing.T) {
 	err := json.NewDecoder(httpResponse.Body).Decode(&errorResponse)
 	s.Is.NoErr(err)
 
-	s.Is.True(errorResponse.Description == "invalid cursor or token")
+	s.Is.True(errorResponse.Description == fmt.Sprintf("invalid cursor %q", "invalid_cursor"))
 	s.Is.True(httpResponse.StatusCode == http.StatusBadRequest)
 }
 
