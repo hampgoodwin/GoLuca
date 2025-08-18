@@ -1,23 +1,14 @@
 TODO
-- [x] use nix devlopment environment
-  - I was in the middle of updating all of my nvim configurations, lsp, lint, format etc.. in the midst of this I also updated my make targets for running my linter golangci-lint in a container. It then also occurred to me that I run linter in my ide, and I would need to manually manage a global golangci-lint version and ensure it's the same as my ci flow. That sounds like a bit of a pain and also inflexible between different repo's packages. For just linting it's probably not a big deal, but there are other tools where it could be more important/impactful. It occurred to me to use something like a multiple version manager, such as asdf. This would definitely work, but then there is another concern of managing the build tool versions separate from that.
-  - I remember hearing about devenv.sh, and briefly about nix develop/shell. I did a _little_ bit of research and it seems like nix development via defining a nix.flake will get me not only consist reproducible distinct projct builds but gains for my ci and build process. SO, I'm pretty interested in this as it is a place I could get lots of gains for developer productivity.
 - [ ] update various patterns/paradigms
-  - [x] singleton logger; changed to reduce logging out of service/db, and rely only on interceptor logger for network interface layers (http/grpc)
-  - [ ] where interfaces are defined
-  - [x] ~~update to proto (editions)[https://protobuf.dev/editions/overview/#migrating]...(lang guide)[https://protobuf.dev/programming-guides/editions]~~ not ready _quite yet_.
+  - [ ] remove http interface, [grpc-gateway](https://github.com/grpc-ecosystem/grpc-gateway), [proto validation](https://github.com/bufbuild/protovalidate)?
+    - [ ] look more into connect-go from buf; i sus this is what I would prefer just based on buf' exellent support for all things rpc thus far.
   - [ ] update pagination, make a separate hampgoodwin/go-paginate lib
+    - [ ] improve pagination by displaying page number of result.
+  - [ ] where interfaces are defined (define them _where used_, and if used in multiple, factor out)
   - [ ] update testing paradigm
-  - [ ] remove http interface, grpc-gateway, proto validation?
+  - [x] singleton logger; changed to reduce logging out of service/db, and rely only on interceptor logger for network interface layers (http/grpc)
+  - [x] ~~update to proto (editions)[https://protobuf.dev/editions/overview/#migrating]...(lang guide)[https://protobuf.dev/programming-guides/editions]~~ not ready _quite yet_.
   - [x] swap ksuid for uuidv7!!
-- [x] update all dependencies
-- [x] make a nix dev environment configuration
-- [ ] after f/e deploy this thing somewhere
-- [ ] create tenant data structures
-  - [ ] create auth
-  - [ ] create management ui
-- [x] add govulnscan
-- [ ] grpc-gateway?
 - [ ] o11y
     - [X] Add tracing
       - [x] Add tracing to response.go files
@@ -25,12 +16,18 @@ TODO
         - [ ] OpenTelemetry metrics ready?
     - [ ] Log Collector?
     - [ ] move off Jaeger, and all in on Grafana stack
-- [ ] make a frontend with some dashboard functionality, (vue3 plz) OOOOH!!!
-- [x] replace hampgoodwin/errors with go std lib multi-errors <3!!!
 - [ ] health checks
     - [ ] add a health reporter
     - [ ] add health checks
-- [ ] improve pagination by displaying page number of result.
+- [ ] after, f/e deploy this thing somewhere
+- [x] update all dependencies
+- [x] make a nix dev environment configuration
+- [ ] create tenant data structures
+  - [ ] create auth
+  - [ ] create management ui
+- [x] add govulnscan
+- [ ] make a frontend with some dashboard functionality, (vue3 plz) OOOOH!!!
+- [x] replace hampgoodwin/errors with go std lib multi-errors <3!!!
 - [ ] Testing
     - [x] Add more unit tests, solitary and sociable
     - [x] Add Integration testing
@@ -48,6 +45,9 @@ TODO
     - [ ] add default limit size as a configurable somewhere
     - [ ] set up configuration loader or a new secrets loader to load values from appvault
 - [ ] redis datastore? Maybe later.
+- [x] use nix devlopment environment
+  - I was in the middle of updating all of my nvim configurations, lsp, lint, format etc.. in the midst of this I also updated my make targets for running my linter golangci-lint in a container. It then also occurred to me that I run linter in my ide, and I would need to manually manage a global golangci-lint version and ensure it's the same as my ci flow. That sounds like a bit of a pain and also inflexible between different repo's packages. For just linting it's probably not a big deal, but there are other tools where it could be more important/impactful. It occurred to me to use something like a multiple version manager, such as asdf. This would definitely work, but then there is another concern of managing the build tool versions separate from that.
+  - I remember hearing about devenv.sh, and briefly about nix develop/shell. I did a _little_ bit of research and it seems like nix development via defining a nix.flake will get me not only consist reproducible distinct projct builds but gains for my ci and build process. SO, I'm pretty interested in this as it is a place I could get lots of gains for developer productivity.
 - [x] retry startup dependecies
     - [x] wont do; i would prefer to rely on some container/pod scheduler like k8s
 - [x] Events
