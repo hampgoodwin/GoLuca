@@ -1,6 +1,6 @@
 package event
 
 const (
-	SubjectAccountCreated     = "account.created"
-	SubjectTransactionCreated = "transaction.created"
+	SubjectAccountCreated     = "luca.account.created"
+	SubjectTransactionCreated = "luca.transaction.created"
 )
