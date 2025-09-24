@@ -62,4 +62,4 @@ apilint:
 
 
 apipreview:
-	sh ./scripts/openapi_previewdocs.sh
+	redocly preview-docs http/v0/spec/openapi.yml
