@@ -1,13 +1,12 @@
-package connect
+package transaction
 
 import (
 	entryv1 "github.com/hampgoodwin/GoLuca/gen/proto/go/goluca/entry/v1"
 	transactionv1 "github.com/hampgoodwin/GoLuca/gen/proto/go/goluca/transaction/v1"
-	"github.com/hampgoodwin/GoLuca/internal/transaction/service"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func NewProtoTransactionFromTransaction(in service.Transaction) *transactionv1.Transaction {
+func NewProtoTransactionFromTransaction(in Transaction) *transactionv1.Transaction {
 	if in.IsZero() {
 		return nil
 	}
@@ -31,8 +30,8 @@ func NewProtoTransactionFromTransaction(in service.Transaction) *transactionv1.T
 	return out
 }
 
-func NewProtoEntryFromEntry(in service.Entry) *entryv1.Entry {
-	if in == (service.Entry{}) {
+func NewProtoEntryFromEntry(in Entry) *entryv1.Entry {
+	if in == (Entry{}) {
 		return nil
 	}
 
@@ -49,8 +48,8 @@ func NewProtoEntryFromEntry(in service.Entry) *entryv1.Entry {
 	return out
 }
 
-func NewProtoAmountFromAmount(in service.Amount) *entryv1.Amount {
-	if in == (service.Amount{}) {
+func NewProtoAmountFromAmount(in Amount) *entryv1.Amount {
+	if in == (Amount{}) {
 		return nil
 	}
 
@@ -62,8 +61,8 @@ func NewProtoAmountFromAmount(in service.Amount) *entryv1.Amount {
 	return out
 }
 
-func NewTransactionFromProtoCreateTransaction(in *transactionv1.CreateTransactionRequest) service.Transaction {
-	out := service.Transaction{}
+func NewTransactionFromProtoCreateTransaction(in *transactionv1.CreateTransactionRequest) Transaction {
+	out := Transaction{}
 
 	if in == nil {
 		return out
@@ -78,8 +77,8 @@ func NewTransactionFromProtoCreateTransaction(in *transactionv1.CreateTransactio
 	return out
 }
 
-func NewEntryFromProtoCreateEntry(in *transactionv1.CreateEntry) service.Entry {
-	out := service.Entry{}
+func NewEntryFromProtoCreateEntry(in *transactionv1.CreateEntry) Entry {
+	out := Entry{}
 
 	if in == nil {
 		return out
@@ -93,8 +92,8 @@ func NewEntryFromProtoCreateEntry(in *transactionv1.CreateEntry) service.Entry {
 	return out
 }
 
-func NewAmountFromProtoAmount(in *entryv1.Amount) service.Amount {
-	out := service.Amount{}
+func NewAmountFromProtoAmount(in *entryv1.Amount) Amount {
+	out := Amount{}
 
 	if in == nil {
 		return out

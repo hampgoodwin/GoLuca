@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/hampgoodwin/GoLuca/internal/meta"
-	"github.com/hampgoodwin/GoLuca/internal/validate"
 	ierrors "github.com/hampgoodwin/GoLuca/pkg/errors"
 
 	"github.com/jackc/pgconn"
@@ -60,10 +59,6 @@ func (r *Repository) GetTransaction(ctx context.Context, transactionID string) (
 			return returning, fmt.Errorf("rolling back on fetching transaction entries error: %w", err)
 		}
 		return returning, fmt.Errorf("getting entries by transaction %q: %w", transactionID, err)
-	}
-
-	if err := validate.Validate(returning); err != nil {
-		return returning, errors.Join(fmt.Errorf("validating transaction fetched from database: %w", err), ierrors.ErrNotValidInternalData)
 	}
 
 	if err := tx.Commit(ctx); err != nil {
@@ -130,9 +125,6 @@ func (r *Repository) ListTransactions(ctx context.Context, transactionID string,
 		returning[i].Entries = append(returning[i].Entries, entries...)
 	}
 
-	if err := validate.Validate(returning); err != nil {
-		return nil, errors.Join(fmt.Errorf("validating transactions fetched from database: %w", err), ierrors.ErrNotValidInternalData)
-	}
 	if err := tx.Commit(ctx); err != nil {
 		return nil, errors.Join(fmt.Errorf("committing get transactions transaction: %w", err), ierrors.ErrNotKnown)
 	}
@@ -184,13 +176,6 @@ func (r *Repository) CreateTransaction(ctx context.Context, create Transaction) 
 		returning.Entries = append(returning.Entries, returningEntry)
 	}
 
-	if err := validate.Validate(returning); err != nil {
-		if err := tx.Rollback(ctx); err != nil {
-			return returning, errors.Join(fmt.Errorf("rolling back create transaction on validating transaction returned from create: %w", err), ierrors.ErrNotKnown)
-		}
-		return returning, errors.Join(fmt.Errorf("validating transaction returned from creation: %w", err), ierrors.ErrNotValidInternalData)
-	}
-
 	if err := tx.Commit(ctx); err != nil {
 		return returning, errors.Join(fmt.Errorf("committing create transaction transaction: %w", err), ierrors.ErrNotKnown)
 	}
@@ -235,10 +220,6 @@ func getEntriesByTransactionID(ctx context.Context, tx pgx.Tx, transactionID str
 		entryIDs = append(entryIDs, entry.ID)
 	}
 	span.SetAttributes(attribute.StringSlice("entry_ids", entryIDs))
-
-	if err := validate.Validate(entries); err != nil {
-		return nil, errors.Join(fmt.Errorf("validating entries fetched from database: %w", err), ierrors.ErrNotValidInternalData)
-	}
 
 	return entries, nil
 }

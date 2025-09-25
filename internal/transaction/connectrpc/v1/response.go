@@ -4,10 +4,8 @@ import (
 	"context"
 	"errors"
 
-	"github.com/go-playground/validator/v10"
 	"go.opentelemetry.io/otel"
 	otelcodes "go.opentelemetry.io/otel/codes"
-	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -48,9 +46,6 @@ func (c *Handler) respondError(ctx context.Context, err error) error {
 		if message == "" {
 			message = "bad request data"
 		}
-		if err := c.respondOnValidationErrors(err, message); err != nil {
-			return err
-		}
 	case errors.Is(err, ierrors.ErrNotFound):
 		statuscode = codes.NotFound
 	case errors.Is(err, ierrors.ErrNotValidInternalData):
@@ -71,25 +66,4 @@ func (c *Handler) respondError(ctx context.Context, err error) error {
 	}
 
 	return status.Error(statuscode, message)
-}
-
-func (c *Handler) respondOnValidationErrors(err error, message string) error {
-	var validationErrors validator.ValidationErrors
-	if errors.As(err, &validationErrors) {
-		st := status.New(codes.InvalidArgument, validationErrors.Error())
-		br := &errdetails.BadRequest{}
-		for _, fieldError := range validationErrors {
-			fv := &errdetails.BadRequest_FieldViolation{
-				Field:       fieldError.StructNamespace(),
-				Description: fieldError.Tag(),
-			}
-			br.FieldViolations = append(br.FieldViolations, fv)
-		}
-		st, err := st.WithDetails(br)
-		if err != nil {
-			return status.Error(codes.Internal, "error construction validation error response")
-		}
-		return st.Err()
-	}
-	return nil
 }

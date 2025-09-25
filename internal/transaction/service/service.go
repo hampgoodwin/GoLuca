@@ -8,10 +8,9 @@ import (
 	"time"
 
 	"github.com/hampgoodwin/GoLuca/internal/meta"
+	"github.com/hampgoodwin/GoLuca/internal/transaction"
 	"github.com/hampgoodwin/GoLuca/internal/transaction/event"
 	"github.com/hampgoodwin/GoLuca/internal/transaction/repository"
-	"github.com/hampgoodwin/GoLuca/internal/transformer"
-	"github.com/hampgoodwin/GoLuca/internal/validate"
 	ierrors "github.com/hampgoodwin/GoLuca/pkg/errors"
 	"github.com/hampgoodwin/GoLuca/pkg/pagination"
 
@@ -32,7 +31,7 @@ func NewService(repository *repository.Repository, nec *nats.Conn) *Service {
 	return &Service{repository, nec}
 }
 
-func (s *Service) GetTransaction(ctx context.Context, transactionID string) (Transaction, error) {
+func (s *Service) GetTransaction(ctx context.Context, transactionID string) (transaction.Transaction, error) {
 	ctx, span := otel.Tracer(meta.ServiceName).Start(ctx, "service.GetTransaction", trace.WithAttributes(
 		attribute.String("transaction_id", transactionID),
 	))
@@ -40,17 +39,14 @@ func (s *Service) GetTransaction(ctx context.Context, transactionID string) (Tra
 
 	repoTransaction, err := s.repository.GetTransaction(ctx, transactionID)
 	if err != nil {
-		return Transaction{}, fmt.Errorf("getting transaction %q: %w", transactionID, err)
+		return transaction.Transaction{}, fmt.Errorf("getting transaction %q: %w", transactionID, err)
 	}
 
-	transaction := transformer.NewTransactionFromRepoTransaction(repoTransaction)
-	if err := validate.Validate(transaction); err != nil {
-		return transaction, errors.Join(fmt.Errorf("validating transfer from repository transfer: %w", err), ierrors.ErrNotValidInternalData)
-	}
+	transaction := newTransactionFromRepoTransaction(repoTransaction)
 	return transaction, nil
 }
 
-func (s *Service) ListTransactions(ctx context.Context, cursor string, limit uint64) ([]Transaction, string, error) {
+func (s *Service) ListTransactions(ctx context.Context, cursor string, limit uint64) ([]transaction.Transaction, string, error) {
 	ctx, span := otel.Tracer(meta.ServiceName).Start(ctx, "service.ListTransaction", trace.WithAttributes(
 		attribute.String("cursor", cursor),
 		attribute.Int64("limit", int64(limit)),
@@ -79,12 +75,9 @@ func (s *Service) ListTransactions(ctx context.Context, cursor string, limit uin
 		return nil, "", fmt.Errorf("fetching transactions from database with cursor %q: %w", cursor, err)
 	}
 
-	transactions := []Transaction{}
+	transactions := []transaction.Transaction{}
 	for _, repoTransaction := range repoTransactions {
-		transactions = append(transactions, transformer.NewTransactionFromRepoTransaction(repoTransaction))
-	}
-	if err := validate.Validate(transactions); err != nil {
-		return transactions, "", errors.Join(fmt.Errorf("validating transfers from repository transfers: %w", err), ierrors.ErrNotValidInternalData)
+		transactions = append(transactions, newTransactionFromRepoTransaction(repoTransaction))
 	}
 
 	nextCursor := ""
@@ -105,7 +98,7 @@ func (s *Service) ListTransactions(ctx context.Context, cursor string, limit uin
 	return transactions, nextCursor, nil
 }
 
-func (s *Service) CreateTransaction(ctx context.Context, create Transaction) (Transaction, error) {
+func (s *Service) CreateTransaction(ctx context.Context, create transaction.Transaction) (transaction.Transaction, error) {
 	ctx, span := otel.Tracer(meta.ServiceName).Start(ctx, "internal.service.CreateTransaction", trace.WithAttributes(
 		attribute.String("description", create.Description),
 		attribute.Int64("entries", int64(len(create.Entries))),
@@ -114,7 +107,7 @@ func (s *Service) CreateTransaction(ctx context.Context, create Transaction) (Tr
 
 	uuidv7, err := uuid.NewV7()
 	if err != nil {
-		return Transaction{}, fmt.Errorf("creating uuid7: %w", err)
+		return transaction.Transaction{}, fmt.Errorf("creating uuid7: %w", err)
 	}
 	create.ID = uuidv7.String()
 	create.CreatedAt = time.Unix(uuidv7.Time().UnixTime())
@@ -124,7 +117,7 @@ func (s *Service) CreateTransaction(ctx context.Context, create Transaction) (Tr
 
 		entryUUIDV7, err := uuid.NewV7()
 		if err != nil {
-			return Transaction{}, fmt.Errorf("creating uuid7 for entry: %w", err)
+			return transaction.Transaction{}, fmt.Errorf("creating uuid7 for entry: %w", err)
 		}
 		create.Entries[i].ID = entryUUIDV7.String()
 		create.Entries[i].TransactionID = create.ID
@@ -139,30 +132,24 @@ func (s *Service) CreateTransaction(ctx context.Context, create Transaction) (Tr
 			attribute.String("amount", fmt.Sprintf("%d_%s", create.Entries[i].Amount.Value, create.Entries[i].Amount.Currency)),
 		)
 	}
-	if err := validate.Validate(create); err != nil {
-		return Transaction{}, errors.Join(fmt.Errorf("validating transaction before persisting to database: %w", err), ierrors.ErrNotValidRequestData)
-	}
 
-	repoTransaction := transformer.NewRepoTransactionFromTransaction(create)
+	repoTransaction := newRepoTransactionFromTransaction(create)
 
 	created, err := s.repository.CreateTransaction(ctx, repoTransaction)
 	if err != nil {
-		return Transaction{}, fmt.Errorf("storing transaction: %w", err)
+		return transaction.Transaction{}, fmt.Errorf("storing transaction: %w", err)
 	}
 
-	transaction := transformer.NewTransactionFromRepoTransaction(created)
-	if err := validate.Validate(transaction); err != nil {
-		return transaction, errors.Join(fmt.Errorf("validating transfer from repository transfer: %w", err), ierrors.ErrNotValidInternalData)
-	}
+	txn := newTransactionFromRepoTransaction(created)
 
-	protoCreated := transformer.NewProtoTransactionFromTransaction(transaction)
+	protoCreated := transaction.NewProtoTransactionFromTransaction(txn)
 	data, err := proto.Marshal(protoCreated)
 	if err != nil {
-		return transaction, fmt.Errorf("proto encoding created transaction: %w", err)
+		return txn, fmt.Errorf("proto encoding created transaction: %w", err)
 	}
 	if err := s.publisher.Publish(event.SubjectTransactionCreated, data); err != nil {
 		log.Printf("publishing %q: %v", event.SubjectTransactionCreated, err)
 	}
 
-	return transaction, nil
+	return txn, nil
 }

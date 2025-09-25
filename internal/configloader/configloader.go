@@ -1,15 +1,12 @@
 package configloader
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"os"
 	"strconv"
 
 	"github.com/hampgoodwin/GoLuca/internal/config"
-	"github.com/hampgoodwin/GoLuca/internal/validate"
-	ierrors "github.com/hampgoodwin/GoLuca/pkg/errors"
 
 	"github.com/pelletier/go-toml/v2"
 )
@@ -34,9 +31,6 @@ func Load(c config.Config, fp string) (config.Config, error) {
 
 	// TODO: Load command line flags
 
-	if err := validate.Validate(cfg); err != nil {
-		return cfg, errors.Join(fmt.Errorf("validating configuration: %w", err), ierrors.ErrNotValid)
-	}
 	return cfg, nil
 }
 

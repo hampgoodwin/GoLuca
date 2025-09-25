@@ -15,9 +15,10 @@ import (
 	"github.com/google/uuid"
 	"github.com/nats-io/nats.go"
 
+	"github.com/hampgoodwin/GoLuca/internal/account"
+	"github.com/hampgoodwin/GoLuca/internal/account/event"
 	"github.com/hampgoodwin/GoLuca/internal/account/repository"
 	"github.com/hampgoodwin/GoLuca/internal/meta"
-	"github.com/hampgoodwin/GoLuca/internal/transformer"
 	ierrors "github.com/hampgoodwin/GoLuca/pkg/errors"
 	"github.com/hampgoodwin/GoLuca/pkg/pagination"
 )
@@ -31,7 +32,7 @@ func NewService(repository *repository.Repository, nec *nats.Conn) *Service {
 	return &Service{repository, nec}
 }
 
-func (s *Service) GetAccount(ctx context.Context, accountID string) (Account, error) {
+func (s *Service) GetAccount(ctx context.Context, accountID string) (account.Account, error) {
 	ctx, span := otel.Tracer(meta.ServiceName).Start(ctx, "service.GetAccount", trace.WithAttributes(
 		attribute.String("account_id", accountID),
 	))
@@ -39,15 +40,15 @@ func (s *Service) GetAccount(ctx context.Context, accountID string) (Account, er
 
 	repoAccount, err := s.repository.GetAccount(ctx, accountID)
 	if err != nil {
-		return Account{}, fmt.Errorf("fetching account from database: %w", err)
+		return account.Account{}, fmt.Errorf("fetching account from database: %w", err)
 	}
 
-	account := NewAccountFromRepoAccount(repoAccount)
+	account := newAccountFromRepoAccount(repoAccount)
 
 	return account, nil
 }
 
-func (s *Service) ListAccounts(ctx context.Context, cursor string, limit uint64) ([]Account, string, error) {
+func (s *Service) ListAccounts(ctx context.Context, cursor string, limit uint64) ([]account.Account, string, error) {
 	ctx, span := otel.Tracer(meta.ServiceName).Start(ctx, "internal.service.CreateAccount", trace.WithAttributes(
 		attribute.String("cursor", cursor),
 		attribute.Int64("limit", int64(limit)),
@@ -60,9 +61,6 @@ func (s *Service) ListAccounts(ctx context.Context, cursor string, limit uint64)
 	if cursor != "" {
 		cursor, err := pagination.ParseCursor(cursor)
 		if err != nil {
-			if err := validate.Validate(cursor); err != nil {
-				return nil, "", errors.Join(fmt.Errorf("invalid cursor/token: %w", err), ierrors.ErrNotValidRequestData)
-			}
 			return nil, "", errors.Join(fmt.Errorf("parsing cursor object: %w", err), ierrors.ErrNotValidRequest)
 		}
 		id = cursor.ID
@@ -77,12 +75,9 @@ func (s *Service) ListAccounts(ctx context.Context, cursor string, limit uint64)
 		return nil, "", fmt.Errorf("fetching accounts from database with cursor %q: %w", cursor, err)
 	}
 
-	accounts := []Account{}
+	accounts := []account.Account{}
 	for _, repoAccount := range repoAccounts {
-		accounts = append(accounts, NewAccountFromRepoAccount(repoAccount))
-	}
-	if err := validate.Validate(accounts); err != nil {
-		return accounts, "", errors.Join(fmt.Errorf("validating accounts from repository accounts: %w", err), ierrors.ErrNotValidInternalData)
+		accounts = append(accounts, newAccountFromRepoAccount(repoAccount))
 	}
 
 	nextCursor := ""
@@ -103,7 +98,7 @@ func (s *Service) ListAccounts(ctx context.Context, cursor string, limit uint64)
 	return accounts, nextCursor, nil
 }
 
-func (s *Service) CreateAccount(ctx context.Context, create Account) (Account, error) {
+func (s *Service) CreateAccount(ctx context.Context, create account.Account) (account.Account, error) {
 	ctx, span := otel.Tracer(meta.ServiceName).Start(ctx, "internal.service.CreateAccount", trace.WithAttributes(
 		attribute.String("parent_id", create.ParentID),
 		attribute.String("name", create.Name),
@@ -114,35 +109,28 @@ func (s *Service) CreateAccount(ctx context.Context, create Account) (Account, e
 
 	uuidv7, err := uuid.NewV7()
 	if err != nil {
-		return Account{}, fmt.Errorf("creating uuid7: %w", err)
+		return account.Account{}, fmt.Errorf("creating uuid7: %w", err)
 	}
 	create.ID = uuidv7.String()
 	create.CreatedAt = time.Unix(uuidv7.Time().UnixTime())
 	span.SetAttributes(attribute.String("id", create.ID))
 
-	if err := validate.Validate(create); err != nil {
-		return Account{}, errors.Join(fmt.Errorf("validating account: %w", err), ierrors.ErrNotValidRequestData)
-	}
-
-	repoAccount := transformer.NewRepoAccountFromAccount(create)
+	repoAccount := newRepoAccountFromAccount(create)
 
 	created, err := s.repository.CreateAccount(ctx, repoAccount)
 	if err != nil {
-		return Account{}, fmt.Errorf("creating account in database: %w", err)
+		return account.Account{}, fmt.Errorf("creating account in database: %w", err)
 	}
 
-	account := NewAccountFromRepoAccount(created)
-	if err := validate.Validate(account); err != nil {
-		return account, errors.Join(fmt.Errorf("validating account from repository account: %w", err), ierrors.ErrNotValidInternalData)
-	}
+	account := newAccountFromRepoAccount(created)
 
-	protoCreated := transformer.NewProtoAccountFromAccount(account)
+	protoCreated := event.NewProtoAccountFromAccount(account)
 	data, err := proto.Marshal(protoCreated)
 	if err != nil {
 		return account, fmt.Errorf("proto encoding created account: %w", err)
 	}
-	if err := s.publisher.Publish(events.SubjectAccountCreated, data); err != nil {
-		log.Printf("publishing %q: %v", events.SubjectAccountCreated, err)
+	if err := s.publisher.Publish(event.SubjectAccountCreated, data); err != nil {
+		log.Printf("publishing %q: %v", event.SubjectAccountCreated, err)
 	}
 
 	return account, nil

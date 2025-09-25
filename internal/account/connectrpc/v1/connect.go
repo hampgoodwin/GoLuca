@@ -7,9 +7,9 @@ import (
 
 	accountv1 "github.com/hampgoodwin/GoLuca/gen/proto/go/goluca/account/v1"
 	accountv1connect "github.com/hampgoodwin/GoLuca/gen/proto/go/goluca/account/v1/accountv1connect"
+	"github.com/hampgoodwin/GoLuca/internal/account"
 	"github.com/hampgoodwin/GoLuca/internal/account/service"
 	"github.com/hampgoodwin/GoLuca/internal/meta"
-	"github.com/hampgoodwin/GoLuca/internal/transformer"
 
 	"connectrpc.com/connect"
 	"go.opentelemetry.io/otel"
@@ -50,7 +50,7 @@ func (h *Handler) GetAccount(
 		return nil, h.respondError(ctx, err)
 	}
 
-	account := NewProtoAccountFromAccount(serviceAccount)
+	account := account.NewProtoAccountFromAccount(serviceAccount)
 
 	res := connect.NewResponse(&accountv1.GetAccountResponse{Account: account})
 
@@ -80,8 +80,8 @@ func (h *Handler) ListAccounts(
 	listAccountsResponse := &accountv1.ListAccountsResponse{
 		NextPageToken: nextCursor,
 	}
-	for _, account := range accounts {
-		listAccountsResponse.Accounts = append(listAccountsResponse.Accounts, NewProtoAccountFromAccount(account))
+	for _, acct := range accounts {
+		listAccountsResponse.Accounts = append(listAccountsResponse.Accounts, account.NewProtoAccountFromAccount(acct))
 	}
 
 	res := connect.NewResponse(listAccountsResponse)
@@ -101,16 +101,16 @@ func (h *Handler) CreateAccount(
 	))
 	defer span.End()
 
-	serviceAccount := transformer.NewAccountFromProtoCreateAccount(create.Msg)
+	serviceAccount := account.NewAccountFromProtoCreateAccount(create.Msg)
 
 	serviceAccount, err := h.service.CreateAccount(ctx, serviceAccount)
 	if err != nil {
 		return nil, fmt.Errorf("creating account: %w", err)
 	}
 
-	account := NewProtoAccountFromAccount(serviceAccount)
+	acct := account.NewProtoAccountFromAccount(serviceAccount)
 
-	res := connect.NewResponse(&accountv1.CreateAccountResponse{Account: account})
+	res := connect.NewResponse(&accountv1.CreateAccountResponse{Account: acct})
 
 	return res, nil
 }

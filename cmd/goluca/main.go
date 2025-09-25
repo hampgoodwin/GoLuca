@@ -68,11 +68,6 @@ func main() {
 		log.Fatal("failed to create nats connection")
 	}
 	env.Log.Info("creating jetstream")
-	if _, err := inats.NewNATSJetStream(nc); err != nil {
-		env.Log.Error("jetstream error, shutting down", zap.Error(err))
-		close(ctx, env.Log, db, nc, nil, nil, tpShutdownFn)
-		log.Fatal("failed to create jetstream")
-	}
 	var ncWiretap *nats.Conn
 	if env.Config.NATS.Wiretap.Enable {
 		env.Log.Info("starting wiretap", zap.Any("service_info", env.Config.NATS.Wiretap.URL()))
