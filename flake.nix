@@ -39,6 +39,7 @@
             # tooling
             ## protoencoding
             pkgs.buf
+            pkgs.grpcurl
             ## openapi
             pkgs.redocly
 

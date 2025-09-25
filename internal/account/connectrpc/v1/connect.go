@@ -33,6 +33,7 @@ func Register(
 ) {
 	// TODO: replace all method types with expectec connect types
 	path, handler := accountv1connect.NewAccountServiceHandler(h)
+	fmt.Println("path", path)
 	m.Handle(path, handler)
 }
 
