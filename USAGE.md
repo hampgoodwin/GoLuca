@@ -1,5 +1,9 @@
-Just some grpcurl commands to get going
+# Usage
 
+To run this you must have the dependencies listed in the flake.nix systemPackges section. To name a few, buf, a docker runtime and current enough docker cli with `docker compose` path.
+Run `make up` and then `make run` (not fully containerized currently, ie the accounting app has no image, just runs via go run atm), and then you're off to the races
+
+## Example grpcurl requests
 
 Accounts
 
