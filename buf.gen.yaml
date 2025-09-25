@@ -1,16 +1,20 @@
-version: v1
+version: v2
+clean: true
 managed:
   enabled: true
-  go_package_prefix:
-    default: github.com/hampgoodwin/GoLuca/gen/proto/go
-    except:
-      - buf.build/googleapis/googleapis
+  override:
+    # Use this prefix by default for all files
+    - file_option: go_package_prefix
+      value: github.com/hampgoodwin/GoLuca/gen/proto/go
 plugins:
-  - plugin: buf.build/protocolbuffers/go
+  - remote: buf.build/protocolbuffers/go
     out: gen/proto/go
     opt: paths=source_relative
-  - plugin: buf.build/grpc/go
+  - remote: buf.build/connectrpc/go
     out: gen/proto/go
     opt:
       - paths=source_relative
-      - require_unimplemented_servers=false
+  - remote: buf.build/bufbuild/es
+    out: gen/proto/ts
+    opt:
+      - target=ts

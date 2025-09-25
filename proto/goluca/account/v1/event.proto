@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package goluca.account.v1;
+
+import "goluca/account/v1/account.proto";
+
+message AccountCreated {
+  goluca.account.v1.Account account = 1;
+}

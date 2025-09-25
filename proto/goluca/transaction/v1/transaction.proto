@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package goluca.transaction.v1;
+
+import "goluca/entry/v1/entry.proto";
+import "google/protobuf/timestamp.proto";
+
+message Transaction {
+  string id = 1;
+  string description = 2;
+  repeated goluca.entry.v1.Entry entries = 3;
+  google.protobuf.Timestamp created_at = 4;
+}

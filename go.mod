@@ -30,6 +30,7 @@ require (
 )
 
 require (
+	connectrpc.com/connect v1.18.1
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.8 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
