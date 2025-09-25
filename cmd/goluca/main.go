@@ -5,29 +5,28 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"net"
 	"net/http"
 	"os/signal"
 	"syscall"
 
 	"github.com/golang-migrate/migrate/v4"
-	grpclogging "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/nats-io/nats.go"
 	"go.uber.org/zap"
-	"google.golang.org/grpc"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 
+	accountconnectv1 "github.com/hampgoodwin/GoLuca/internal/account/connectrpc/v1"
+	accountrepository "github.com/hampgoodwin/GoLuca/internal/account/repository"
+	accountservice "github.com/hampgoodwin/GoLuca/internal/account/service"
 	"github.com/hampgoodwin/GoLuca/internal/database"
+	postgresdb "github.com/hampgoodwin/GoLuca/internal/database/postgres"
 	"github.com/hampgoodwin/GoLuca/internal/environment"
 	inats "github.com/hampgoodwin/GoLuca/internal/event/nats"
-	grpccontroller "github.com/hampgoodwin/GoLuca/internal/grpc/v1/controller"
-	igrpclogging "github.com/hampgoodwin/GoLuca/internal/grpc/v1/logging"
-	grpcrouter "github.com/hampgoodwin/GoLuca/internal/grpc/v1/router"
-	httpcontroller "github.com/hampgoodwin/GoLuca/internal/http/v0/controller"
-	httprouter "github.com/hampgoodwin/GoLuca/internal/http/v0/router"
-	"github.com/hampgoodwin/GoLuca/internal/repository"
-	"github.com/hampgoodwin/GoLuca/internal/service"
 	itrace "github.com/hampgoodwin/GoLuca/internal/trace"
+	transactionconnectv1 "github.com/hampgoodwin/GoLuca/internal/transaction/connectrpc/v1"
+	transactionrepository "github.com/hampgoodwin/GoLuca/internal/transaction/repository"
+	transactionservice "github.com/hampgoodwin/GoLuca/internal/transaction/service"
 )
 
 func main() {
@@ -47,12 +46,12 @@ func main() {
 	}
 
 	// Create the postgres database pool and migrate
-	db, err := database.NewDatabasePool(ctx, env.Config.Database.ConnectionString())
+	db, err := postgresdb.NewDatabasePool(ctx, env.Config.Database.ConnectionString())
 	if err != nil {
 		env.Log.Error("creating new database pool", zap.Error(err))
 		log.Fatal("error creating database pool on application start")
 	}
-	if err := database.Migrate(db); err != nil {
+	if err := postgresdb.Migrate(db, database.MigrationsFS); err != nil {
 		if !errors.Is(err, migrate.ErrNoChange) {
 			env.Log.Fatal("migrating", zap.Error(err))
 			log.Fatal("error migrating database on application start")
@@ -60,92 +59,62 @@ func main() {
 		env.Log.Info("no migration changes")
 	}
 
-	// Create the repository layer
-	repository := repository.NewRepository(db)
-
 	// Create NATS event bus, using proto encoded connection and JetStream
 	env.Log.Info("starting nats", zap.Any("service_info", env.Config.NATS.URL()))
 	nc, err := inats.NewNATSConn(env.Config.NATS.URL())
 	if err != nil {
 		env.Log.Error("nats error, shutting down", zap.Error(err))
-		close(ctx, env.Log, db, nc, nil, nil, nil, tpShutdownFn)
+		close(ctx, env.Log, db, nc, nil, nil, tpShutdownFn)
 		log.Fatal("failed to create nats connection")
 	}
 	env.Log.Info("creating jetstream")
-	if _, err := inats.NewNATSJetStream(nc); err != nil {
-		env.Log.Error("jetstream error, shutting down", zap.Error(err))
-		close(ctx, env.Log, db, nc, nil, nil, nil, tpShutdownFn)
-		log.Fatal("failed to create jetstream")
-	}
 	var ncWiretap *nats.Conn
 	if env.Config.NATS.Wiretap.Enable {
 		env.Log.Info("starting wiretap", zap.Any("service_info", env.Config.NATS.Wiretap.URL()))
 		ncWiretap, err = inats.WireTap(env.Config.NATS.Wiretap.URL())
 		if err != nil {
 			env.Log.Error("nats wiretap error, shutting down", zap.Error(err))
-			close(ctx, env.Log, db, nc, ncWiretap, nil, nil, tpShutdownFn)
+			close(ctx, env.Log, db, nc, ncWiretap, nil, tpShutdownFn)
 			log.Fatal("failed to create wiretap")
 		}
 	}
-	// Create the service layer
-	service := service.NewService(repository, nc)
 
-	// Create the HTTP interface
-	httpController := httpcontroller.NewController(service)
-	httpServer := &http.Server{
-		Addr:     env.Config.HTTPServer.AddressString(),
-		ErrorLog: zap.NewStdLog(env.Log),
-		Handler: httprouter.Register(
-			env.Log,
-			httpController.RegisterAccountRoutes,
-			httpController.RegisterTransactionRoutes,
-		),
+	// create layers
+	//// account
+	accountRepository := accountrepository.NewRepository(db)
+	accountService := accountservice.NewService(accountRepository, nc)
+	accountHandler := accountconnectv1.NewHandler(accountService)
+	//// transaction
+	transactionRepository := transactionrepository.NewRepository(db)
+	transactionService := transactionservice.NewService(transactionRepository, nc)
+	transactionHandler := transactionconnectv1.NewHandler(transactionService)
+
+	mux := http.NewServeMux()
+	accountconnectv1.Register(mux, accountHandler)
+	transactionconnectv1.Register(mux, transactionHandler)
+
+	connectServer := &http.Server{
+		Addr:    ":8080",
+		Handler: h2c.NewHandler(mux, &http2.Server{}),
 	}
 
-	// Create the gRPC server
-	// Create the controller for the to-be-created gRPC Server
-	grpcController := grpccontroller.NewController(service)
-	// Create listener for gRPC Server
-	lis, err := net.Listen("tcp", env.Config.GRPCServer.URL())
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
-	// Create the gRPC server with zap log grpc intercepter
-	interceptorLogger := igrpclogging.InterceptorLogger(env.Log)
-	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(
-		grpclogging.UnaryServerInterceptor(interceptorLogger),
-	))
-	// Register the controller with the server
-	grpcrouter.Register(grpcServer, grpcController)
-
-	// Serve the gRPC server on the earlier created Listener
-	grpcErr := make(chan error)
+	connectErr := make(chan error)
 	go func() {
-		env.Log.Info("starting grpc server", zap.Any("service_info", grpcServer.GetServiceInfo()))
-		grpcErr <- grpcServer.Serve(lis)
-	}()
-
-	httpErr := make(chan error)
-	go func() {
-		env.Log.Info("starting http server", zap.String("service_info", httpServer.Addr))
-		httpErr <- httpServer.ListenAndServe()
+		env.Log.Info("starting connect server", zap.String("service_info", "localhost:8080"))
+		connectErr <- connectServer.ListenAndServe()
 	}()
 
 	// Handle any errors from Servers
 	for {
 		select {
-		case err := <-grpcErr:
-			env.Log.Error("grpc server error, shutting down", zap.Error(err))
-			close(ctx, env.Log, db, nc, ncWiretap, grpcServer, httpServer, tpShutdownFn)
-			return
-		case err := <-httpErr:
-			env.Log.Error("http server error, shutting down", zap.Error(err))
-			close(ctx, env.Log, db, nc, ncWiretap, grpcServer, httpServer, tpShutdownFn)
+		case err := <-connectErr:
+			env.Log.Error("connect server error, shutting down", zap.Error(err))
+			close(ctx, env.Log, db, nc, ncWiretap, connectServer, tpShutdownFn)
 			return
 		case <-ctx.Done():
 			fmt.Printf("received shutdown signal: %s\n", ctx.Err())
 			cancel()
-			close(ctx, env.Log, db, nc, ncWiretap, grpcServer, httpServer, tpShutdownFn)
+			close(ctx, env.Log, db, nc, ncWiretap, connectServer, tpShutdownFn)
 			return
 		}
 	}
@@ -158,21 +127,15 @@ func close(
 	db *pgxpool.Pool,
 	nc *nats.Conn,
 	ncWiretap *nats.Conn,
-	grpcServer *grpc.Server,
-	httpServer *http.Server,
+	connectServer *http.Server,
 	tpShutdownFunc func(context.Context) error,
 ) {
 	log.Info("closing")
-	// close grpc server
-	if grpcServer != nil {
-		log.Info("closing grpcserver")
-		grpcServer.GracefulStop()
-	}
 	// close http server
-	if httpServer != nil {
-		if err := httpServer.Shutdown(ctx); err != nil {
+	if connectServer != nil {
+		if err := connectServer.Shutdown(ctx); err != nil {
 			log.Info("closing httpserver")
-			_ = httpServer.Close()
+			_ = connectServer.Close()
 		}
 	}
 	// disconnect from db

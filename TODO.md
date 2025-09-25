@@ -1,7 +1,9 @@
 TODO
+- [ ] add back new testing paradigm
+- [ ] add back new eventing paradigm
 - [ ] update various patterns/paradigms
-  - [ ] remove http interface, [grpc-gateway](https://github.com/grpc-ecosystem/grpc-gateway), [proto validation](https://github.com/bufbuild/protovalidate)?
-    - [ ] look more into connect-go from buf; i sus this is what I would prefer just based on buf' exellent support for all things rpc thus far.
+  - [x] remove http interface, [grpc-gateway](https://github.com/grpc-ecosystem/grpc-gateway), [proto validation](https://github.com/bufbuild/protovalidate)?
+    - [x] look more into connect-go from buf; i sus this is what I would prefer just based on buf' exellent support for all things rpc thus far.
   - [ ] update pagination, make a separate hampgoodwin/go-paginate lib
     - [ ] improve pagination by displaying page number of result.
   - [ ] where interfaces are defined (define them _where used_, and if used in multiple, factor out)

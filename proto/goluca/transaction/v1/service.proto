@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package goluca.transaction.v1;
+
+import "goluca/entry/v1/amount.proto";
+import "goluca/transaction/v1/transaction.proto";
+
+message GetTransactionRequest {
+  string transaction_id = 1;
+}
+
+message GetTransactionResponse {
+  goluca.transaction.v1.Transaction transaction = 1;
+}
+
+message ListTransactionsRequest {
+  uint64 page_size = 2047;
+  string page_token = 2046;
+}
+
+message ListTransactionsResponse {
+  repeated goluca.transaction.v1.Transaction transactions = 1;
+  string next_page_token = 2047;
+}
+
+message CreateEntry {
+  string description = 1;
+  string debit_account = 2;
+  string credit_account = 3;
+  goluca.entry.v1.Amount amount = 4;
+}
+
+message CreateTransactionRequest {
+  string description = 1;
+  repeated CreateEntry entries = 2;
+}
+
+message CreateTransactionResponse {
+  goluca.transaction.v1.Transaction transaction = 1;
+}
+
+service TransactionService {
+  rpc GetTransaction(GetTransactionRequest) returns (GetTransactionResponse) {}
+  rpc ListTransactions(ListTransactionsRequest) returns (ListTransactionsResponse) {}
+  rpc CreateTransaction(CreateTransactionRequest) returns (CreateTransactionResponse) {}
+}

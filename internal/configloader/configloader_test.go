@@ -6,7 +6,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/matryer/is"
 	"github.com/pelletier/go-toml/v2"
 
@@ -33,10 +32,6 @@ func TestLoad(t *testing.T) {
 		{
 			description: "empty-file-empty-vars-empty-config-err-validation",
 			filepath:    "../../test/data/configloader/empty.env.toml",
-			assertErr: func(err error) bool {
-				validationErrors := validator.ValidationErrors{}
-				return errors.As(err, &validationErrors)
-			},
 		},
 		{
 			description: "full-file-empty-vars-empty-config",

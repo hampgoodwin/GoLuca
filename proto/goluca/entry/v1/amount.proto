@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+package goluca.entry.v1;
+
+message Amount {
+  int64 value = 1;
+  string currency = 2;
+}

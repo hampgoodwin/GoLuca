@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package goluca.account.v1;
+
+import "goluca/account/v1/account.proto";
+
+message GetAccountRequest {
+  string account_id = 1;
+}
+
+message GetAccountResponse {
+  goluca.account.v1.Account account = 1;
+}
+
+message ListAccountsRequest {
+  uint64 page_size = 2047;
+  string page_token = 2046;
+}
+
+message ListAccountsResponse {
+  repeated goluca.account.v1.Account accounts = 1;
+  string next_page_token = 2047;
+}
+
+message CreateAccountRequest {
+  optional string parent_id = 1;
+  string name = 2;
+  goluca.account.v1.AccountType type = 3;
+  goluca.account.v1.Basis basis = 4;
+}
+
+message CreateAccountResponse {
+  goluca.account.v1.Account account = 1;
+}
+
+service AccountService {
+  // Account Endpoints
+  rpc GetAccount(GetAccountRequest) returns (GetAccountResponse) {}
+  rpc ListAccounts(ListAccountsRequest) returns (ListAccountsResponse) {}
+  rpc CreateAccount(CreateAccountRequest) returns (CreateAccountResponse) {}
+}
